@@ -216,11 +216,15 @@ const AdminDashboard = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {isSessionLoading && <div>Loading...</div>}
+                  {isSessionLoading && (
+                    <TableRow>
+                      <TableCell>Loading...</TableCell>
+                    </TableRow>
+                  )}
                   {selectedUser &&
                     isSessionSuccess &&
-                    sessionData?.data.map((session) => {
-                      const Icon = session.device.includes("Mobile")
+                    sessionData?.data?.map((session) => {
+                      const Icon = session?.device?.includes("Mobile")
                         ? Smartphone
                         : Monitor;
                       return (

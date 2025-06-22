@@ -33,7 +33,7 @@ export interface AllUsers {
   fullname: string;
   email: string;
   role: "user" | "admin";
-  status: "active" | "expired";
+  status: "active" | "expired" | "inactive";
   lastActive: string;
   sessionsCount: number;
 }
@@ -64,5 +64,3 @@ export interface ResetPasswordFormData {
   password: string;
   confirmPassword: string;
 }
-
-// API Request n Response Types

@@ -45,14 +45,21 @@ export const getAllUsers = asyncHandler(async (req, res) => {
   });
 
   const formattedUsers = users.map((user) => {
+    const latestSession = user.sessions?.[0];
     return {
       id: user.id,
       fullname: capitalize(user.fullname),
       email: user.email,
       role: user.role,
-      status: new Date() < new Date(user.sessions[0].expiresAt) ? "active" : "expired",
-      lastActive: format(new Date(user.sessions[0].updatedAt), "d/M/yyyy, h:mm:ss a"),
-      sessionsCount: user._count.sessions,
+      status: latestSession
+        ? new Date() < new Date(latestSession.expiresAt)
+          ? "active"
+          : "expired"
+        : "inactive",
+      lastActive: latestSession
+        ? format(new Date(latestSession.updatedAt), "d/M/yyyy, h:mm:ss a")
+        : "",
+      sessionsCount: user._count.sessions || 0,
     };
   });
 
@@ -75,9 +82,15 @@ export const getUserById = asyncHandler(async (req, res) => {
     orderBy: { createdAt: "desc" },
   });
 
+  if (!session.length) {
+    return res.status(200).json(new ApiResponse(200, "No sessions are active", null));
+  }
+
   const formattedSession = await transformSessions(session);
 
-  res.status(200).json(new ApiResponse(200, "User fetched successfully", formattedSession));
+  res
+    .status(200)
+    .json(new ApiResponse(200, "User sessions fetched successfully", formattedSession));
 });
 
 export const updateUserRole = asyncHandler(async (req, res) => {
