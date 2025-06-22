@@ -75,6 +75,7 @@ const Login = () => {
           <GoogleLogin
             theme="outline"
             text="continue_with"
+            width={420}
             onSuccess={async (credentialResponse) => {
               try {
                 const idToken = credentialResponse.credential;
