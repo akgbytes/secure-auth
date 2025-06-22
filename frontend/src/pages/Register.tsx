@@ -102,13 +102,13 @@ const Register = () => {
                     })
                   );
 
-                  toast.success("Login successful");
+                  toast.success("Login successful.");
                   navigate("/dashboard");
                 } catch (error: any) {
                   toast.error(error?.data?.message);
                 }
               }}
-              onError={() => toast.error("Login Failed")}
+              onError={() => toast.error("Login Failed.")}
             />
           </div>
 

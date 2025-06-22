@@ -28,7 +28,7 @@ const ResetPassword = () => {
   const navigate = useNavigate();
   const { token } = useParams();
 
-  const [countdown, setCountdown] = useState(5);
+  const [countdown, setCountdown] = useState(3);
 
   const [resetPassword, { isLoading, isError, error, isSuccess }] =
     useResetPasswordMutation();
@@ -44,7 +44,7 @@ const ResetPassword = () => {
       const response = await resetPassword(data).unwrap();
       toast.success(response.message);
 
-      let seconds = 5;
+      let seconds = 3;
       setCountdown(seconds);
 
       const interval = setInterval(() => {
@@ -55,7 +55,7 @@ const ResetPassword = () => {
 
       setTimeout(() => {
         navigate("/login");
-      }, 5000);
+      }, 3000);
     } catch (error: any) {
       toast.error(error.data?.message);
     }

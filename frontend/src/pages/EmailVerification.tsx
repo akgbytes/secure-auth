@@ -24,7 +24,7 @@ const EmailVerification = () => {
   const [verificationStatus, setVerificationStatus] = useState<
     "loading" | "success" | "error"
   >("loading");
-  const [countdown, setCountdown] = useState(5);
+  const [countdown, setCountdown] = useState(3);
 
   const { data, isLoading, isSuccess, isError } = useVerifyEmailQuery(token!, {
     skip: !token,
@@ -41,7 +41,7 @@ const EmailVerification = () => {
 
       try {
         const user = await getProfile().unwrap();
-        let seconds = 5;
+        let seconds = 3;
         setCountdown(seconds);
 
         const interval = setInterval(() => {
@@ -58,7 +58,7 @@ const EmailVerification = () => {
           );
           toast.success("Login successful");
           navigate("/dashboard");
-        }, 5000);
+        }, 3000);
       } catch (error: any) {
         toast.error(error.data.message);
       }
