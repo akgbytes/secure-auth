@@ -117,7 +117,7 @@ export const verifyEmail = asyncHandler(async (req, res) => {
     },
   });
 
-  await prisma.session.create({
+  const kk = await prisma.session.create({
     data: {
       userId: user.id,
       userAgent: req.headers["user-agent"],
@@ -290,8 +290,6 @@ export const logout = asyncHandler(async (req, res) => {
       secure: env.NODE_ENV === "production",
       sameSite: "strict",
     })
-    .status(200)
-    .json({ message: "Logged out successfully" })
     .json(new ApiResponse(200, "Logged out successfully", null));
 });
 
