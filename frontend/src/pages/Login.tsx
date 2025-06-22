@@ -72,34 +72,35 @@ const Login = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <GoogleLogin
-            theme="outline"
-            text="continue_with"
-            width={420}
-            onSuccess={async (credentialResponse) => {
-              try {
-                const idToken = credentialResponse.credential;
-                await googleLogin({
-                  token: idToken!,
-                  rememberMe,
-                }).unwrap();
+          <div className="flex items-center justify-center w-full">
+            <GoogleLogin
+              theme="outline"
+              text="continue_with"
+              onSuccess={async (credentialResponse) => {
+                try {
+                  const idToken = credentialResponse.credential;
+                  await googleLogin({
+                    token: idToken!,
+                    rememberMe,
+                  }).unwrap();
 
-                const user = await getProfile().unwrap();
+                  const user = await getProfile().unwrap();
 
-                dispatch(
-                  setCredentials({
-                    user: user.data,
-                  })
-                );
+                  dispatch(
+                    setCredentials({
+                      user: user.data,
+                    })
+                  );
 
-                toast.success("Login successful");
-                navigate("/dashboard");
-              } catch (error: any) {
-                toast.error(error.data.message);
-              }
-            }}
-            onError={() => toast.error("Login Failed")}
-          />
+                  toast.success("Login successful");
+                  navigate("/dashboard");
+                } catch (error: any) {
+                  toast.error(error.data.message);
+                }
+              }}
+              onError={() => toast.error("Login Failed")}
+            />
+          </div>
 
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
