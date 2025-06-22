@@ -41,12 +41,8 @@ const envSchema = z.object({
   REFRESH_TOKEN_EXPIRY: nonEmptyString("REFRESH_TOKEN_EXPIRY"),
   REFRESH_TOKEN_EXPIRY_REMEMBER_ME: nonEmptyString("REFRESH_TOKEN_EXPIRY_REMEMBER_ME"),
 
-  MAILTRAP_HOST: nonEmptyString("MAILTRAP_HOST"),
-  MAILTRAP_PORT: validNumber("MAILTRAP_PORT"),
-  MAILTRAP_USERNAME: nonEmptyString(" MAILTRAP_USERNAME"),
   MAILTRAP_TOKEN: nonEmptyString("MAILTRAP_TOKEN"),
-  MAILTRAP_SENDERMAIL: z.string(),
-  // .email("MAILTRAP_SENDERMAIL must be a valid email"),
+  MAILTRAP_SENDERMAIL: z.string().email("MAILTRAP_SENDERMAIL must be a valid email"),
 
   CLOUDINARY_NAME: nonEmptyString("CLOUDINARY_NAME"),
   CLOUDINARY_API_KEY: nonEmptyString("CLOUDINARY_API_KEY"),
