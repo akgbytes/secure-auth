@@ -44,7 +44,7 @@ const envSchema = z.object({
   MAILTRAP_HOST: nonEmptyString("MAILTRAP_HOST"),
   MAILTRAP_PORT: validNumber("MAILTRAP_PORT"),
   MAILTRAP_USERNAME: nonEmptyString(" MAILTRAP_USERNAME"),
-  MAILTRAP_PASSWORD: nonEmptyString("MAILTRAP_PASSWORD"),
+  MAILTRAP_TOKEN: nonEmptyString("MAILTRAP_TOKEN"),
   MAILTRAP_SENDERMAIL: z.string(),
   // .email("MAILTRAP_SENDERMAIL must be a valid email"),
 

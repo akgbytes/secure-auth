@@ -1,35 +1,35 @@
 import Mailgen from "mailgen";
-import nodemailer from "nodemailer";
 import { env } from "../configs/env";
 import { CustomError } from "./CustomError";
 import { capitalize } from "./helper";
+import { MailtrapClient } from "mailtrap";
 
 const mailGenerator = new Mailgen({
   theme: "default",
   product: {
-    name: "My Auth",
+    name: "Secure Auth",
     link: env.CLIENT_URL,
   },
 });
 
-const sendMail = async (email: string, subject: string, content: Mailgen.Content) => {
-  const transporter = nodemailer.createTransport({
-    host: env.MAILTRAP_HOST,
-    port: env.MAILTRAP_PORT,
-    secure: false,
-    auth: {
-      user: env.MAILTRAP_USERNAME,
-      pass: env.MAILTRAP_PASSWORD,
-    },
-  });
+const client = new MailtrapClient({
+  token: env.MAILTRAP_TOKEN,
+});
 
+const sendMail = async (email: string, subject: string, content: Mailgen.Content) => {
   const html = mailGenerator.generate(content);
   const text = mailGenerator.generatePlaintext(content);
 
+  const sender = {
+    email: env.MAILTRAP_SENDERMAIL,
+    name: "Secure Auth",
+  };
+
+  const recipients = [{ email }];
   try {
-    await transporter.sendMail({
-      from: env.MAILTRAP_SENDERMAIL,
-      to: email,
+    await client.send({
+      from: sender,
+      to: recipients,
       subject,
       text,
       html,
@@ -43,7 +43,7 @@ const emailVerificationMailContent = (fullName: string, link: string) => {
   return {
     body: {
       name: fullName,
-      intro: "Welcome to My Auth! We're excited to have you on board.",
+      intro: "Welcome to Secure Auth! We're excited to have you on board.",
       action: {
         instructions:
           "To complete your registration, please verify your email by clicking the button below:",

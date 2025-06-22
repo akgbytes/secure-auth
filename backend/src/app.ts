@@ -6,6 +6,7 @@ import { env } from "./configs/env";
 
 const app = express();
 
+app.set("trust proxy", "loopback");
 app.use(helmet());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
