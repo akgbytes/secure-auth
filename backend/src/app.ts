@@ -11,7 +11,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-const allowedOrigins = [env.CLIENT_URL];
+const allowedOrigins = [env.CLIENT_URL, "http://localhost:5173"];
 
 app.use(
   cors({

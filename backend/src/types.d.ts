@@ -1,4 +1,4 @@
-import { User } from "./generated/prisma/models";
+import { User } from "./generated/prisma/client";
 
 export type decodedUser = Pick<User, "id" | "email" | "role">;
 

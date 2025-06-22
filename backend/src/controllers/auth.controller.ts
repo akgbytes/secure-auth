@@ -557,6 +557,8 @@ export const googleLogin = asyncHandler(async (req, res) => {
   const accessToken = generateAccessToken(user);
   const refreshToken = generateRefreshToken(user);
 
+  const hashedRefreshToken = createHash(refreshToken);
+
   const expiresAt = new Date(Date.now() + ms(env.REFRESH_TOKEN_EXPIRY as StringValue));
 
   if (existingSession) {
@@ -564,7 +566,7 @@ export const googleLogin = asyncHandler(async (req, res) => {
     await prisma.session.update({
       where: { id: existingSession.id },
       data: {
-        refreshToken,
+        refreshToken: hashedRefreshToken,
         expiresAt,
       },
     });
@@ -575,7 +577,7 @@ export const googleLogin = asyncHandler(async (req, res) => {
         userId: user.id,
         userAgent,
         ipAddress,
-        refreshToken,
+        refreshToken: hashedRefreshToken,
         expiresAt,
       },
     });
