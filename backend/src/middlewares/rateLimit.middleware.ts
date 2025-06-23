@@ -13,7 +13,7 @@ export const authRateLimiter = rateLimit({
 
 export const resendVerificationRateLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
-  max: 3,
+  max: 10,
   message: {
     statusCode: 429,
     message: "Too many verification email requests. Try again later.",
@@ -24,7 +24,7 @@ export const resendVerificationRateLimiter = rateLimit({
 
 export const forgotPasswordRateLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
-  max: 3,
+  max: 10,
   message: {
     statusCode: 429,
     message: "Too many password reset requests. Try again later.",

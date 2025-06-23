@@ -128,7 +128,7 @@ const Login = () => {
                       message: "Invalid email address",
                     },
                   })}
-                  placeholder="Enter your name"
+                  placeholder="Enter your email"
                   className="w-full pl-10 pr-4 py-3 border rounded border-white/10 bg-zinc-900 text-zinc-200 focus-visible:ring-zinc-50 focus-visible:ring-[1px]"
                 />
               </div>

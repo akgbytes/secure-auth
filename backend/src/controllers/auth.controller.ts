@@ -273,7 +273,21 @@ export const logout = asyncHandler(async (req, res) => {
       where: { refreshToken: hashedRefreshToken },
     });
   } catch (error: any) {
-    throw new CustomError(400, "Invalid or expired session. Please log in again.");
+    // Confussion ++
+    // throw new CustomError(400, "Invalid or expired session. Please log in again.");
+    res
+      .status(200)
+      .clearCookie("accessToken", {
+        httpOnly: true,
+        secure: env.NODE_ENV === "production",
+        sameSite: "strict",
+      })
+      .clearCookie("refreshToken", {
+        httpOnly: true,
+        secure: env.NODE_ENV === "production",
+        sameSite: "strict",
+      })
+      .json(new ApiResponse(200, "Logged out successfully", null));
   }
 
   logger.info("User logged out", { email, userId: id, ip: req.ip });
