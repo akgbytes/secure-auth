@@ -306,6 +306,18 @@ export const forgotPassword = asyncHandler(async (req, res) => {
       );
   }
 
+  if (user.provider !== "local") {
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        "You signed up using Google. Please use Google Sign-In to access your account.",
+        {
+          code: "OAUTH_USER",
+        },
+      ),
+    );
+  }
+
   const { unHashedToken, hashedToken, tokenExpiry } = generateToken();
 
   await prisma.user.update({
@@ -435,7 +447,7 @@ export const logoutAllSessions = asyncHandler(async (req, res) => {
 
   const hashedRefreshToken = createHash(refreshToken);
 
-  const result = await prisma.session.deleteMany({
+  await prisma.session.deleteMany({
     where: {
       userId: id,
       NOT: {

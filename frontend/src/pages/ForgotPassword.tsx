@@ -31,6 +31,10 @@ const ForgotPassword = () => {
   const onSubmit: SubmitHandler<ForgotPasswordFormData> = async (data) => {
     try {
       const response = await forgotPassword(data).unwrap();
+      if (response.data?.code === "OAUTH_USER") {
+        toast.success(response.message);
+        return;
+      }
       setEmailSent(true);
       toast.success(response.message);
     } catch (error: any) {

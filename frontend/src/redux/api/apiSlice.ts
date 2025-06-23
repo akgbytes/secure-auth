@@ -96,15 +96,16 @@ export const apiSlice = createApi({
       }),
     }),
 
-    forgotPassword: builder.mutation<ApiResponse<null>, ForgotPasswordFormData>(
-      {
-        query: (data) => ({
-          url: `${AUTH_PATH}/password/forgot`,
-          method: "POST",
-          body: data,
-        }),
-      }
-    ),
+    forgotPassword: builder.mutation<
+      ApiResponse<null> | ApiResponse<{ code: string }>,
+      ForgotPasswordFormData
+    >({
+      query: (data) => ({
+        url: `${AUTH_PATH}/password/forgot`,
+        method: "POST",
+        body: data,
+      }),
+    }),
 
     resetPassword: builder.mutation<ApiResponse<null>, ResetPasswordFormData>({
       query: ({ token, password, confirmPassword }) => ({
