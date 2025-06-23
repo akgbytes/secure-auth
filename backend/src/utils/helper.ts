@@ -18,7 +18,7 @@ export const generateAccessToken = (user: decodedUser) =>
       role: user.role,
     },
     env.ACCESS_TOKEN_SECRET,
-    { expiresIn: env.ACCESS_TOKEN_EXPIRY as s },
+    { expiresIn: env.ACCESS_TOKEN_EXPIRY as StringValue },
   );
 
 export const generateRefreshToken = (user: decodedUser) =>

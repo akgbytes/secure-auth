@@ -100,7 +100,8 @@ SecureAuth is a powerful authentication system built with React, Redux Toolkit, 
 3.  **Install dependencies:**
 
     ```bash
-    npm install
+    cd backend && npm install
+    cd ../frontend && npm install
     ```
 
 4.  **Add Environment Variables:**
@@ -116,13 +117,15 @@ SecureAuth is a powerful authentication system built with React, Redux Toolkit, 
 5.  **Setup Database**
 
     ```bash
+    cd backend
     npx prisma migrate dev --name init
     ```
 
 6.  **Start the App:**
 
     ```bash
-    npm run dev
+    cd frontend && npm run dev
+    cd ../backend && npm run dev
     ```
 
     Visit &nbsp;[http://localhost:5172](http://localhost:5172)&nbsp; to access your app.
@@ -130,7 +133,7 @@ SecureAuth is a powerful authentication system built with React, Redux Toolkit, 
 7.  **Start Prisma Studio:**
 
     ```bash
-    pnpm prisma studio
+    npm prisma studio
     ```
 
     Visit &nbsp;[http://localhost:5555](http://localhost:5555)&nbsp; to access prisma studio.
