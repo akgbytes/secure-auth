@@ -33,10 +33,12 @@ const ForgotPassword = () => {
       const response = await forgotPassword(data).unwrap();
       if (response.data?.code === "OAUTH_USER") {
         toast.success(response.message);
+        setEmailSent(false);
         return;
+      } else {
+        setEmailSent(true);
+        toast.success(response.message);
       }
-      setEmailSent(true);
-      toast.success(response.message);
     } catch (error: any) {
       toast.error(error.data?.message);
     }
