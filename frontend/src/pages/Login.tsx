@@ -155,7 +155,7 @@ const Login = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-zinc-300/70 hover:text-zinc-50"
+                  className="absolute right-5 top-1/2 transform -translate-y-1/2 text-zinc-300/70 hover:text-zinc-50"
                 >
                   {showPassword ? (
                     <EyeOff className="h-4 w-4" />
@@ -199,8 +199,7 @@ const Login = () => {
 
             <Button
               type="submit"
-              className="w-full cursor-pointer py-5 rounded-[4px] text-zinc-700"
-              variant={"outline"}
+              className="w-full cursor-pointer py-5 rounded-[4px]"
               disabled={isLoading}
             >
               {isLoading ? (
@@ -219,9 +218,7 @@ const Login = () => {
 
           <div className="flex flex-col gap-2">
             <div className="text-center text-sm">
-              <span className="text-zinc-300/60">
-                Already have an account?{" "}
-              </span>
+              <span className="text-zinc-300/60">Don't have an account? </span>
               <Link
                 to="/register"
                 className="hover:underline text-zinc-200 font-medium"

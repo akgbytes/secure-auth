@@ -80,13 +80,12 @@ const ForgotPassword = () => {
                 </div>
 
                 <div className="space-y-3">
-                  <p className="text-zinc-300/70 text-sm">
+                  <p className="text-sm">
                     Didn't receive the email? Check your spam folder or try
                     again.
                   </p>
                   <Button
                     onClick={() => setEmailSent(false)}
-                    variant="outline"
                     className="w-full cursor-pointer"
                   >
                     <RefreshCw className="h-4 w-4 mr-2" />
@@ -156,8 +155,7 @@ const ForgotPassword = () => {
 
             <Button
               type="submit"
-              className="w-full cursor-pointer py-5 rounded-[4px] text-zinc-700"
-              variant={"outline"}
+              className="w-full cursor-pointer py-5 rounded-[4px]"
               disabled={isLoading}
             >
               {isLoading ? (

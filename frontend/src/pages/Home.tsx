@@ -1,109 +1,154 @@
-import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardHeader,
-  CardContent,
-  CardDescription,
-  CardTitle,
-} from "@/components/ui/card";
 import { useAppSelector } from "@/hooks";
-import { Lock, Shield, Users } from "lucide-react";
-import { Link } from "react-router-dom";
+import {
+  ArrowRight,
+  KeyRound,
+  Mail,
+  Monitor,
+  RotateCcw,
+  Smartphone,
+  Users,
+} from "lucide-react";
+import { FaGithub } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
+  const navigate = useNavigate();
   const user = useAppSelector((state) => state.auth.user);
   return (
-    <div className="min-h-screen bg-zinc-900">
-      <div className="mx-auto px-4 py-16">
-        <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 text-zinc-50 mt-12">
-            Secure Authentication System
-          </h1>
-          <p className="text-xl text-zinc-400/90 mb-8 max-w-2xl mx-auto">
-            A modern, secure authentication platform with advanced session
-            management and administrative controls.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            {user ? (
-              <Button
-                size={"lg"}
-                className="bg-teal-600 hover:bg-teal-700 cursor-pointer"
+    <div className="min-h-screen bg-background">
+      <section className="min-h-screen flex items-center justify-center py-16">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="space-y-8">
+            <div>
+              <h1 className="text-5xl font-bold mb-6">
+                <span className="">Secure Auth</span>
+              </h1>
+              <p className="text-xl text-muted-foreground mb-8">
+                A complete authentication system built for learning and
+                production use.
+              </p>
+            </div>
+
+            <div className="space-y-6 grid grid-cols-2 gap-4">
+              <div className="flex items-center gap-4">
+                <div className="w-8 h-8 rounded-full bg-green-950 flex items-center justify-center">
+                  <Mail className="w-4 h-4 text-green-500" />
+                </div>
+                <div>
+                  <h3 className="font-medium text-foreground">
+                    Email Authentication
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Login/signup with email verification
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <div className="w-8 h-8 rounded-full bg-green-950 flex items-center justify-center">
+                  <RotateCcw className="w-4 h-4 text-green-500" />
+                </div>
+                <div>
+                  <h3 className="font-medium text-foreground">
+                    Password Reset
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Secure password reset via email
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <div className="w-8 h-8 rounded-full bg-green-950 flex items-center justify-center">
+                  <KeyRound className="w-4 h-4 text-green-500" />
+                </div>
+                <div>
+                  <h3 className="font-medium text-foreground">
+                    Token Management
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Secure access & refresh token flow
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <div className="w-8 h-8 rounded-full bg-green-950 flex items-center justify-center">
+                  <Monitor className="w-4 h-4 text-green-500" />
+                </div>
+                <div>
+                  <h3 className="font-medium text-foreground">
+                    Session Management
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Multi-device session control
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <div className="w-8 h-8 rounded-full bg-green-950 flex items-center justify-center">
+                  <Smartphone className="w-4 h-4 text-green-500" />
+                </div>
+                <div>
+                  <h3 className="font-medium text-foreground">Social Login</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Google, GitHub authentication
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <div className="w-8 h-8 rounded-full bg-green-950 flex items-center justify-center">
+                  <Users className="w-4 h-4 text-green-500" />
+                </div>
+                <div>
+                  <h3 className="font-medium text-foreground">
+                    Admin Dashboard
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    User & session management
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-4">
+              <a
+                href="https://github.com/akgbytes/secure-auth"
+                target="_blank"
+                rel="noopener noreferrer"
               >
-                <Link to="/dashboard">Go to Dashboard</Link>
-              </Button>
-            ) : (
-              <>
-                <Button
-                  size={"lg"}
-                  className="bg-teal-600 hover:bg-teal-700 cursor-pointer"
-                >
-                  <Link to="/login">Sign In</Link>
+                <Button variant="default" className="gap-2">
+                  <FaGithub className="w-4 h-4" />
+                  View Code
                 </Button>
+              </a>
+
+              {user ? (
                 <Button
+                  onClick={() => navigate("/dashboard")}
                   variant="outline"
-                  size="lg"
-                  className="hover:bg-zinc-100/90"
+                  className="gap-2"
                 >
-                  <Link to="/register">Create Account</Link>
+                  Dashboard
+                  <ArrowRight className="w-4 h-4" />
                 </Button>
-              </>
-            )}
+              ) : (
+                <Button
+                  onClick={() => navigate("/login")}
+                  variant="outline"
+                  className="gap-2"
+                >
+                  Get Started
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              )}
+            </div>
           </div>
         </div>
-
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          <Card className="text-center bg-zinc-800 border-0 shadow-lg hover:shadow-xl transition-shadow">
-            <CardHeader>
-              <div className="w-12 h-12  bg-teal-700 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Lock className="h-6 w-6 text-white" />
-              </div>
-              <CardTitle className="text-zinc-50">
-                Secure Authentication
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CardDescription className="text-zinc-300/70">
-                Supports both custom auth and Google OAuth for improved security
-                and user convenience.
-              </CardDescription>
-            </CardContent>
-          </Card>
-
-          <Card className="text-center bg-zinc-800 border-0 shadow-lg hover:shadow-xl transition-shadow">
-            <CardHeader>
-              <div className="w-12 h-12 bg-teal-700 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Users className="h-6 w-6 text-white" />
-              </div>
-              <CardTitle className="text-zinc-50">Session Management</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CardDescription className="text-zinc-300/70">
-                Monitor and control active sessions across all devices.
-              </CardDescription>
-            </CardContent>
-          </Card>
-
-          <Card className="text-center bg-zinc-800 border-0 shadow-lg hover:shadow-xl transition-shadow">
-            <CardHeader>
-              <div className="w-12 h-12 bg-teal-700 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Shield className="h-6 w-6 text-white" />
-              </div>
-              <CardTitle className="text-zinc-50">Admin Dashboard</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CardDescription className="text-zinc-300/70">
-                Comprehensive user management with role-based access control and
-                analytics.
-              </CardDescription>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="flex items-center justify-center">
-          <Footer />
-        </div>
-      </div>
+      </section>
     </div>
   );
 };

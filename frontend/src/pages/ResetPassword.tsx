@@ -100,7 +100,7 @@ const ResetPassword = () => {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-zinc-300/70 hover:text-zinc-50"
+                      className="absolute right-5 top-1/2 transform -translate-y-1/2 text-zinc-300/70 hover:text-zinc-50"
                     >
                       {showPassword ? (
                         <EyeOff className="h-4 w-4" />
@@ -142,7 +142,7 @@ const ResetPassword = () => {
                       onClick={() =>
                         setShowConfirmPassword(!showConfirmPassword)
                       }
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-zinc-300/70 hover:text-zinc-50"
+                      className="absolute right-5 top-1/2 transform -translate-y-1/2 text-zinc-300/70 hover:text-zinc-50"
                     >
                       {showConfirmPassword ? (
                         <EyeOff className="h-4 w-4" />
@@ -161,8 +161,7 @@ const ResetPassword = () => {
 
                 <Button
                   type="submit"
-                  className="w-full cursor-pointer py-5 rounded-[4px] text-zinc-700"
-                  variant={"outline"}
+                  className="w-full cursor-pointer py-5 rounded-[4px]"
                   disabled={isLoading}
                 >
                   {isLoading ? (
@@ -229,10 +228,7 @@ const ResetPassword = () => {
                 </div>
 
                 <Link to="/forgot-password">
-                  <Button
-                    className="w-full cursor-pointer "
-                    variant={"outline"}
-                  >
+                  <Button className="w-full cursor-pointer ">
                     Request New Reset Link
                   </Button>
                 </Link>
@@ -294,10 +290,7 @@ const ResetPassword = () => {
                 </div>
 
                 <Link to="/login">
-                  <Button
-                    className="w-full cursor-pointer "
-                    variant={"outline"}
-                  >
+                  <Button className="w-full cursor-pointer ">
                     Continue to Login
                   </Button>
                 </Link>
@@ -346,7 +339,7 @@ const ResetPassword = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-zinc-300/70 hover:text-zinc-50"
+                  className="absolute right-5 top-1/2 transform -translate-y-1/2 text-zinc-300/70 hover:text-zinc-50"
                 >
                   {showPassword ? (
                     <EyeOff className="h-4 w-4" />
@@ -386,7 +379,7 @@ const ResetPassword = () => {
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-zinc-300/70 hover:text-zinc-50"
+                  className="absolute right-5 top-1/2 transform -translate-y-1/2 text-zinc-300/70 hover:text-zinc-50"
                 >
                   {showConfirmPassword ? (
                     <EyeOff className="h-4 w-4" />
@@ -405,8 +398,7 @@ const ResetPassword = () => {
 
             <Button
               type="submit"
-              className="w-full cursor-pointer py-5 rounded-[4px] text-zinc-700"
-              variant={"outline"}
+              className="w-full cursor-pointer py-5 rounded-[4px]"
               disabled={isLoading}
             >
               {isLoading ? (

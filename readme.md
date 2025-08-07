@@ -18,7 +18,7 @@
 
 ## Introduction
 
-SecureAuth is a powerful authentication system built with React, Redux Toolkit, RTK Query, Node.js, Prisma, and PostgreSQL, it includes complete flows for login, signup, email verification, password resets, image uploads, and RBAC — all styled using Shadcn UI and Tailwind CSS.
+SecureAuth is a powerful authentication system built with React, Redux Toolkit, RTK Query, Node.js, Prisma, and PostgreSQL, it includes complete flows for login, signup, email verification, password resets, image uploads, and RBAC.
 <br>
 
 ## Features
@@ -128,15 +128,7 @@ SecureAuth is a powerful authentication system built with React, Redux Toolkit, 
     cd ../backend && npm run dev
     ```
 
-    Visit &nbsp;[http://localhost:5172](http://localhost:5172)&nbsp; to access your app.
-
-7.  **Start Prisma Studio:**
-
-    ```bash
-    npm prisma studio
-    ```
-
-    Visit &nbsp;[http://localhost:5555](http://localhost:5555)&nbsp; to access prisma studio.
+    Visit &nbsp;[http://localhost:5173](http://localhost:5173)&nbsp; to access your app.
 
 <br>
 

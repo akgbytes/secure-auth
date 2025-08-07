@@ -1,4 +1,10 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -18,6 +24,11 @@ import {
   Smartphone,
   UserCog,
   Loader2,
+  Tablet,
+  Calendar,
+  Shield,
+  MapPin,
+  Trash2,
 } from "lucide-react";
 import { useAppSelector } from "@/hooks";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
@@ -30,8 +41,38 @@ import {
   useLogoutSpecificSessionMutation,
 } from "@/redux/api/apiSlice";
 import { toast } from "react-toastify";
+import { useState } from "react";
 
 const Dashboard = () => {
+  const [sessions] = useState([
+    {
+      id: "1",
+      device: "Chrome on Windows",
+      location: "New York, US",
+      ip: "192.168.1.1",
+      lastActive: "2 minutes ago",
+      current: true,
+      icon: Monitor,
+    },
+    {
+      id: "2",
+      device: "Safari on iPhone",
+      location: "New York, US",
+      ip: "192.168.1.2",
+      lastActive: "1 hour ago",
+      current: false,
+      icon: Smartphone,
+    },
+    {
+      id: "3",
+      device: "Chrome on iPad",
+      location: "Boston, US",
+      ip: "192.168.1.3",
+      lastActive: "1 day ago",
+      current: false,
+      icon: Tablet,
+    },
+  ]);
   const userProfile = useAppSelector((state) => state.auth.user);
 
   const { data: sessionData, isLoading, refetch } = useFetchUserSessionsQuery();
@@ -88,7 +129,6 @@ const Dashboard = () => {
           <div className="flex gap-6 text-zinc-900">
             {userProfile?.role === "admin" && (
               <Button
-                variant="outline"
                 className="cursor-pointer"
                 onClick={() => navigate("/admin")}
               >
@@ -97,8 +137,7 @@ const Dashboard = () => {
               </Button>
             )}
             <Button
-              className="cursor-pointer text-zinc-700"
-              variant={"outline"}
+              className="cursor-pointer"
               disabled={logoutLoading}
               onClick={logoutHandler}
             >
@@ -114,41 +153,16 @@ const Dashboard = () => {
                 </>
               )}
             </Button>
-
-            <Button
-              className="cursor-pointer text-zinc-700"
-              variant={"outline"}
-              disabled={logoutAllLoading}
-              onClick={logoutAllHandler}
-            >
-              {logoutAllLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Logout...
-                </>
-              ) : (
-                <>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Logout All Other Sessions
-                </>
-              )}
-            </Button>
           </div>
         </div>
 
-        <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 bg-zinc-500">
-            <TabsTrigger value="profile" className="flex items-center gap-2">
-              <User className="h-4 w-4" />
-              Profile
-            </TabsTrigger>
-            <TabsTrigger value="sessions" className="flex items-center gap-2">
-              <Settings className="h-4 w-4" />
-              Sessions
-            </TabsTrigger>
+        <Tabs defaultValue="overview" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="sessions">Sessions</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="profile">
+          <TabsContent value="overview" className="space-y-6">
             <Card className="bg-zinc-900 border-white/10 text-zinc-50">
               <CardHeader>
                 <CardTitle>Profile Information</CardTitle>
@@ -199,10 +213,13 @@ const Dashboard = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="sessions">
-            <Card className="bg-zinc-900 border-white/10 text-zinc-50">
+          <TabsContent value="sessions" className="space-y-6">
+            <Card>
               <CardHeader>
                 <CardTitle>Active Sessions</CardTitle>
+                <CardDescription>
+                  Manage your active sessions across different devices
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 {isLoading ? (
@@ -218,81 +235,91 @@ const Dashboard = () => {
                     ))}
                   </div>
                 ) : sessionData ? (
-                  <Table className="text-zinc-50">
-                    <TableHeader>
-                      <TableRow className="hover:bg-transparent">
-                        <TableHead className="text-zinc-50 font-bold">
-                          Device
-                        </TableHead>
-                        <TableHead className="text-zinc-50 font-bold">
-                          Location
-                        </TableHead>
-                        <TableHead className="text-zinc-50 font-bold">
-                          IP Address
-                        </TableHead>
-                        <TableHead className="text-zinc-50 font-bold">
-                          Last Active
-                        </TableHead>
-                        <TableHead className="text-zinc-50 font-bold">
-                          Status
-                        </TableHead>
-                        <TableHead className="text-zinc-50 font-bold">
-                          Actions
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {sessionData.data &&
-                        sessionData.data.map((session) => {
-                          const Icon = session.device.includes("Mobile")
-                            ? Smartphone
-                            : Monitor;
-                          return (
-                            <TableRow
-                              key={session.id}
-                              className="hover:bg-zinc-800 cursor-pointer"
-                            >
-                              <TableCell className="flex items-center gap-2">
-                                <Icon className="h-4 w-4" />
-                                {session.device}
-                              </TableCell>
-                              <TableCell>{session.location}</TableCell>
-                              <TableCell>{session.ip}</TableCell>
-                              <TableCell>{session.lastActive}</TableCell>
-                              <TableCell>
-                                <Badge
-                                  variant="default"
-                                  className={
-                                    session.current
-                                      ? "bg-zinc-50 text-zinc-900"
-                                      : session.status === "active"
-                                      ? "bg-green-300 text-zinc-800"
-                                      : "bg-red-400 text-zinc-50"
-                                  }
-                                >
-                                  {session.current ? "current" : session.status}
-                                </Badge>
-                              </TableCell>
-                              <TableCell>
-                                {!session.current && (
-                                  <Button
-                                    variant="destructive"
-                                    size="sm"
-                                    className="h-7 cursor-pointer"
-                                    onClick={() =>
-                                      logoutSpecificSessionHandler(session.id)
-                                    }
-                                  >
-                                    <LogOut className="h-4 w-4 mr-1" />
-                                    Logout
-                                  </Button>
-                                )}
-                              </TableCell>
-                            </TableRow>
-                          );
-                        })}
-                    </TableBody>
-                  </Table>
+                  <>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Device</TableHead>
+                          <TableHead>Location</TableHead>
+                          <TableHead>IP Address</TableHead>
+                          <TableHead>Last Active</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead></TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {sessionData.data &&
+                          sessionData.data.map((session) => {
+                            const Icon = session.device.includes("Mobile")
+                              ? Smartphone
+                              : Monitor;
+                            return (
+                              <TableRow key={session.id}>
+                                <TableCell>
+                                  <div className="flex items-center space-x-3">
+                                    <Icon className="h-4 w-4 text-muted-foreground" />
+                                    <span className="font-medium">
+                                      {session.device}
+                                    </span>
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  <div className="flex items-center space-x-2">
+                                    <MapPin className="h-3 w-3 text-muted-foreground" />
+                                    <span>{session.location}</span>
+                                  </div>
+                                </TableCell>
+                                <TableCell className="font-mono text-sm">
+                                  {session.ip}
+                                </TableCell>
+                                <TableCell>{session.lastActive}</TableCell>
+                                <TableCell>
+                                  {session.current ? (
+                                    <Badge variant="default">Current</Badge>
+                                  ) : (
+                                    <Badge variant="secondary">Active</Badge>
+                                  )}
+                                </TableCell>
+                                <TableCell>
+                                  {!session.current && (
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="text-destructive hover:text-destructive"
+                                      onClick={() =>
+                                        logoutSpecificSessionHandler(session.id)
+                                      }
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  )}
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                      </TableBody>
+                    </Table>
+                    <div className="mt-4">
+                      <Button
+                        variant="destructive"
+                        className="gap-2"
+                        disabled={logoutAllLoading}
+                        onClick={logoutAllHandler}
+                      >
+                        {logoutAllLoading ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Terminating...
+                          </>
+                        ) : (
+                          <>
+                            <Trash2 className="h-4 w-4" />
+                            Terminate All Other Sessions
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </>
                 ) : null}
               </CardContent>
             </Card>

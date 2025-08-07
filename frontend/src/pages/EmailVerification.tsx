@@ -112,7 +112,7 @@ const EmailVerification = () => {
               </p>
             </div>
             <Link to="/login">
-              <Button className="w-full cursor-pointer" variant={"outline"}>
+              <Button className="w-full cursor-pointer">
                 Continue to Login
               </Button>
             </Link>
@@ -135,7 +135,7 @@ const EmailVerification = () => {
               </p>
             </div>
             <Link to="/resend-verification">
-              <Button className="w-full cursor-pointer" variant={"outline"}>
+              <Button className="w-full cursor-pointer">
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Resend Verification Email
               </Button>

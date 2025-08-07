@@ -178,8 +178,7 @@ const AdminDashboard = () => {
                       </TableCell>
                       <TableCell>
                         <Button
-                          variant="outline"
-                          className="text-zinc-900 cursor-pointer"
+                          className="cursor-pointer"
                           size="sm"
                           onClick={() => {
                             viewSessionsHandler(user);

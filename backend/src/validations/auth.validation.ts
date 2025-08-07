@@ -1,5 +1,4 @@
-import { resetPassword } from "../controllers/auth.controller";
-import { boolean, z } from "zod";
+import { z } from "zod";
 
 const strongPassword = z
   .string()
@@ -55,28 +54,28 @@ const resetPasswordSchema = z
     path: ["confirmPassword"],
   });
 
-type RegisterData = z.infer<typeof registerSchema>;
-type LoginData = z.infer<typeof loginSchema>;
-type EmailData = z.infer<typeof emailSchema>;
-type ChangePasswordData = z.infer<typeof changePasswordSchema>;
-type ResetPasswordData = z.infer<typeof resetPasswordSchema>;
+export type RegisterData = z.infer<typeof registerSchema>;
+export type LoginData = z.infer<typeof loginSchema>;
+export type EmailData = z.infer<typeof emailSchema>;
+export type ChangePasswordData = z.infer<typeof changePasswordSchema>;
+export type ResetPasswordData = z.infer<typeof resetPasswordSchema>;
 
-export const validateRegister = (data: RegisterData) => {
+export const validateRegister = (data: unknown) => {
   return registerSchema.safeParse(data);
 };
 
-export const validateLogin = (data: LoginData) => {
+export const validateLogin = (data: unknown) => {
   return loginSchema.safeParse(data);
 };
 
-export const validateEmail = (data: EmailData) => {
+export const validateEmail = (data: unknown) => {
   return emailSchema.safeParse(data);
 };
 
-export const validateChangePassword = (data: ChangePasswordData) => {
+export const validateChangePassword = (data: unknown) => {
   return changePasswordSchema.safeParse(data);
 };
 
-export const validateResetPassword = (data: ResetPasswordData) => {
+export const validateResetPassword = (data: unknown) => {
   return resetPasswordSchema.safeParse(data);
 };

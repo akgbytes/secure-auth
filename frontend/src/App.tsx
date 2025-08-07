@@ -10,29 +10,34 @@ import EmailVerification from "./pages/EmailVerification";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import AdminDashboard from "./pages/AdminDashboard";
-import AdminRoutes from "./pages/AdminRoutes";
-import PrivateRoutes from "./pages/PrivateRoutes";
+import AdminRoutes from "./routes/AdminRoutes";
+import PrivateRoutes from "./routes/PrivateRoutes";
 import { useUser } from "./hooks";
+import AuthRoutes from "./routes/AuthRoutes";
 
 const App = () => {
   useUser();
   return (
-    <div>
+    <div className="min-h-screen bg-background">
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/verify-email/:token" element={<EmailVerification />} />
-        <Route
-          path="/resend-verification"
-          element={<ResendVerificationEmail />}
-        />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password/:token" element={<ResetPassword />} />
+
+        <Route element={<AuthRoutes />}>
+          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/verify-email/:token" element={<EmailVerification />} />
+          <Route
+            path="/resend-verification"
+            element={<ResendVerificationEmail />}
+          />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
+        </Route>
 
         <Route element={<PrivateRoutes />}>
           <Route path="/dashboard" element={<Dashboard />} />
         </Route>
+
         <Route element={<AdminRoutes />}>
           <Route path="/admin" element={<AdminDashboard />} />
         </Route>
