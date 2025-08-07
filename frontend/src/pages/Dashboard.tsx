@@ -17,16 +17,11 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import {
-  User,
-  Settings,
   LogOut,
   Monitor,
   Smartphone,
   UserCog,
   Loader2,
-  Tablet,
-  Calendar,
-  Shield,
   MapPin,
   Trash2,
 } from "lucide-react";
@@ -41,38 +36,8 @@ import {
   useLogoutSpecificSessionMutation,
 } from "@/redux/api/apiSlice";
 import { toast } from "react-toastify";
-import { useState } from "react";
 
 const Dashboard = () => {
-  const [sessions] = useState([
-    {
-      id: "1",
-      device: "Chrome on Windows",
-      location: "New York, US",
-      ip: "192.168.1.1",
-      lastActive: "2 minutes ago",
-      current: true,
-      icon: Monitor,
-    },
-    {
-      id: "2",
-      device: "Safari on iPhone",
-      location: "New York, US",
-      ip: "192.168.1.2",
-      lastActive: "1 hour ago",
-      current: false,
-      icon: Smartphone,
-    },
-    {
-      id: "3",
-      device: "Chrome on iPad",
-      location: "Boston, US",
-      ip: "192.168.1.3",
-      lastActive: "1 day ago",
-      current: false,
-      icon: Tablet,
-    },
-  ]);
   const userProfile = useAppSelector((state) => state.auth.user);
 
   const { data: sessionData, isLoading, refetch } = useFetchUserSessionsQuery();
