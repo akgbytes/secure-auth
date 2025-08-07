@@ -10,7 +10,7 @@ export function generateCookieOptions({ rememberMe = false }: CookieOptionsArgs 
   return {
     httpOnly: true,
     secure: env.NODE_ENV === "production",
-    sameSite: "strict" as const,
+    sameSite: "lax" as const,
     maxAge: ms(expiry as StringValue),
   };
 }
