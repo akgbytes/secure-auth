@@ -1,7 +1,6 @@
 import { logger } from "@/utils/logger";
 import * as z from "zod";
-import { configDotenv } from "dotenv";
-configDotenv();
+import "dotenv/config";
 
 const envSchema = z.object({
   PORT: z.coerce.number<number>({ error: "PORT must be a valid number" }),
