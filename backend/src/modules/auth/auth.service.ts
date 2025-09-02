@@ -23,7 +23,7 @@ export async function registerUser({ name, email, password }: RegisterInput) {
   if (!user)
     throw new ApiError(
       HttpStatus.INTERNAL_SERVER_ERROR,
-      "Failed to create user, Please try again."
+      "Failed to register, Please try again."
     );
 
   return user;
