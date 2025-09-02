@@ -33,3 +33,11 @@ export const loginSchema = z.object({
     .min(6, "Password must be at least 6 characters long")
     .max(128, "Password must be less than 128 characters"),
 });
+
+export type RegisterInput = z.infer<typeof registerSchema>;
+export type Login = z.infer<typeof registerSchema>;
+
+export const validateRegister = (data: unknown) =>
+  registerSchema.safeParse(data);
+
+export const validateLogin = (data: unknown) => loginSchema.safeParse(data);
