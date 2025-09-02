@@ -9,6 +9,18 @@ const envSchema = z.object({
     error: (issue) => `NODE ENV must be ${issue.values.join(" | ")}`,
   }),
   APP_ORIGIN: z.url({ error: "APP ORIGIN must be a valid URL" }),
+
+  REDIS_HOST: z.string({}),
+  REDIS_PORT: z.coerce.number<number>({
+    error: "Redis PORT must be a valid number",
+  }),
+
+  MAILTRAP_API_TOKEN: z
+    .string()
+    .nonempty({ error: "Mailtrap token must not be empty" }),
+  MAILTRAP_SENDER_EMAIL: z.email({
+    error: "Mailtrap sender mail must be a valid email",
+  }),
 });
 
 const createEnv = (env: NodeJS.ProcessEnv) => {
