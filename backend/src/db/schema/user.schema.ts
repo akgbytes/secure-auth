@@ -1,6 +1,7 @@
 import { pgTable, text, boolean, uuid, pgEnum } from "drizzle-orm/pg-core";
 import { timestamps } from "@/db/column-helpers";
 import { Provider, UserRole } from "@/constants";
+import { InferSelectModel } from "drizzle-orm";
 
 export const roleEnum = pgEnum("role", UserRole);
 export const providerEnum = pgEnum("provider", Provider);
@@ -18,3 +19,5 @@ export const userTable = pgTable("user", {
   ),
   ...timestamps,
 });
+
+export type User = InferSelectModel<typeof userTable>;
