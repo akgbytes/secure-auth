@@ -35,7 +35,7 @@ export const loginSchema = z.object({
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;
-export type Login = z.infer<typeof registerSchema>;
+export type LoginInput = z.infer<typeof registerSchema>;
 
 export const validateRegister = (data: unknown) =>
   registerSchema.safeParse(data);
