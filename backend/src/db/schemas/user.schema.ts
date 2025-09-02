@@ -7,7 +7,7 @@ export const userTable = pgTable("user", {
   email: text("email").notNull().unique(),
   password: text("password"),
   emailVerified: boolean("email_verified").default(false).notNull(),
-  image: text("image").default(
+  avatar: text("avatar").default(
     "https://res.cloudinary.com/dmnh10etf/image/upload/v1750270944/default_epnleu.png"
   ),
   ...timestamps,
