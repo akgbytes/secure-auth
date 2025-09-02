@@ -7,24 +7,31 @@
     "skipLibCheck": true,
     "resolveJsonModule": true,
 
-    "rootDir": "src",
-    "outDir": "dist",
-
     "strict": true,
     "noImplicitAny": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmitOnError": true,
 
+    "removeComments": true,
     "isolatedModules": true,
 
-    "lib": ["es2022"],
+    "rootDir": "src",
+    "outDir": "dist",
+
+    "lib": ["es2022", "DOM"],
     "types": ["node"],
 
     "baseUrl": "./src",
     "paths": {
       "@/*": ["*"]
-    }
+    },
+
+    "sourceMap": true,
+    "inlineSources": true
   },
+
   "include": ["src", "types"],
   "exclude": ["node_modules", "dist"]
 }
