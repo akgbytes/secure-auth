@@ -24,10 +24,9 @@ app.use(
   pinoHttp({
     logger: logger,
     genReqId: () => randomUUID(),
-    customLogLevel: function (res, err) {
+    customLogLevel: function (req, res, err) {
       const statusCode = res.statusCode as number;
-      if (statusCode >= 500 || err) return "error";
-      if (statusCode >= 400) return "warn";
+      if (statusCode >= 400) return "error";
       return "info";
     },
     serializers: {
@@ -45,18 +44,18 @@ app.use(
       },
     },
     customSuccessMessage: function (req, res) {
-      return `Request completed in ${(res as any).responseTime}ms`;
+      return `Request completed`;
     },
-    customErrorMessage: function (req, res, err) {
-      return `Request errored with status ${res.statusCode}: ${err.message}`;
-    },
+
     autoLogging: true,
   })
 );
 
-import healthRoutes from "@/modules/health/health.routes";
-import { errorHandler } from "@/middlewares/error.middleware";
+import healthRoutes from "@/modules/health";
+import authRoutes from "@/modules/auth";
 
 app.use("/api/v1/health", healthRoutes);
+app.use("/api/v1/auth", authRoutes);
 
+import { errorHandler } from "@/middlewares/error.middleware";
 app.use(errorHandler);

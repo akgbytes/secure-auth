@@ -1,8 +1,11 @@
 import { db } from "@/db";
-import { RegisterInput, hashPassword } from "@/modules/auth";
-import { userTable } from "@/db/schemas";
+import { generateToken, hashPassword } from "./auth.utils";
+import { RegisterInput } from "./auth.validators";
+import { userTable } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { ApiError, HttpStatus } from "@/core";
+import { emailQueue } from "@/queues/email";
+import { sendVerificationMail } from "@/utils/mail";
 
 export async function registerUser({ name, email, password }: RegisterInput) {
   const [existingUser] = await db
@@ -15,6 +18,8 @@ export async function registerUser({ name, email, password }: RegisterInput) {
 
   const hashedPassword = await hashPassword(password);
 
+  const { unHashedToken, hashedToken, tokenExpiry } = generateToken();
+
   const [user] = await db
     .insert(userTable)
     .values({ name, email, password: hashedPassword })
@@ -25,6 +30,15 @@ export async function registerUser({ name, email, password }: RegisterInput) {
       HttpStatus.INTERNAL_SERVER_ERROR,
       "Failed to register, Please try again."
     );
+
+  emailQueue.add("sendVerifyEmail", {
+    type: "verify",
+    fullname: user.name,
+    email: user.email,
+    token: unHashedToken,
+  });
+
+  await sendVerificationMail(user.name, user.email, unHashedToken);
 
   return user;
 }

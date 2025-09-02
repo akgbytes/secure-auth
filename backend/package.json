@@ -8,7 +8,7 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
-    "worker:email": "tsx watch src/workers/email.worker.ts"
+    "worker:email": "tsx watch src/queues/email/email.worker.ts"
   },
   "keywords": [],
   "author": "akgbytes",

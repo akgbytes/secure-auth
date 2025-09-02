@@ -15,24 +15,28 @@ export const emailVerificationMailContent = (
 ) => ({
   body: {
     name: fullName,
-    intro: "Welcome to Secure Auth! We're excited to have you onboard.",
+    intro: `Welcome to Secure Auth! 🎉 We're excited to have you onboard.`,
     action: {
       instructions:
-        "To complete your registration, please verify your email by clicking below:",
+        "To complete your registration, please verify your email by clicking the button below:",
       button: {
         color: "#22BC66",
         text: "Verify Email",
         link,
       },
     },
-    outro: "If you have any questions, just reply to this email.",
+    outro: `
+     This link will expire in 24 hours for security reasons.
+      
+      If you have any questions, reach out at support@secureauth.com.
+    `,
     signature: false,
   },
 });
 
-export const resetPasswordMailContent = (fullName: string, link: string) => ({
+export const resetPasswordMailContent = (name: string, link: string) => ({
   body: {
-    name: fullName,
+    name,
     intro: "You requested to reset your password.",
     action: {
       instructions: "Click the button below to reset your password:",
