@@ -55,5 +55,8 @@ app.use(
 );
 
 import healthRoutes from "@/modules/health/health.routes";
+import { errorHandler } from "@/middlewares/error.middleware";
 
 app.use("/api/v1/health", healthRoutes);
+
+app.use(errorHandler);
