@@ -17,10 +17,24 @@ const envSchema = z.object({
 
   MAILTRAP_API_TOKEN: z
     .string()
-    .nonempty({ error: "Mailtrap token must not be empty" }),
+    .nonempty({ error: "Mailtrap Token must not be empty" }),
   MAILTRAP_SENDER_EMAIL: z.email({
-    error: "Mailtrap sender mail must be a valid email",
+    error: "Mailtrap Sender mail must be a valid email",
   }),
+
+  ACCESS_TOKEN_SECRET: z
+    .string()
+    .nonempty({ error: "Access Token Secret must not be empty" }),
+  ACCESS_TOKEN_EXPIRY: z
+    .string()
+    .nonempty({ error: "Access Token Expiry must not be empty" }),
+
+  REFRESH_TOKEN_SECRET: z
+    .string()
+    .nonempty({ error: "Refresh Token Secret must not be empty" }),
+  REFRESH_TOKEN_EXPIRY: z
+    .string()
+    .nonempty({ error: "Refresh Token Expiry must not be empty" }),
 });
 
 const createEnv = (env: NodeJS.ProcessEnv) => {

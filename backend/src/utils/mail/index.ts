@@ -7,29 +7,27 @@ import { env } from "@/config/env";
 import { capitalize } from "@/utils";
 
 export const sendVerificationMail = async (
-  fullname: string,
+  name: string,
   email: string,
   token: string
 ) => {
   const link = `${env.APP_ORIGIN}/verify-email/${token}`;
-  const name = capitalize(fullname);
   await sendMail(
     email,
     "Verify Your Email",
-    emailVerificationMailContent(name, link)
+    emailVerificationMailContent(capitalize(name), link)
   );
 };
 
 export const sendResetPasswordMail = async (
-  fullname: string,
+  name: string,
   email: string,
   token: string
 ) => {
   const link = `${env.APP_ORIGIN}/reset-password/${token}`;
-  const name = capitalize(fullname);
   await sendMail(
     email,
     "Reset Your Password",
-    resetPasswordMailContent(name, link)
+    resetPasswordMailContent(capitalize(name), link)
   );
 };

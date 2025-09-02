@@ -17,7 +17,6 @@ export async function registerUser({ name, email, password }: RegisterInput) {
     throw new ApiError(HttpStatus.CONFLICT, "Email already registered");
 
   const hashedPassword = await hashPassword(password);
-
   const { unHashedToken, hashedToken, tokenExpiry } = generateToken();
 
   const [user] = await db
@@ -33,7 +32,7 @@ export async function registerUser({ name, email, password }: RegisterInput) {
 
   emailQueue.add("sendVerifyEmail", {
     type: "verify",
-    fullname: user.name,
+    name: user.name,
     email: user.email,
     token: unHashedToken,
   });

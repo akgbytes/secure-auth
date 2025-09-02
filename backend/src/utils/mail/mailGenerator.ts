@@ -1,5 +1,5 @@
-import { env } from "@/config/env";
 import Mailgen from "mailgen";
+import { env } from "@/config/env";
 
 export const mailGenerator = new Mailgen({
   theme: "default",

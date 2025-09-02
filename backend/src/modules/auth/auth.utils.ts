@@ -15,7 +15,7 @@ export const createHash = (token: string) =>
 export const generateToken = () => {
   const unHashedToken = crypto.randomBytes(32).toString("hex");
   const hashedToken = createHash(unHashedToken);
-  const tokenExpiry = new Date(Date.now() + 30 * 60 * 1000);
+  const tokenExpiry = new Date(Date.now() + 30 * 60 * 1000); // 30 min
 
   return { unHashedToken, hashedToken, tokenExpiry };
 };

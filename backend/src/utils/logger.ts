@@ -1,5 +1,5 @@
-import path from "path";
 import pino from "pino";
+import path from "path";
 
 const logDir = path.join(process.cwd(), "logs");
 const isProduction = process.env.NODE_ENV === "production";

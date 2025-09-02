@@ -10,12 +10,12 @@ const worker = new Worker(
 
     if (type === "verify") {
       await sendVerificationMail(fullname, email, token);
-      logger.info({ email }, "Verification email sent to");
+      logger.info({ email }, "Verification email sent to: ");
     }
 
     if (type === "reset") {
       await sendResetPasswordMail(fullname, email, token);
-      logger.info({ email }, "Password reset email sent to");
+      logger.info({ email }, "Password reset email sent to: ");
     }
   },
   { connection }
