@@ -1,9 +1,24 @@
 import express from "express";
 import { pinoHttp } from "pino-http";
 import { logger } from "@/utils/logger";
+import cookieParser from "cookie-parser";
 import { randomUUID } from "crypto";
+import cors from "cors";
+import { env } from "@/config/env";
 
 export const app = express();
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+
+app.use(
+  cors({
+    origin: env.APP_ORIGIN,
+    credentials: true,
+    methods: ["GET", "POST", "DELETE", "PUT"],
+  })
+);
 
 app.use(
   pinoHttp({
