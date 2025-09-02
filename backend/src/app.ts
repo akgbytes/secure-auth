@@ -1,6 +1,6 @@
 import express from "express";
 import { pinoHttp } from "pino-http";
-import { logger } from "./utils/logger";
+import { logger } from "@/utils/logger";
 import { randomUUID } from "crypto";
 
 export const app = express();
