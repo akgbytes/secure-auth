@@ -53,3 +53,7 @@ app.use(
     autoLogging: true,
   })
 );
+
+import healthRoutes from "@/modules/health/health.routes";
+
+app.use("/api/v1/health", healthRoutes);
