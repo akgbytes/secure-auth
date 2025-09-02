@@ -1,4 +1,4 @@
-import { ApiError } from "@/utils/ApiError";
+import { ApiError, HttpStatus } from "@/core";
 import { ErrorRequestHandler, Request, Response, NextFunction } from "express";
 
 export const errorHandler: ErrorRequestHandler = (
@@ -13,7 +13,7 @@ export const errorHandler: ErrorRequestHandler = (
     apiError = error;
   } else {
     let message = error.message ? error.message : "Internal Server Error";
-    apiError = new ApiError(500, message);
+    apiError = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, message);
   }
 
   res.status(apiError.statusCode).json({

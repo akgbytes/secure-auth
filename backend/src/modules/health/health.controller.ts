@@ -1,6 +1,7 @@
-import { ApiResponse } from "@/utils/ApiResponse";
-import { asyncHandler } from "@/utils/asyncHandler";
+import { ApiResponse, asyncHandler, HttpStatus } from "@/core";
 
 export const checkHealth = asyncHandler(async (req, res) => {
-  res.status(200).json(new ApiResponse(200, "Health check passed", null));
+  res
+    .status(HttpStatus.OK)
+    .json(new ApiResponse(HttpStatus.OK, "Health check passed", null));
 });
