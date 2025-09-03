@@ -1,5 +1,8 @@
+import { env } from "@/config/env";
+import { JWTPayload } from "@/types";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
+import jwt, { SignOptions } from "jsonwebtoken";
 
 export const hashPassword = async (password: string) =>
   await bcrypt.hash(password, 10);
@@ -19,3 +22,23 @@ export const generateToken = () => {
 
   return { unHashedToken, hashedToken, tokenExpiry };
 };
+
+export const generateAccessToken = ({ userId, sessionId }: JWTPayload) =>
+  jwt.sign(
+    {
+      userId,
+      sessionId,
+    },
+    env.ACCESS_TOKEN_SECRET,
+    { expiresIn: env.ACCESS_TOKEN_EXPIRY as SignOptions["expiresIn"] }
+  );
+
+export const generateRefreshToken = ({ userId, sessionId }: JWTPayload) =>
+  jwt.sign(
+    {
+      userId,
+      sessionId,
+    },
+    env.REFRESH_TOKEN_SECRET,
+    { expiresIn: env.REFRESH_TOKEN_EXPIRY as SignOptions["expiresIn"] }
+  );
