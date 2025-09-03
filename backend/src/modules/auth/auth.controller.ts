@@ -3,6 +3,7 @@ import { handleZodError } from "@/utils/handleZodError";
 import {
   validateEmail,
   validateLogin,
+  validatePassword,
   validateRegister,
 } from "./auth.validators";
 
@@ -265,6 +266,19 @@ export const forgotPassword = asyncHandler(async (req, res) => {
       );
   }
 
+  // Sirf verified user hi password reset kar paye
+  if (!user.emailVerified) {
+    return res
+      .status(HttpStatus.OK)
+      .json(
+        new ApiResponse(
+          HttpStatus.OK,
+          "If an account exists, a reset link has been sent to the email.",
+          null
+        )
+      );
+  }
+
   if (user.provider !== "local") {
     return res.status(200).json(
       new ApiResponse(
@@ -316,7 +330,72 @@ export const forgotPassword = asyncHandler(async (req, res) => {
     );
 });
 
-export const resetPassword = asyncHandler(async (req, res) => {});
+export const resetPassword = asyncHandler(async (req, res) => {
+  const password = handleZodError(validatePassword(req.body));
+  const token = req.params.token as string;
+
+  const hashedToken = hashToken(token);
+
+  const [verificationRecord] = await db
+    .select({
+      verification: verificationTable,
+      user: {
+        id: userTable.id,
+        email: userTable.email,
+        password: userTable.password,
+        isEmailVerified: userTable.emailVerified,
+      },
+    })
+    .from(verificationTable)
+    .innerJoin(userTable, eq(verificationTable.userId, userTable.id))
+    .where(
+      and(
+        eq(verificationTable.value, hashedToken),
+        eq(verificationTable.type, "forgot_password"),
+        gt(verificationTable.expiresAt, new Date())
+      )
+    );
+
+  if (!verificationRecord) {
+    throw new ApiError(
+      HttpStatus.UNAUTHORIZED,
+      "Reset link has expired or is invalid"
+    );
+  }
+
+  const isSamePassword = await isPasswordValid(
+    password,
+    verificationRecord.user.password!
+  );
+  if (isSamePassword) {
+    throw new ApiError(
+      HttpStatus.BAD_REQUEST,
+      "New password cannot be the same as the old password"
+    );
+  }
+
+  const hashedPassword = await hashPassword(password);
+
+  await db
+    .update(userTable)
+    .set({
+      password: hashedPassword,
+    })
+    .where(eq(userTable.id, verificationRecord.user.id));
+
+  await db
+    .delete(verificationTable)
+    .where(eq(verificationTable.id, verificationRecord.verification.id));
+
+  logger.info(
+    { email: verificationRecord.user.email },
+    "Password reset successful"
+  );
+
+  res
+    .status(HttpStatus.OK)
+    .json(new ApiResponse(HttpStatus.OK, "Password reset successfully", null));
+});
 export const resendVerificationEmail = asyncHandler(async (req, res) => {});
 export const logout = asyncHandler(async (req, res) => {});
 export const example = asyncHandler(async (req, res) => {});
