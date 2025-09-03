@@ -14,15 +14,15 @@ export const isPasswordValid = async (
   storedPassword: string
 ) => bcrypt.compare(enteredPassword, storedPassword);
 
-export const createHash = (token: string) =>
-  crypto.createHash("sha256").update(token).digest("hex");
+export const hashToken = (rawToken: string) =>
+  crypto.createHash("sha256").update(rawToken).digest("hex");
 
 export const generateToken = () => {
-  const unHashedToken = crypto.randomBytes(32).toString("hex");
-  const hashedToken = createHash(unHashedToken);
+  const rawToken = crypto.randomBytes(32).toString("hex");
+  const hashedToken = hashToken(rawToken);
   const tokenExpiry = new Date(Date.now() + 30 * 60 * 1000); // 30 min
 
-  return { unHashedToken, hashedToken, tokenExpiry };
+  return { rawToken, hashedToken, tokenExpiry };
 };
 
 export const generateAccessToken = ({ userId, sessionId }: TokenPayload) =>

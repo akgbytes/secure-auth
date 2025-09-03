@@ -1,10 +1,21 @@
-import { pgTable, text, boolean, uuid, timestamp } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  boolean,
+  uuid,
+  timestamp,
+  pgEnum,
+} from "drizzle-orm/pg-core";
 import { timestamps } from "@/db/column-helpers";
 import { userTable } from "./user.schema";
+import { VerificationType } from "@/constants/verificationTypes";
+
+export const verificationType = pgEnum("type", VerificationType);
 
 export const verificationTable = pgTable("verification", {
   id: uuid("id").defaultRandom().primaryKey(),
   value: text("value").notNull().unique(),
+  type: verificationType().notNull(),
   userId: uuid("user_id")
     .notNull()
     .references(() => userTable.id, { onDelete: "cascade" }),

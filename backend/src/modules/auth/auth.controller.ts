@@ -1,7 +1,12 @@
 import { ApiError, ApiResponse, asyncHandler, HttpStatus } from "@/core";
 import { handleZodError } from "@/utils/handleZodError";
 import { validateLogin, validateRegister } from "./auth.validators";
-import { loginUser, refreshTokens, registerUser } from "./auth.service";
+import {
+  loginUser,
+  refreshTokens,
+  registerUser,
+  verifyUserEmail,
+} from "./auth.service";
 import { setAuthCookies } from "@/utils/cookies";
 
 export const register = asyncHandler(async (req, res) => {
@@ -60,3 +65,15 @@ export const refreshAccessToken = asyncHandler(async (req, res) => {
       )
     );
 });
+
+export const verifyEmail = asyncHandler(async (req, res) => {
+  const token = req.params.token as string;
+
+  await verifyUserEmail(token);
+
+  res
+    .status(HttpStatus.OK)
+    .json(new ApiResponse(HttpStatus.OK, "Email verified successfully", null));
+});
+
+export const example = asyncHandler(async (req, res) => {});

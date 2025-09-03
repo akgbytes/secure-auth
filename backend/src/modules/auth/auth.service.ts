@@ -1,5 +1,6 @@
 import { db } from "@/db";
 import {
+  hashToken,
   expiresAfter,
   generateAccessToken,
   generateRefreshToken,
@@ -9,16 +10,13 @@ import {
   verifyRefreshJWT,
 } from "./auth.utils";
 
-import { sessionTable, userTable } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { sessionTable, userTable, verificationTable } from "@/db/schema";
+import { and, eq, gt } from "drizzle-orm";
 import { ApiError, HttpStatus } from "@/core";
 import { emailQueue } from "@/queues/email";
 import { sendVerificationMail } from "@/utils/mail";
 import { logger } from "@/utils/logger";
 import { LoginDto, RegisterDto } from "./auth.dto";
-import { setAuthCookies } from "@/utils/cookies";
-import ms from "ms";
-import { env } from "@/config/env";
 
 export async function registerUser({ name, email, password }: RegisterDto) {
   logger.info({ email }, "Registration attempt");
@@ -31,7 +29,7 @@ export async function registerUser({ name, email, password }: RegisterDto) {
     throw new ApiError(HttpStatus.CONFLICT, "Email is already registered");
 
   const hashedPassword = await hashPassword(password);
-  const { unHashedToken, hashedToken, tokenExpiry } = generateToken();
+  const { rawToken, hashedToken, tokenExpiry } = generateToken();
 
   const [user] = await db
     .insert(userTable)
@@ -56,10 +54,10 @@ export async function registerUser({ name, email, password }: RegisterDto) {
     type: "verify",
     name: user.name,
     email: user.email,
-    token: unHashedToken,
+    token: rawToken,
   });
 
-  await sendVerificationMail(user.name, user.email, unHashedToken);
+  await sendVerificationMail(user.name, user.email, rawToken);
 
   logger.info({ email }, "User registered successfully");
 
@@ -163,4 +161,30 @@ export async function refreshTokens(refreshToken: string) {
     accessToken,
     newRefreshToken,
   };
+}
+
+export async function verifyUserEmail(token: string) {
+  const hashedToken = hashToken(token);
+
+  const [record] = await db
+    .select()
+    .from(verificationTable)
+    .where(
+      and(
+        eq(verificationTable.value, hashedToken),
+        eq(verificationTable.type, "email_verify"),
+        gt(verificationTable.expiresAt, new Date())
+      )
+    );
+
+  if (!record) {
+    throw new ApiError(400, "Invalid or expired verification token");
+  }
+
+  await db
+    .update(userTable)
+    .set({ emailVerified: true })
+    .where(eq(userTable.id, record.userId));
+
+  await db.delete(verificationTable).where(eq(verificationTable.id, record.id));
 }
