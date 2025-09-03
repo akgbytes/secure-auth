@@ -1,9 +1,10 @@
 import { userTable } from "@/db/schema";
 import { InferSelectModel } from "drizzle-orm";
+import { JwtPayload } from "jsonwebtoken";
 
 export type User = InferSelectModel<typeof userTable>;
 
-export interface JWTPayload {
+export interface TokenPayload extends JwtPayload {
   userId: string;
   sessionId: string;
 }

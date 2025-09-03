@@ -1,7 +1,7 @@
-import { ApiResponse, asyncHandler, HttpStatus } from "@/core";
+import { ApiError, ApiResponse, asyncHandler, HttpStatus } from "@/core";
 import { handleZodError } from "@/utils/handleZodError";
 import { validateLogin, validateRegister } from "./auth.validators";
-import { loginUser, registerUser } from "./auth.service";
+import { loginUser, refreshTokens, registerUser } from "./auth.service";
 import { setAuthCookies } from "@/utils/cookies";
 
 export const register = asyncHandler(async (req, res) => {
@@ -35,5 +35,28 @@ export const login = asyncHandler(async (req, res) => {
     .status(HttpStatus.OK)
     .json(
       new ApiResponse(HttpStatus.OK, "Logged in successfully", { MFA_Required })
+    );
+});
+
+export const refreshAccessToken = asyncHandler(async (req, res) => {
+  const incomingRefreshToken = req.cookies.refreshToken as string | undefined;
+  if (!incomingRefreshToken) {
+    throw new ApiError(HttpStatus.UNAUTHORIZED, "Refresh token is missing");
+  }
+
+  const { accessToken, newRefreshToken } = await refreshTokens(
+    incomingRefreshToken
+  );
+
+  setAuthCookies(res, accessToken, newRefreshToken);
+
+  res
+    .status(HttpStatus.OK)
+    .json(
+      new ApiResponse(
+        HttpStatus.OK,
+        "Access token refreshed successfully",
+        null
+      )
     );
 });

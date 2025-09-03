@@ -51,8 +51,8 @@ app.use(
   })
 );
 
-import healthRoutes from "@/modules/health";
-import authRoutes from "@/modules/auth";
+import healthRoutes from "@/modules/health/health.routes";
+import authRoutes from "@/modules/auth/auth.routes";
 
 app.use("/api/v1/health", healthRoutes);
 app.use("/api/v1/auth", authRoutes);

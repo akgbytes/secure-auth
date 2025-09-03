@@ -1,10 +1,12 @@
 import { db } from "@/db";
 import {
+  expiresAfter,
   generateAccessToken,
   generateRefreshToken,
   generateToken,
   hashPassword,
   isPasswordValid,
+  verifyRefreshJWT,
 } from "./auth.utils";
 
 import { sessionTable, userTable } from "@/db/schema";
@@ -15,6 +17,8 @@ import { sendVerificationMail } from "@/utils/mail";
 import { logger } from "@/utils/logger";
 import { LoginDto, RegisterDto } from "./auth.dto";
 import { setAuthCookies } from "@/utils/cookies";
+import ms from "ms";
+import { env } from "@/config/env";
 
 export async function registerUser({ name, email, password }: RegisterDto) {
   logger.info({ email }, "Registration attempt");
@@ -97,6 +101,7 @@ export async function loginUser({
       userId: user.id,
       ipAddress,
       userAgent,
+      expiresAt: expiresAfter(),
     })
     .returning();
 
@@ -119,4 +124,43 @@ export async function loginUser({
   logger.info({ email }, "User logged in successfully");
 
   return { accessToken, refreshToken, MFA_Required: false };
+}
+
+export async function refreshTokens(refreshToken: string) {
+  const payload = verifyRefreshJWT(refreshToken);
+
+  const [validSession] = await db
+    .select()
+    .from(sessionTable)
+    .where(eq(sessionTable.id, payload.sessionId));
+
+  if (!validSession) {
+    throw new ApiError(401, "Refresh token has been used or is invalid");
+  }
+
+  if (new Date(validSession.expiresAt) < new Date()) {
+    throw new ApiError(401, "Session expired, Please login again.");
+  }
+
+  await db
+    .update(sessionTable)
+    .set({
+      expiresAt: expiresAfter(),
+    })
+    .where(eq(sessionTable.id, validSession.id));
+
+  const accessToken = generateAccessToken({
+    userId: validSession.userId,
+    sessionId: validSession.id,
+  });
+
+  const newRefreshToken = generateRefreshToken({
+    userId: validSession.userId,
+    sessionId: validSession.id,
+  });
+
+  return {
+    accessToken,
+    newRefreshToken,
+  };
 }

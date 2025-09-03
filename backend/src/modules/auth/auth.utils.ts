@@ -1,8 +1,10 @@
 import { env } from "@/config/env";
-import { JWTPayload } from "@/types";
+import { ApiError } from "@/core";
+import { TokenPayload } from "@/types";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 import jwt, { SignOptions } from "jsonwebtoken";
+import ms from "ms";
 
 export const hashPassword = async (password: string) =>
   await bcrypt.hash(password, 10);
@@ -23,7 +25,7 @@ export const generateToken = () => {
   return { unHashedToken, hashedToken, tokenExpiry };
 };
 
-export const generateAccessToken = ({ userId, sessionId }: JWTPayload) =>
+export const generateAccessToken = ({ userId, sessionId }: TokenPayload) =>
   jwt.sign(
     {
       userId,
@@ -33,7 +35,7 @@ export const generateAccessToken = ({ userId, sessionId }: JWTPayload) =>
     { expiresIn: env.ACCESS_TOKEN_EXPIRY as SignOptions["expiresIn"] }
   );
 
-export const generateRefreshToken = ({ userId, sessionId }: JWTPayload) =>
+export const generateRefreshToken = ({ userId, sessionId }: TokenPayload) =>
   jwt.sign(
     {
       userId,
@@ -42,3 +44,15 @@ export const generateRefreshToken = ({ userId, sessionId }: JWTPayload) =>
     env.REFRESH_TOKEN_SECRET,
     { expiresIn: env.REFRESH_TOKEN_EXPIRY as SignOptions["expiresIn"] }
   );
+
+export const verifyRefreshJWT = (refreshToken: string): TokenPayload => {
+  try {
+    const payload = jwt.verify(refreshToken, env.REFRESH_TOKEN_SECRET);
+    return payload as TokenPayload;
+  } catch (error: any) {
+    throw new ApiError(401, "Invalid or expired refresh token");
+  }
+};
+
+export const expiresAfter = () =>
+  new Date(Date.now() + ms(env.REFRESH_TOKEN_EXPIRY as ms.StringValue));
