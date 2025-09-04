@@ -1,10 +1,14 @@
 import { env } from "@/config/env";
-import { ApiError } from "@/core";
+import { ApiError, HttpStatus } from "@/core";
 import { TokenPayload } from "@/types";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
+import { OAuth2Client } from "google-auth-library";
 import jwt, { SignOptions } from "jsonwebtoken";
 import ms from "ms";
+
+export const sessionExpiresAfter = () =>
+  new Date(Date.now() + ms(env.REFRESH_TOKEN_EXPIRY as ms.StringValue));
 
 export const hashPassword = async (password: string) =>
   await bcrypt.hash(password, 10);
@@ -66,5 +70,31 @@ export const verifyRefreshJWT = (refreshToken: string): TokenPayload => {
   }
 };
 
-export const expiresAfter = () =>
-  new Date(Date.now() + ms(env.REFRESH_TOKEN_EXPIRY as ms.StringValue));
+const googleClient = new OAuth2Client(
+  env.GOOGLE_CLIENT_ID,
+  env.GOOGLE_CLIENT_SECRET,
+  "http://localhost:3000"
+);
+
+export const getGoogleTokens = async (code: string) => {
+  const { tokens } = await googleClient.getToken(code);
+  return tokens;
+};
+
+export const verifyGoogleToken = async (token: string) => {
+  const ticket = await googleClient.verifyIdToken({
+    idToken: token,
+    audience: process.env.GOOGLE_CLIENT_ID,
+  });
+
+  const payload = ticket.getPayload();
+
+  if (!payload) {
+    throw new ApiError(
+      HttpStatus.UNAUTHORIZED,
+      "Google token verification failed, No payload received."
+    );
+  }
+
+  return payload;
+};

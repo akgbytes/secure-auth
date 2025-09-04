@@ -34,10 +34,12 @@ const verifyEmailSchema = z.object({
   otp: z.string().regex(/^\d{6}$/, "OTP must be a 6-digit number"),
 });
 
-export const validateEmail = (data: unknown) => emailSchema.safeParse(data);
+const resetPassword = z.object({
+  token: z.string().min(1, "Token is required"),
+  password: passwordSchema,
+});
 
-export const validatePassword = (data: unknown) =>
-  passwordSchema.safeParse(data);
+export const validateEmail = (data: unknown) => emailSchema.safeParse(data);
 
 export const validateSignUp = (data: unknown) => signUpSchema.safeParse(data);
 
@@ -45,3 +47,6 @@ export const validateSignIn = (data: unknown) => signInSchema.safeParse(data);
 
 export const validateVerifyEmail = (data: unknown) =>
   verifyEmailSchema.safeParse(data);
+
+export const validateResetPassword = (data: unknown) =>
+  resetPassword.safeParse(data);

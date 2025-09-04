@@ -43,6 +43,17 @@ const envSchema = z.object({
   OTP_LENGTH: z.coerce.number<number>({
     error: "OTP Length must be a valid number",
   }),
+
+  MAX_SESSIONS: z.coerce.number<number>({
+    error: "Max Sessions must be a valid number",
+  }),
+
+  GOOGLE_CLIENT_ID: z
+    .string()
+    .nonempty({ error: "Google Client ID must not be empty" }),
+  GOOGLE_CLIENT_SECRET: z
+    .string()
+    .nonempty({ error: "Google Client Secret must not be empty" }),
 });
 
 const createEnv = (env: NodeJS.ProcessEnv) => {
