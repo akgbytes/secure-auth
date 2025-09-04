@@ -19,10 +19,22 @@ export const hashToken = (rawToken: string) =>
 
 export const generateToken = () => {
   const rawToken = crypto.randomBytes(32).toString("hex");
-  const hashedToken = hashToken(rawToken);
-  const tokenExpiry = new Date(Date.now() + 30 * 60 * 1000); // 30 min
+  const tokenHash = hashToken(rawToken);
+  const tokenExpiry = new Date(
+    Date.now() + env.VERIFICATION_TOKEN_EXPIRY_MINUTES * 60 * 1000
+  );
 
-  return { rawToken, hashedToken, tokenExpiry };
+  return { rawToken, tokenHash, tokenExpiry };
+};
+
+export const generateOtp = () => {
+  const otp = Array.from(crypto.randomFillSync(new Uint8Array(env.OTP_LENGTH)))
+    .map((n) => (n % 10).toString())
+    .join("");
+
+  const otpHash = hashToken(otp);
+
+  return { otp, otpHash };
 };
 
 export const generateAccessToken = ({ userId, sessionId }: TokenPayload) =>

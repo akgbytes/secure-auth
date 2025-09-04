@@ -1,18 +1,18 @@
 import { Router } from "express";
 import {
-  login,
-  register,
   refreshTokens,
   verifyEmail,
   forgotPassword,
+  signup,
+  signin,
 } from "./auth.controller";
 
 const router = Router();
 
-router.post("/register", register);
-router.post("/login", login);
+router.post("/signup", signup);
+router.post("/signin", signin);
 router.post("/refresh", refreshTokens);
-router.get("/email/verify/:token", verifyEmail);
+router.get("/email/verify", verifyEmail);
 
 router.post("/password/forgot", forgotPassword);
 

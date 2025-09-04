@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -20,6 +20,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import api from "@/lib/axios";
+import type { RegisterResponse, ApiAxiosError, RegisterInput } from "@/types";
+import { toast } from "sonner";
 
 const formSchema = z.object({
   name: z
@@ -32,20 +36,19 @@ const formSchema = z.object({
   password: z
     .string()
     .trim()
-    .min(8, { error: "Password must be at least 8 characters long" })
-    .max(64, { error: "Password must be at most 64 characters long" })
-    .regex(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-\[\]])/, {
-      error:
-        "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.",
-    }),
+    .min(6, { error: "Password must be at least 6 characters long" })
+    .max(64, { error: "Password must be at most 64 characters long" }),
 });
 
-export const Route = createFileRoute("/(auth)/register/")({
+type FormValues = z.infer<typeof formSchema>;
+
+export const Route = createFileRoute("/(auth)/signup/")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  const form = useForm<z.infer<typeof formSchema>>({
+  const navigate = useNavigate();
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema as any),
     defaultValues: {
       name: "",
@@ -54,7 +57,34 @@ function RouteComponent() {
     },
   });
 
-  const onSubmit = async () => {};
+  const { mutate: signupUser, isPending } = useMutation<
+    RegisterResponse,
+    ApiAxiosError,
+    RegisterInput
+  >({
+    mutationFn: async (values) => {
+      const response = await api.post("/auth/signup", values);
+      return response.data;
+    },
+  });
+
+  const onSubmit = (values: FormValues) => {
+    signupUser(values, {
+      onSuccess: (res) => {
+        console.log(res);
+        toast.success(res.message);
+        navigate({
+          to: "/verify-email",
+          search: {
+            token: res.data.token,
+          },
+        });
+      },
+      onError: (error) => {
+        toast.error(error.response?.data.message);
+      },
+    });
+  };
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -136,8 +166,8 @@ function RouteComponent() {
                       )}
                     />
                   </div>
-                  <Button type="submit" className="w-full" disabled={false}>
-                    {true ? (
+                  <Button type="submit" className="w-full" disabled={isPending}>
+                    {isPending ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         Creating account...
@@ -154,7 +184,7 @@ function RouteComponent() {
               <p className="text-sm text-muted-foreground">
                 Already have an account?{" "}
                 <Link
-                  to="/login"
+                  to="/signin"
                   className="text-primary hover:underline font-medium"
                 >
                   Sign in

@@ -2,9 +2,8 @@ import { ApiError, ApiResponse, asyncHandler, HttpStatus } from "@/core";
 import { handleZodError } from "@/utils/handleZodError";
 import {
   validateEmail,
-  validateLogin,
-  validatePassword,
-  validateRegister,
+  validateSignIn,
+  validateSignUp,
 } from "./auth.validators";
 
 import { setAuthCookies } from "@/utils/cookies";
@@ -15,6 +14,7 @@ import { db } from "@/db";
 import {
   expiresAfter,
   generateAccessToken,
+  generateOtp,
   generateRefreshToken,
   generateToken,
   hashPassword,
@@ -25,10 +25,10 @@ import {
 import { emailQueue } from "@/queues/email";
 import { sendVerificationMail } from "@/utils/mail";
 
-export const register = asyncHandler(async (req, res) => {
-  const { name, email, password } = handleZodError(validateRegister(req.body));
+export const signup = asyncHandler(async (req, res) => {
+  const { name, email, password } = handleZodError(validateSignUp(req.body));
 
-  logger.info({ email }, "Registration attempt");
+  logger.info({ email }, "Sign up attempt");
 
   const [existingUser] = await db
     .select()
@@ -53,18 +53,22 @@ export const register = asyncHandler(async (req, res) => {
       provider: userTable.provider,
     });
 
-  if (!user)
+  if (!user) {
+    logger.warn({ email }, "Failed to create user");
     throw new ApiError(
       HttpStatus.INTERNAL_SERVER_ERROR,
-      "Failed to register, Please try again."
+      "Unable to complete signup, Please try again later."
     );
+  }
 
-  const { rawToken, hashedToken, tokenExpiry } = generateToken();
+  const { rawToken, tokenHash, tokenExpiry } = generateToken();
+  const { otp, otpHash } = generateOtp();
 
   const [verification] = await db
     .insert(verificationTable)
     .values({
-      value: hashedToken,
+      code: otpHash,
+      token: tokenHash,
       type: "email_verify",
       userId: user.id,
       expiresAt: tokenExpiry,
@@ -72,9 +76,10 @@ export const register = asyncHandler(async (req, res) => {
     .returning();
 
   if (!verification) {
+    logger.warn({ email }, "Failed to create verification record");
     throw new ApiError(
       HttpStatus.INTERNAL_SERVER_ERROR,
-      "Failed to register, Please try again."
+      "Unable to complete signup, Please try again later."
     );
   }
 
@@ -83,25 +88,24 @@ export const register = asyncHandler(async (req, res) => {
     name: user.name,
     email: user.email,
     token: rawToken,
+    otp: otp,
   });
 
-  await sendVerificationMail(user.name, user.email, rawToken);
-
-  logger.info({ email }, "User registered successfully");
+  logger.info({ email }, "Signup successful, verification email queued");
 
   res
     .status(HttpStatus.CREATED)
     .json(
       new ApiResponse(
         HttpStatus.CREATED,
-        "Registered successfully, Please verify your email.",
-        user
+        "Signup successful, Please verify your email.",
+        { user, token: rawToken }
       )
     );
 });
 
-export const login = asyncHandler(async (req, res) => {
-  const { email, password } = handleZodError(validateLogin(req.body));
+export const signin = asyncHandler(async (req, res) => {
+  const { email, password } = handleZodError(validateSignIn(req.body));
   logger.info({ email }, "Login attempt");
   const userAgent = req.headers["user-agent"] || "";
   const ipAddress = req.ip || "";
@@ -217,189 +221,165 @@ export const refreshTokens = asyncHandler(async (req, res) => {
 });
 
 export const verifyEmail = asyncHandler(async (req, res) => {
-  const token = req.params.token as string;
-  const hashedToken = hashToken(token);
-
-  const [record] = await db
-    .select()
-    .from(verificationTable)
-    .where(
-      and(
-        eq(verificationTable.value, hashedToken),
-        eq(verificationTable.type, "email_verify"),
-        gt(verificationTable.expiresAt, new Date())
-      )
-    );
-
-  if (!record) {
-    throw new ApiError(400, "Invalid or expired verification token");
-  }
-
-  await db
-    .update(userTable)
-    .set({ emailVerified: true })
-    .where(eq(userTable.id, record.userId));
-
-  await db.delete(verificationTable).where(eq(verificationTable.id, record.id));
-  res
-    .status(HttpStatus.OK)
-    .json(new ApiResponse(HttpStatus.OK, "Email verified successfully", null));
+  // const token = req.params.token as string;
+  // const hashedToken = hashToken(token);
+  // const [record] = await db
+  //   .select()
+  //   .from(verificationTable)
+  //   .where(
+  //     and(
+  //       eq(verificationTable.value, hashedToken),
+  //       eq(verificationTable.type, "email_verify"),
+  //       gt(verificationTable.expiresAt, new Date())
+  //     )
+  //   );
+  // if (!record) {
+  //   throw new ApiError(400, "Invalid or expired verification token");
+  // }
+  // await db
+  //   .update(userTable)
+  //   .set({ emailVerified: true })
+  //   .where(eq(userTable.id, record.userId));
+  // await db.delete(verificationTable).where(eq(verificationTable.id, record.id));
+  // res
+  //   .status(HttpStatus.OK)
+  //   .json(new ApiResponse(HttpStatus.OK, "Email verified successfully", null));
 });
 
 export const forgotPassword = asyncHandler(async (req, res) => {
-  const email = handleZodError(validateEmail(req.body));
-
-  const [user] = await db
-    .select()
-    .from(userTable)
-    .where(eq(userTable.email, email));
-
-  if (!user) {
-    return res
-      .status(200)
-      .json(
-        new ApiResponse(
-          200,
-          "If an account exists, a reset link has been sent to the email.",
-          null
-        )
-      );
-  }
-
-  // Sirf verified user hi password reset kar paye
-  if (!user.emailVerified) {
-    return res
-      .status(HttpStatus.OK)
-      .json(
-        new ApiResponse(
-          HttpStatus.OK,
-          "If an account exists, a reset link has been sent to the email.",
-          null
-        )
-      );
-  }
-
-  if (user.provider !== "local") {
-    return res.status(200).json(
-      new ApiResponse(
-        200,
-        `You signed up using ${user.provider}. Please use sign-in using ${user.provider} to access your account.`,
-        {
-          code: "OAUTH_USER",
-        }
-      )
-    );
-  }
-
-  const { rawToken, hashedToken, tokenExpiry } = generateToken();
-
-  const [verification] = await db
-    .insert(verificationTable)
-    .values({
-      value: hashedToken,
-      type: "forgot_password",
-      userId: user.id,
-      expiresAt: tokenExpiry,
-    })
-    .returning();
-
-  if (!verification) {
-    throw new ApiError(
-      HttpStatus.INTERNAL_SERVER_ERROR,
-      "Failed to create verification record"
-    );
-  }
-
-  emailQueue.add("sendResetEmail", {
-    type: "reset",
-    name: user.name,
-    email: user.email,
-    token: rawToken,
-  });
-
-  logger.info({ email }, "Password reset email sent");
-
-  res
-    .status(HttpStatus.OK)
-    .json(
-      new ApiResponse(
-        HttpStatus.OK,
-        "If an account exists, a reset link has been sent to the email",
-        null
-      )
-    );
+  // const email = handleZodError(validateEmail(req.body));
+  // const [user] = await db
+  //   .select()
+  //   .from(userTable)
+  //   .where(eq(userTable.email, email));
+  // if (!user) {
+  //   return res
+  //     .status(200)
+  //     .json(
+  //       new ApiResponse(
+  //         200,
+  //         "If an account exists, a reset link has been sent to the email.",
+  //         null
+  //       )
+  //     );
+  // }
+  // // Sirf verified user hi password reset kar paye
+  // if (!user.emailVerified) {
+  //   return res
+  //     .status(HttpStatus.OK)
+  //     .json(
+  //       new ApiResponse(
+  //         HttpStatus.OK,
+  //         "If an account exists, a reset link has been sent to the email.",
+  //         null
+  //       )
+  //     );
+  // }
+  // if (user.provider !== "local") {
+  //   return res.status(200).json(
+  //     new ApiResponse(
+  //       200,
+  //       `You signed up using ${user.provider}. Please use sign-in using ${user.provider} to access your account.`,
+  //       {
+  //         code: "OAUTH_USER",
+  //       }
+  //     )
+  //   );
+  // }
+  // const { rawToken, hashedToken, tokenExpiry } = generateToken();
+  // const [verification] = await db
+  //   .insert(verificationTable)
+  //   .values({
+  //     value: hashedToken,
+  //     type: "forgot_password",
+  //     userId: user.id,
+  //     expiresAt: tokenExpiry,
+  //   })
+  //   .returning();
+  // if (!verification) {
+  //   throw new ApiError(
+  //     HttpStatus.INTERNAL_SERVER_ERROR,
+  //     "Failed to create verification record"
+  //   );
+  // }
+  // emailQueue.add("sendResetEmail", {
+  //   type: "reset",
+  //   name: user.name,
+  //   email: user.email,
+  //   token: rawToken,
+  // });
+  // logger.info({ email }, "Password reset email sent");
+  // res
+  //   .status(HttpStatus.OK)
+  //   .json(
+  //     new ApiResponse(
+  //       HttpStatus.OK,
+  //       "If an account exists, a reset link has been sent to the email",
+  //       null
+  //     )
+  //   );
 });
 
 export const resetPassword = asyncHandler(async (req, res) => {
-  const password = handleZodError(validatePassword(req.body));
-  const token = req.params.token as string;
-
-  const hashedToken = hashToken(token);
-
-  const [verificationRecord] = await db
-    .select({
-      verification: verificationTable,
-      user: {
-        id: userTable.id,
-        email: userTable.email,
-        password: userTable.password,
-        isEmailVerified: userTable.emailVerified,
-      },
-    })
-    .from(verificationTable)
-    .innerJoin(userTable, eq(verificationTable.userId, userTable.id))
-    .where(
-      and(
-        eq(verificationTable.value, hashedToken),
-        eq(verificationTable.type, "forgot_password"),
-        gt(verificationTable.expiresAt, new Date())
-      )
-    );
-
-  if (!verificationRecord) {
-    throw new ApiError(
-      HttpStatus.UNAUTHORIZED,
-      "Reset link has expired or is invalid"
-    );
-  }
-
-  const isSamePassword = await isPasswordValid(
-    password,
-    verificationRecord.user.password!
-  );
-  if (isSamePassword) {
-    throw new ApiError(
-      HttpStatus.BAD_REQUEST,
-      "New password cannot be the same as the old password"
-    );
-  }
-
-  const hashedPassword = await hashPassword(password);
-
-  await db
-    .update(userTable)
-    .set({
-      password: hashedPassword,
-    })
-    .where(eq(userTable.id, verificationRecord.user.id));
-
-  await db
-    .delete(verificationTable)
-    .where(eq(verificationTable.id, verificationRecord.verification.id));
-
-  // Sare existing session ko invalidate krna h bcuz of security
-  await db
-    .delete(sessionTable)
-    .where(eq(sessionTable.userId, verificationRecord.user.id));
-
-  logger.info(
-    { email: verificationRecord.user.email },
-    "Password reset successful"
-  );
-
-  res
-    .status(HttpStatus.OK)
-    .json(new ApiResponse(HttpStatus.OK, "Password reset successfully", null));
+  // const password = handleZodError(validatePassword(req.body));
+  // const token = req.params.token as string;
+  // const hashedToken = hashToken(token);
+  // const [verificationRecord] = await db
+  //   .select({
+  //     verification: verificationTable,
+  //     user: {
+  //       id: userTable.id,
+  //       email: userTable.email,
+  //       password: userTable.password,
+  //       isEmailVerified: userTable.emailVerified,
+  //     },
+  //   })
+  //   .from(verificationTable)
+  //   .innerJoin(userTable, eq(verificationTable.userId, userTable.id))
+  //   .where(
+  //     and(
+  //       eq(verificationTable.value, hashedToken),
+  //       eq(verificationTable.type, "forgot_password"),
+  //       gt(verificationTable.expiresAt, new Date())
+  //     )
+  //   );
+  // if (!verificationRecord) {
+  //   throw new ApiError(
+  //     HttpStatus.UNAUTHORIZED,
+  //     "Reset link has expired or is invalid"
+  //   );
+  // }
+  // const isSamePassword = await isPasswordValid(
+  //   password,
+  //   verificationRecord.user.password!
+  // );
+  // if (isSamePassword) {
+  //   throw new ApiError(
+  //     HttpStatus.BAD_REQUEST,
+  //     "New password cannot be the same as the old password"
+  //   );
+  // }
+  // const hashedPassword = await hashPassword(password);
+  // await db
+  //   .update(userTable)
+  //   .set({
+  //     password: hashedPassword,
+  //   })
+  //   .where(eq(userTable.id, verificationRecord.user.id));
+  // await db
+  //   .delete(verificationTable)
+  //   .where(eq(verificationTable.id, verificationRecord.verification.id));
+  // // Sare existing session ko invalidate krna h bcuz of security
+  // await db
+  //   .delete(sessionTable)
+  //   .where(eq(sessionTable.userId, verificationRecord.user.id));
+  // logger.info(
+  //   { email: verificationRecord.user.email },
+  //   "Password reset successful"
+  // );
+  // res
+  //   .status(HttpStatus.OK)
+  //   .json(new ApiResponse(HttpStatus.OK, "Password reset successfully", null));
 });
 export const resendVerificationEmail = asyncHandler(async (req, res) => {});
 export const logout = asyncHandler(async (req, res) => {});

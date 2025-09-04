@@ -35,6 +35,14 @@ const envSchema = z.object({
   REFRESH_TOKEN_EXPIRY: z
     .string()
     .nonempty({ error: "Refresh Token Expiry must not be empty" }),
+
+  VERIFICATION_TOKEN_EXPIRY_MINUTES: z.coerce.number<number>({
+    error: "Verification Token Expiry must be a valid number",
+  }),
+
+  OTP_LENGTH: z.coerce.number<number>({
+    error: "OTP Length must be a valid number",
+  }),
 });
 
 const createEnv = (env: NodeJS.ProcessEnv) => {

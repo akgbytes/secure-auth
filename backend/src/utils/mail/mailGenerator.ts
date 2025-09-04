@@ -9,26 +9,21 @@ export const mailGenerator = new Mailgen({
   },
 });
 
-export const emailVerificationMailContent = (
-  fullName: string,
-  link: string
-) => ({
+export const emailVerificationMailContent = (name: string, otp: string) => ({
   body: {
-    name: fullName,
+    name: name,
     intro: `Welcome to Secure Auth! 🎉 We're excited to have you onboard.`,
-    action: {
-      instructions:
-        "To complete your registration, please verify your email by clicking the button below:",
-      button: {
-        color: "#22BC66",
-        text: "Verify Email",
-        link,
-      },
+    table: {
+      data: [
+        {
+          "Your OTP": otp,
+        },
+      ],
     },
     outro: `
-     This link will expire in 24 hours for security reasons.
-      
-      If you have any questions, reach out at support@secureauth.com.
+      This OTP is valid for 30 minutes.
+
+      If you did not request this, please ignore this email or contact support at support@secureauth.com.
     `,
     signature: false,
   },

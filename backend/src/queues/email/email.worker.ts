@@ -6,16 +6,18 @@ import { connection } from "@/config/redis";
 const worker = new Worker(
   "email",
   async (job) => {
-    const { type, fullname, email, token } = job.data;
+    const { type, name, email, otp, token } = job.data;
+
+    console.log("job data: ", job.data);
 
     if (type === "verify") {
-      await sendVerificationMail(fullname, email, token);
-      logger.info({ email }, "Verification email sent to: ");
+      await sendVerificationMail(name, email, otp);
+      logger.info({ email }, "Verification email sent");
     }
 
     if (type === "reset") {
-      await sendResetPasswordMail(fullname, email, token);
-      logger.info({ email }, "Password reset email sent to: ");
+      await sendResetPasswordMail(name, email, token);
+      logger.info({ email }, "Password reset email sent");
     }
   },
   { connection }

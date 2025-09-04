@@ -9,13 +9,12 @@ import { capitalize } from "@/utils";
 export const sendVerificationMail = async (
   name: string,
   email: string,
-  token: string
+  otp: string
 ) => {
-  const link = `${env.APP_ORIGIN}/verify-email/${token}`;
   await sendMail(
     email,
     "Verify Your Email",
-    emailVerificationMailContent(capitalize(name), link)
+    emailVerificationMailContent(capitalize(name), otp)
   );
 };
 

@@ -1,0 +1,35 @@
+import axios, { AxiosError } from "axios";
+
+export const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8080/api/v1",
+  withCredentials: true,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+// 🔹 Interceptors
+api.interceptors.response.use(
+  (res) => res,
+  async (error: AxiosError) => {
+    const originalRequest = error.config;
+
+    if (
+      error.response?.status === 401 &&
+      (error.response.data as { message?: string })?.message ===
+        "TokenExpiredError"
+    ) {
+      try {
+        await api.post("/auth/refresh");
+        return api(originalRequest!);
+      } catch (err: any) {
+        console.error("error while refreshing:", err.message);
+        window.location.href = "/login";
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
+
+export default api;
