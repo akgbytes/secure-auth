@@ -10,33 +10,79 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as authVerifyEmailIndexRouteImport } from './routes/(auth)/verify-email/index'
+import { Route as authRegisterIndexRouteImport } from './routes/(auth)/register/index'
+import { Route as authLoginIndexRouteImport } from './routes/(auth)/login/index'
+import { Route as authForgotPasswordIndexRouteImport } from './routes/(auth)/forgot-password/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const authVerifyEmailIndexRoute = authVerifyEmailIndexRouteImport.update({
+  id: '/(auth)/verify-email/',
+  path: '/verify-email/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const authRegisterIndexRoute = authRegisterIndexRouteImport.update({
+  id: '/(auth)/register/',
+  path: '/register/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const authLoginIndexRoute = authLoginIndexRouteImport.update({
+  id: '/(auth)/login/',
+  path: '/login/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const authForgotPasswordIndexRoute = authForgotPasswordIndexRouteImport.update({
+  id: '/(auth)/forgot-password/',
+  path: '/forgot-password/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/forgot-password': typeof authForgotPasswordIndexRoute
+  '/login': typeof authLoginIndexRoute
+  '/register': typeof authRegisterIndexRoute
+  '/verify-email': typeof authVerifyEmailIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/forgot-password': typeof authForgotPasswordIndexRoute
+  '/login': typeof authLoginIndexRoute
+  '/register': typeof authRegisterIndexRoute
+  '/verify-email': typeof authVerifyEmailIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/(auth)/forgot-password/': typeof authForgotPasswordIndexRoute
+  '/(auth)/login/': typeof authLoginIndexRoute
+  '/(auth)/register/': typeof authRegisterIndexRoute
+  '/(auth)/verify-email/': typeof authVerifyEmailIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/forgot-password' | '/login' | '/register' | '/verify-email'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/forgot-password' | '/login' | '/register' | '/verify-email'
+  id:
+    | '__root__'
+    | '/'
+    | '/(auth)/forgot-password/'
+    | '/(auth)/login/'
+    | '/(auth)/register/'
+    | '/(auth)/verify-email/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  authForgotPasswordIndexRoute: typeof authForgotPasswordIndexRoute
+  authLoginIndexRoute: typeof authLoginIndexRoute
+  authRegisterIndexRoute: typeof authRegisterIndexRoute
+  authVerifyEmailIndexRoute: typeof authVerifyEmailIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +94,43 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/(auth)/verify-email/': {
+      id: '/(auth)/verify-email/'
+      path: '/verify-email'
+      fullPath: '/verify-email'
+      preLoaderRoute: typeof authVerifyEmailIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(auth)/register/': {
+      id: '/(auth)/register/'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof authRegisterIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(auth)/login/': {
+      id: '/(auth)/login/'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof authLoginIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(auth)/forgot-password/': {
+      id: '/(auth)/forgot-password/'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof authForgotPasswordIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  authForgotPasswordIndexRoute: authForgotPasswordIndexRoute,
+  authLoginIndexRoute: authLoginIndexRoute,
+  authRegisterIndexRoute: authRegisterIndexRoute,
+  authVerifyEmailIndexRoute: authVerifyEmailIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
