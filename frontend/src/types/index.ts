@@ -36,3 +36,8 @@ export type RegisterInput = {
   email: string;
   password: string;
 };
+
+export type VerifyEmailInput = {
+  token: string;
+  otp: string;
+};

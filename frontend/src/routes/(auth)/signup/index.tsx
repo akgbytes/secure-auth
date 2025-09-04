@@ -74,7 +74,7 @@ function RouteComponent() {
         console.log(res);
         toast.success(res.message);
         navigate({
-          to: "/verify-email",
+          to: "/email-verify",
           search: {
             token: res.data.token,
           },

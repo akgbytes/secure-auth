@@ -4,6 +4,7 @@ import {
   validateEmail,
   validateSignIn,
   validateSignUp,
+  validateVerifyEmail,
 } from "./auth.validators";
 
 import { setAuthCookies } from "@/utils/cookies";
@@ -106,7 +107,7 @@ export const signup = asyncHandler(async (req, res) => {
 
 export const signin = asyncHandler(async (req, res) => {
   const { email, password } = handleZodError(validateSignIn(req.body));
-  logger.info({ email }, "Login attempt");
+  logger.info({ email }, "Signin attempt");
   const userAgent = req.headers["user-agent"] || "";
   const ipAddress = req.ip || "";
 
@@ -116,19 +117,23 @@ export const signin = asyncHandler(async (req, res) => {
     .where(eq(userTable.email, email));
 
   if (!user) {
-    logger.warn(`Login failed: User with email ${email} not found`);
-    throw new ApiError(HttpStatus.UNAUTHORIZED, "Invalid credentials");
+    logger.warn({ email }, "Signin failed: User not found");
+    throw new ApiError(HttpStatus.UNAUTHORIZED, "Invalid email or password");
   }
 
   if (!user.emailVerified) {
-    throw new ApiError(401, "Please verify your email first");
+    logger.warn({ email }, "Signin blocked: Email not verified");
+    throw new ApiError(
+      HttpStatus.UNAUTHORIZED,
+      "Your email is not verified. Please verify before signing in."
+    );
   }
 
   const isPasswordCorrect = await isPasswordValid(password, user.password!);
 
   if (!isPasswordCorrect) {
-    logger.warn(`Login failed: Invalid password for email ${email}`);
-    throw new ApiError(401, "Invalid credentials");
+    logger.warn({ email }, "Signin failed: Incorrect password");
+    throw new ApiError(HttpStatus.UNAUTHORIZED, "Invalid email or password");
   }
 
   const [session] = await db
@@ -141,11 +146,13 @@ export const signin = asyncHandler(async (req, res) => {
     })
     .returning();
 
-  if (!session)
+  if (!session) {
+    logger.error({ email }, "Signin failed: Session creation error");
     throw new ApiError(
       HttpStatus.INTERNAL_SERVER_ERROR,
-      "Failed to create session, Please try again."
+      "Unable to create session. Please try again later."
     );
+  }
 
   const accessToken = generateAccessToken({
     userId: user.id,
@@ -157,12 +164,12 @@ export const signin = asyncHandler(async (req, res) => {
     sessionId: session.id,
   });
 
-  logger.info({ email }, "User logged in successfully");
+  logger.info({ email, sessionId: session.id }, "Signin successful");
 
   setAuthCookies(res, accessToken, refreshToken);
 
   res.status(HttpStatus.OK).json(
-    new ApiResponse(HttpStatus.OK, "Logged in successfully", {
+    new ApiResponse(HttpStatus.OK, "Signed in successfully", {
       MFA_Required: false,
     })
   );
@@ -221,29 +228,32 @@ export const refreshTokens = asyncHandler(async (req, res) => {
 });
 
 export const verifyEmail = asyncHandler(async (req, res) => {
-  // const token = req.params.token as string;
-  // const hashedToken = hashToken(token);
-  // const [record] = await db
-  //   .select()
-  //   .from(verificationTable)
-  //   .where(
-  //     and(
-  //       eq(verificationTable.value, hashedToken),
-  //       eq(verificationTable.type, "email_verify"),
-  //       gt(verificationTable.expiresAt, new Date())
-  //     )
-  //   );
-  // if (!record) {
-  //   throw new ApiError(400, "Invalid or expired verification token");
-  // }
-  // await db
-  //   .update(userTable)
-  //   .set({ emailVerified: true })
-  //   .where(eq(userTable.id, record.userId));
-  // await db.delete(verificationTable).where(eq(verificationTable.id, record.id));
-  // res
-  //   .status(HttpStatus.OK)
-  //   .json(new ApiResponse(HttpStatus.OK, "Email verified successfully", null));
+  const { token, otp } = handleZodError(validateVerifyEmail(req.body));
+  const tokenHash = hashToken(token);
+  const otpHash = hashToken(otp);
+
+  const [record] = await db
+    .select()
+    .from(verificationTable)
+    .where(
+      and(
+        eq(verificationTable.token, tokenHash),
+        eq(verificationTable.code, otpHash),
+        eq(verificationTable.type, "email_verify"),
+        gt(verificationTable.expiresAt, new Date())
+      )
+    );
+  if (!record) {
+    throw new ApiError(400, "Invalid or expired OTP");
+  }
+  await db
+    .update(userTable)
+    .set({ emailVerified: true })
+    .where(eq(userTable.id, record.userId));
+  await db.delete(verificationTable).where(eq(verificationTable.id, record.id));
+  res
+    .status(HttpStatus.OK)
+    .json(new ApiResponse(HttpStatus.OK, "Email verified successfully", null));
 });
 
 export const forgotPassword = asyncHandler(async (req, res) => {

@@ -1,6 +1,6 @@
 import * as z from "zod";
 
-export const emailSchema = z.email({ error: "Invalid email format" });
+const emailSchema = z.email({ error: "Invalid email format" });
 
 const passwordSchema = z
   .string()
@@ -11,7 +11,7 @@ const passwordSchema = z
 //     "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.",
 // });
 
-export const signUpSchema = z.object({
+const signUpSchema = z.object({
   name: z
     .string()
     .min(2, { error: "Name must be at least 2 characters long" })
@@ -21,12 +21,17 @@ export const signUpSchema = z.object({
   password: passwordSchema,
 });
 
-export const signInSchema = z.object({
+const signInSchema = z.object({
   email: emailSchema,
   password: z
     .string()
     .min(6, { error: "Password must be at least 6 characters long" })
     .max(64, { error: "Password must be less than 64 characters" }),
+});
+
+const verifyEmailSchema = z.object({
+  token: z.string().min(1, "Token is required"),
+  otp: z.string().regex(/^\d{6}$/, "OTP must be a 6-digit number"),
 });
 
 export const validateEmail = (data: unknown) => emailSchema.safeParse(data);
@@ -37,3 +42,6 @@ export const validatePassword = (data: unknown) =>
 export const validateSignUp = (data: unknown) => signUpSchema.safeParse(data);
 
 export const validateSignIn = (data: unknown) => signInSchema.safeParse(data);
+
+export const validateVerifyEmail = (data: unknown) =>
+  verifyEmailSchema.safeParse(data);
