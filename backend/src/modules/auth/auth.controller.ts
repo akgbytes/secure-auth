@@ -387,6 +387,11 @@ export const resetPassword = asyncHandler(async (req, res) => {
     .delete(verificationTable)
     .where(eq(verificationTable.id, verificationRecord.verification.id));
 
+  // Sare existing session ko invalidate krna h bcuz of security
+  await db
+    .delete(sessionTable)
+    .where(eq(sessionTable.userId, verificationRecord.user.id));
+
   logger.info(
     { email: verificationRecord.user.email },
     "Password reset successful"
