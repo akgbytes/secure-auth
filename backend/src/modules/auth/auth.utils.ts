@@ -4,7 +4,7 @@ import { TokenPayload } from "@/types";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 import { OAuth2Client } from "google-auth-library";
-import jwt, { SignOptions } from "jsonwebtoken";
+import jwt, { SignOptions, TokenExpiredError } from "jsonwebtoken";
 import ms from "ms";
 
 export const sessionExpiresAfter = () =>
@@ -50,6 +50,21 @@ export const generateRefreshToken = ({ userId, sessionId }: TokenPayload) =>
     env.REFRESH_TOKEN_SECRET,
     { expiresIn: env.REFRESH_TOKEN_EXPIRY as SignOptions["expiresIn"] }
   );
+
+export const verifyAccessJWT = (accessToken: string): TokenPayload => {
+  try {
+    const payload = jwt.verify(accessToken, env.ACCESS_TOKEN_SECRET);
+    return payload as TokenPayload;
+  } catch (error: any) {
+    if (error instanceof TokenExpiredError) {
+      throw new ApiError(HttpStatus.UNAUTHORIZED, "TokenExpiredError");
+    }
+    throw new ApiError(
+      HttpStatus.UNAUTHORIZED,
+      "Invalid or expired access token"
+    );
+  }
+};
 
 export const verifyRefreshJWT = (refreshToken: string): TokenPayload => {
   try {

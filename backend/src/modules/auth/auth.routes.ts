@@ -9,7 +9,9 @@ import {
   resendVerificationEmail,
   logout,
   resetPassword,
+  getMe,
 } from "./auth.controller";
+import { isLoggedIn } from "@/middlewares/auth.middleware";
 
 const router = Router();
 
@@ -26,5 +28,7 @@ router.post("/password/forgot", forgotPassword);
 router.post("/password/reset", resetPassword);
 
 router.post("/google", googleLogin);
+
+router.get("/me", isLoggedIn, getMe);
 
 export default router;

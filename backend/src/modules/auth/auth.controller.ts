@@ -771,3 +771,23 @@ export const googleLogin = asyncHandler(async (req, res) => {
     .status(HttpStatus.OK)
     .json(new ApiResponse(HttpStatus.OK, "Google login successful", null));
 });
+
+export const getMe = asyncHandler(async (req, res) => {
+  const user = req.user;
+
+  if (!user) {
+    throw new ApiError(HttpStatus.UNAUTHORIZED, "Unauthorized");
+  }
+
+  res.status(HttpStatus.OK).json(
+    new ApiResponse(HttpStatus.OK, "User profile fetched successfully", {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      emailVerified: user.emailVerified,
+      avatar: user.avatar,
+      role: user.role,
+      provider: user.provider,
+    })
+  );
+});
