@@ -30,7 +30,7 @@ const signInSchema = z.object({
 });
 
 const verifyEmailSchema = z.object({
-  token: z.string().min(1, "Token is required"),
+  token: z.string().trim().min(1, "Token is required"),
   otp: z.string().regex(/^\d{6}$/, "OTP must be a 6-digit number"),
 });
 

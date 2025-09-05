@@ -1,5 +1,5 @@
 import { app } from "@/app";
-import { logger } from "@/utils/logger";
+import { logger } from "@/core/logger";
 import { env } from "@/config/env";
 import { connectDrizzle } from "@/db";
 

@@ -1,4 +1,4 @@
-import { logger } from "@/utils/logger";
+import { logger } from "@/core/logger";
 import * as z from "zod";
 import "dotenv/config";
 

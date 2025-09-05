@@ -1,5 +1,12 @@
-import { ApiError, ApiResponse, asyncHandler, HttpStatus } from "@/core";
-import { handleZodError } from "@/utils/handleZodError";
+import {
+  ApiError,
+  ApiResponse,
+  asyncHandler,
+  HttpStatus,
+  handleZodError,
+  logger,
+} from "@/core";
+
 import {
   validateEmail,
   validateResetPassword,
@@ -9,7 +16,6 @@ import {
 } from "./auth.validators";
 
 import { clearAuthCookies, setAuthCookies } from "@/utils/cookies";
-import { logger } from "@/utils/logger";
 import { sessionTable, userTable, verificationTable } from "@/db/schema";
 import { and, eq, gt, sql } from "drizzle-orm";
 import { db } from "@/db";
@@ -28,7 +34,6 @@ import {
 } from "./auth.utils";
 import { emailQueue } from "@/queues/email";
 import { env } from "@/config/env";
-import { error } from "console";
 
 export const signup = asyncHandler(async (req, res) => {
   const { name, email, password } = handleZodError(validateSignUp(req.body));
@@ -433,7 +438,7 @@ export const resendVerificationEmail = asyncHandler(async (req, res) => {
       new ApiResponse(
         HttpStatus.OK,
         "If an account exists, a verification email has been sent.",
-        null
+        { token: rawToken }
       )
     );
 });

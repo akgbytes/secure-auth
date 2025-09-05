@@ -1,4 +1,4 @@
-import { logger } from "@/utils/logger";
+import { logger } from "@/core/logger";
 import { sendResetPasswordMail, sendVerificationMail } from "@/utils/mail";
 import { Worker } from "bullmq";
 import { connection } from "@/config/redis";

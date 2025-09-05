@@ -1,5 +1,5 @@
 import { env } from "@/config/env";
-import { logger } from "@/utils/logger";
+import { logger } from "@/core/logger";
 import { sql } from "drizzle-orm";
 import { Pool } from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";

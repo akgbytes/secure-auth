@@ -1,6 +1,6 @@
 import express from "express";
 import { pinoHttp } from "pino-http";
-import { logger } from "@/utils/logger";
+import { logger } from "@/core/logger";
 import cookieParser from "cookie-parser";
 import { randomUUID } from "crypto";
 import cors from "cors";

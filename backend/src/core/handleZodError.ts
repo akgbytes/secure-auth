@@ -17,6 +17,6 @@ export const handleZodError = <T>(
       ? path
         ? `Missing '${path}' field`
         : "Missing required fields"
-      : issue!.message
+      : issue?.message || "Invalid input data"
   );
 };
