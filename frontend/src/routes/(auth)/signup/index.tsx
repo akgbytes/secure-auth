@@ -66,7 +66,6 @@ function RouteComponent() {
   const onSubmit = (values: FormValues) => {
     signupUser(values, {
       onSuccess: (res) => {
-        console.log(res);
         toast.success(res.message);
         navigate({
           to: "/email-verify",
@@ -84,9 +83,14 @@ function RouteComponent() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
-        <h2 className="text-left mb-8 text-3xl font-semibold text-foreground">
-          Create your account
-        </h2>
+        <div className="text-center mb-6">
+          <h2 className="text-3xl font-semibold text-foreground">
+            Create your account
+          </h2>
+          <p className="text-muted-foreground text-sm pt-2">
+            Get started with SecureAuth today
+          </p>
+        </div>
 
         <div className="py-4 w-full space-y-5">
           <GoogleLoginButton isPending={isPending} />
@@ -160,9 +164,11 @@ function RouteComponent() {
                 </div>
                 <Button type="submit" className="w-full" disabled={isPending}>
                   {isPending ? (
-                    <Spinner text="Creating account" />
+                    <>
+                      <Spinner text="Signing up" />
+                    </>
                   ) : (
-                    "Create Account"
+                    "Sign Up with Email"
                   )}
                 </Button>
               </div>

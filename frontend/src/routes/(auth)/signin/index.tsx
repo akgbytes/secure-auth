@@ -70,9 +70,14 @@ function RouteComponent() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
-        <h2 className="text-left mb-8 text-3xl font-semibold text-foreground">
-          Welcome back
-        </h2>
+        <div className="text-center mb-6">
+          <h2 className="text-3xl font-semibold text-foreground">
+            Welcome back
+          </h2>
+          <p className="text-muted-foreground text-sm pt-2">
+            Sign in to your account
+          </p>
+        </div>
 
         <div className="py-4 w-full space-y-5">
           <GoogleLoginButton isPending={isPending} />
@@ -129,7 +134,7 @@ function RouteComponent() {
 
                 <Link
                   to="/forgot-password"
-                  className="-my-3 text-right text-sm text-muted-foreground hover:text-foreground"
+                  className="-my-3 text-left text-sm text-primary hover:underline"
                 >
                   Forgot password?
                 </Link>
@@ -140,7 +145,7 @@ function RouteComponent() {
                       <Spinner text="Signing in" />
                     </>
                   ) : (
-                    "Sign In"
+                    "Sign In with Email"
                   )}
                 </Button>
               </div>

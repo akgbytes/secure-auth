@@ -1,13 +1,6 @@
 import Spinner from "@/components/Spinner";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
   InputOTP,
   InputOTPGroup,
   InputOTPSlot,
@@ -60,69 +53,60 @@ function RouteComponent() {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <h2 className="text-xl font-semibold text-foreground">
+      <div className="w-full max-w-sm">
+        <div className="text-center mb-6">
+          <h2 className="text-3xl font-semibold text-foreground">
             Verify your email
           </h2>
-          <p className="text-muted-foreground">
+          <p className="pt-2 text-muted-foreground text-sm">
             Enter the 6-digit code sent to your email
           </p>
         </div>
 
-        <Card className="border-border shadow-sm">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-xl">Email Verification</CardTitle>
-            <CardDescription>
-              We've sent a verification code to your email address. Please enter
-              it below.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={onSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <div className="flex items-center justify-center">
-                  <InputOTP
-                    maxLength={6}
-                    value={otp}
-                    onChange={(value) => setOtp(value.replace(/\D/g, ""))}
-                    pattern="[0-9]*"
-                  >
-                    <InputOTPGroup>
-                      {[...Array(6)].map((_, i) => (
-                        <InputOTPSlot key={i} index={i} inputMode="numeric" />
-                      ))}
-                    </InputOTPGroup>
-                  </InputOTP>
-                </div>
-              </div>
-
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={isPending || otp.length !== 6}
-              >
-                {isPending ? <Spinner text="Verifying" /> : "Verify Email"}
-              </Button>
-            </form>
-
-            <div className="mt-6 text-center space-y-4">
-              <div className="text-sm text-muted-foreground">
-                <Link to="/email-resend">Resend verification code</Link>
-              </div>
-
-              <p className="text-sm text-muted-foreground">
-                Wrong email?{" "}
-                <Link
-                  to="/signup"
-                  className="text-primary hover:underline font-medium"
+        <div className="py-4 w-full space-y-5">
+          <form onSubmit={onSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <div className="flex items-center justify-center">
+                <InputOTP
+                  maxLength={6}
+                  value={otp}
+                  onChange={(value) => setOtp(value.replace(/\D/g, ""))}
+                  pattern="[0-9]*"
                 >
-                  Go back to sign up
-                </Link>
-              </p>
+                  <InputOTPGroup>
+                    {[...Array(6)].map((_, i) => (
+                      <InputOTPSlot key={i} index={i} inputMode="numeric" />
+                    ))}
+                  </InputOTPGroup>
+                </InputOTP>
+              </div>
             </div>
-          </CardContent>
-        </Card>
+
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isPending || otp.length !== 6}
+            >
+              {isPending ? <Spinner text="Verifying" /> : "Verify Email"}
+            </Button>
+          </form>
+
+          <div className="mt-6 text-center space-y-2">
+            <div className="text-sm text-muted-foreground hover:text-foreground hover:underline transition-all duration-200">
+              <Link to="/email-resend">Resend verification code</Link>
+            </div>
+
+            <p className="text-sm text-muted-foreground">
+              Wrong email?{" "}
+              <Link
+                to="/signup"
+                className="text-primary hover:underline font-medium transition-all duration-200"
+              >
+                Go back to sign up
+              </Link>
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
