@@ -1,7 +1,7 @@
 import { pgTable, text, uuid, timestamp, pgEnum } from "drizzle-orm/pg-core";
 import { timestamps } from "@/db/column-helpers";
 import { userTable } from "./user.schema";
-import { VerificationType } from "@/constants/verificationTypes";
+import { VerificationType } from "@/constants";
 
 export const verificationType = pgEnum("type", VerificationType);
 

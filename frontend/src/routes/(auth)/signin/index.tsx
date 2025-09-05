@@ -22,8 +22,9 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import api from "@/lib/axios";
-import type { RegisterResponse, ApiAxiosError, RegisterInput } from "@/types";
+import type { ApiAxiosError, ApiResponse, SignInInput } from "@/types";
 import { toast } from "sonner";
+import Spinner from "@/components/Spinner";
 
 const formSchema = z.object({
   email: z.email("Invalid email format").trim(),
@@ -51,9 +52,9 @@ function RouteComponent() {
   });
 
   const { mutate: signupUser, isPending } = useMutation<
-    RegisterResponse,
+    ApiResponse<null>,
     ApiAxiosError,
-    RegisterInput
+    SignInInput
   >({
     mutationFn: async (values) => {
       const response = await api.post("/auth/signup", values);
@@ -64,14 +65,8 @@ function RouteComponent() {
   const onSubmit = (values: FormValues) => {
     signupUser(values, {
       onSuccess: (res) => {
-        console.log(res);
         toast.success(res.message);
-        navigate({
-          to: "/email-verify",
-          search: {
-            token: res.data.token,
-          },
-        });
+        navigate({ to: "/dashboard" });
       },
       onError: (error) => {
         toast.error(error.response?.data.message);
@@ -82,24 +77,18 @@ function RouteComponent() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Header */}
         <div className="text-center mb-8">
-          <Link to="/" className="inline-block">
-            <h1 className="text-2xl font-bold text-primary mb-2">SecureAuth</h1>
-          </Link>
           <h2 className="text-xl font-semibold text-foreground">
-            Create your account
+            Welcome back
           </h2>
-          <p className="text-muted-foreground">
-            Get started with SecureAuth today
-          </p>
+          <p className="text-muted-foreground">Sign in to your account</p>
         </div>
 
         <Card className="border-border shadow-sm">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-xl">Sign Up</CardTitle>
+            <CardTitle className="text-xl">Sign In</CardTitle>
             <CardDescription>
-              Create a new account to get started
+              Enter your email and password to access your account
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -109,23 +98,6 @@ function RouteComponent() {
                   <div className="grid gap-4">
                     <FormField
                       control={form.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Name</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="text"
-                              placeholder="Aman Gupta"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
                       name="email"
                       render={({ field }) => (
                         <FormItem>
@@ -133,7 +105,7 @@ function RouteComponent() {
                           <FormControl>
                             <Input
                               type="email"
-                              placeholder="akgbytes@gmail.com"
+                              placeholder="Enter your email"
                               {...field}
                             />
                           </FormControl>
@@ -150,7 +122,7 @@ function RouteComponent() {
                           <FormControl>
                             <Input
                               type="password"
-                              placeholder="********"
+                              placeholder="Enter your password"
                               {...field}
                             />
                           </FormControl>
@@ -162,11 +134,10 @@ function RouteComponent() {
                   <Button type="submit" className="w-full" disabled={isPending}>
                     {isPending ? (
                       <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Creating account...
+                        <Spinner text="Signing in" />
                       </>
                     ) : (
-                      "Create Account"
+                      "Sign In"
                     )}
                   </Button>
                 </div>
@@ -175,12 +146,12 @@ function RouteComponent() {
 
             <div className="mt-6 text-center">
               <p className="text-sm text-muted-foreground">
-                Already have an account?{" "}
+                Don't have an account?{" "}
                 <Link
-                  to="/signin"
+                  to="/signup"
                   className="text-primary hover:underline font-medium"
                 >
-                  Sign in
+                  Sign up
                 </Link>
               </p>
             </div>

@@ -1,3 +1,4 @@
+import { GoogleOAuthProvider } from "@react-oauth/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
@@ -33,17 +34,20 @@ declare module "@tanstack/react-router" {
   }
 }
 
-// Render the app
+const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
 const rootElement = document.getElementById("app");
 if (rootElement && !rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement);
   root.render(
     <StrictMode>
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-        <TanStackQueryProvider.Provider {...TanStackQueryProviderContext}>
-          <RouterProvider router={router} />
-        </TanStackQueryProvider.Provider>
-        <Toaster />
+        <GoogleOAuthProvider clientId={CLIENT_ID}>
+          <TanStackQueryProvider.Provider {...TanStackQueryProviderContext}>
+            <RouterProvider router={router} />
+          </TanStackQueryProvider.Provider>
+          <Toaster />
+        </GoogleOAuthProvider>
       </ThemeProvider>
     </StrictMode>
   );

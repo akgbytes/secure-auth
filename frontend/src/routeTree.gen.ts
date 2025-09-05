@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as authSignupIndexRouteImport } from './routes/(auth)/signup/index'
 import { Route as authSigninIndexRouteImport } from './routes/(auth)/signin/index'
 import { Route as authForgotPasswordIndexRouteImport } from './routes/(auth)/forgot-password/index'
@@ -19,6 +20,11 @@ import { Route as authEmailResendIndexRouteImport } from './routes/(auth)/email-
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardIndexRoute = DashboardIndexRouteImport.update({
+  id: '/dashboard/',
+  path: '/dashboard/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const authSignupIndexRoute = authSignupIndexRouteImport.update({
@@ -49,6 +55,7 @@ const authEmailResendIndexRoute = authEmailResendIndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardIndexRoute
   '/email-resend': typeof authEmailResendIndexRoute
   '/email-verify': typeof authEmailVerifyIndexRoute
   '/forgot-password': typeof authForgotPasswordIndexRoute
@@ -57,6 +64,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardIndexRoute
   '/email-resend': typeof authEmailResendIndexRoute
   '/email-verify': typeof authEmailVerifyIndexRoute
   '/forgot-password': typeof authForgotPasswordIndexRoute
@@ -66,6 +74,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/dashboard/': typeof DashboardIndexRoute
   '/(auth)/email-resend/': typeof authEmailResendIndexRoute
   '/(auth)/email-verify/': typeof authEmailVerifyIndexRoute
   '/(auth)/forgot-password/': typeof authForgotPasswordIndexRoute
@@ -76,6 +85,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/dashboard'
     | '/email-resend'
     | '/email-verify'
     | '/forgot-password'
@@ -84,6 +94,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/dashboard'
     | '/email-resend'
     | '/email-verify'
     | '/forgot-password'
@@ -92,6 +103,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/dashboard/'
     | '/(auth)/email-resend/'
     | '/(auth)/email-verify/'
     | '/(auth)/forgot-password/'
@@ -101,6 +113,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DashboardIndexRoute: typeof DashboardIndexRoute
   authEmailResendIndexRoute: typeof authEmailResendIndexRoute
   authEmailVerifyIndexRoute: typeof authEmailVerifyIndexRoute
   authForgotPasswordIndexRoute: typeof authForgotPasswordIndexRoute
@@ -115,6 +128,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/': {
+      id: '/dashboard/'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(auth)/signup/': {
@@ -157,6 +177,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DashboardIndexRoute: DashboardIndexRoute,
   authEmailResendIndexRoute: authEmailResendIndexRoute,
   authEmailVerifyIndexRoute: authEmailVerifyIndexRoute,
   authForgotPasswordIndexRoute: authForgotPasswordIndexRoute,

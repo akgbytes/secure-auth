@@ -1,6 +1,5 @@
 export const Provider = {
   local: "local",
-  github: "github",
   google: "google",
 } as const;
 

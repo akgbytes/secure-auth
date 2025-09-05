@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { GoogleLogin, useGoogleLogin } from "@react-oauth/google";
 import {
   Card,
   CardHeader,
@@ -22,8 +23,9 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import api from "@/lib/axios";
-import type { RegisterResponse, ApiAxiosError, RegisterInput } from "@/types";
+import type { ApiAxiosError, SignUpInput, SignUpResponse } from "@/types";
 import { toast } from "sonner";
+import GoogleLoginButton from "@/components/GoogleLoginButton";
 
 const formSchema = z.object({
   name: z
@@ -58,9 +60,9 @@ function RouteComponent() {
   });
 
   const { mutate: signupUser, isPending } = useMutation<
-    RegisterResponse,
+    SignUpResponse,
     ApiAxiosError,
-    RegisterInput
+    SignUpInput
   >({
     mutationFn: async (values) => {
       const response = await api.post("/auth/signup", values);
@@ -89,11 +91,7 @@ function RouteComponent() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Header */}
         <div className="text-center mb-8">
-          <Link to="/" className="inline-block">
-            <h1 className="text-2xl font-bold text-primary mb-2">SecureAuth</h1>
-          </Link>
           <h2 className="text-xl font-semibold text-foreground">
             Create your account
           </h2>
@@ -110,6 +108,9 @@ function RouteComponent() {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            <div className="flex items-center justify-center w-full">
+              <GoogleLoginButton />
+            </div>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)}>
                 <div className="flex flex-col gap-6">
@@ -123,7 +124,7 @@ function RouteComponent() {
                           <FormControl>
                             <Input
                               type="text"
-                              placeholder="Aman Gupta"
+                              placeholder="Email your name"
                               {...field}
                             />
                           </FormControl>
@@ -140,7 +141,7 @@ function RouteComponent() {
                           <FormControl>
                             <Input
                               type="email"
-                              placeholder="akgbytes@gmail.com"
+                              placeholder="Enter your email"
                               {...field}
                             />
                           </FormControl>
@@ -157,7 +158,7 @@ function RouteComponent() {
                           <FormControl>
                             <Input
                               type="password"
-                              placeholder="********"
+                              placeholder="Create a strong password"
                               {...field}
                             />
                           </FormControl>

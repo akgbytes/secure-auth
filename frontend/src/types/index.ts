@@ -26,13 +26,18 @@ export interface User {
   provider: "local" | "github" | "google";
 }
 
-export type RegisterResponse = ApiResponse<{
+export type SignUpResponse = ApiResponse<{
   user: User;
   token: string;
 }>;
 
-export type RegisterInput = {
+export type SignUpInput = {
   name: string;
+  email: string;
+  password: string;
+};
+
+export type SignInInput = {
   email: string;
   password: string;
 };

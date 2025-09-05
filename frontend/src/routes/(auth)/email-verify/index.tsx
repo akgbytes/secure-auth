@@ -15,7 +15,7 @@ import {
 import api from "@/lib/axios";
 import type { ApiAxiosError, ApiResponse, VerifyEmailInput } from "@/types";
 import { useMutation } from "@tanstack/react-query";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 
@@ -27,6 +27,7 @@ export const Route = createFileRoute("/(auth)/email-verify/")({
 });
 
 function RouteComponent() {
+  const navigate = useNavigate();
   const { token } = Route.useSearch();
   const { mutate: verifyEmail, isPending } = useMutation<
     ApiResponse<null>,
@@ -47,8 +48,8 @@ function RouteComponent() {
       { token: token, otp: otp },
       {
         onSuccess: (res) => {
-          console.log(res);
           toast.success(res.message);
+          navigate({ to: "/signin" });
         },
         onError: (error) => {
           toast.error(error.response?.data.message);
