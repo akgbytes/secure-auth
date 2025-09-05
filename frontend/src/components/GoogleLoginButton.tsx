@@ -8,6 +8,7 @@ import { Button } from "./ui/button";
 
 import { FaGoogle } from "react-icons/fa";
 import { useAuthStore } from "@/store";
+import { fetchUser } from "@/hooks/useUser";
 
 const GoogleLoginButton = ({ isPending }: { isPending: boolean }) => {
   const { setUser } = useAuthStore();
@@ -29,9 +30,16 @@ const GoogleLoginButton = ({ isPending }: { isPending: boolean }) => {
       mutation.mutate(
         { code: response.code },
         {
-          onSuccess: (res) => {
+          onSuccess: async (res) => {
             toast.success(res.message);
-            navigate({ to: "/dashboard" });
+
+            try {
+              const user = await fetchUser();
+              setUser(user);
+              navigate({ to: "/dashboard" });
+            } catch (err) {
+              toast.error("Failed to fetch user details");
+            }
           },
           onError: (error) => {
             toast.error(error.response?.data.message);

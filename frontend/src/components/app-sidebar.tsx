@@ -1,6 +1,5 @@
 import * as React from "react";
 import {
-  IconHome,
   IconInnerShadowTop,
   IconLock,
   IconSettings,
@@ -19,35 +18,24 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+const navMain = [
+  {
+    title: "User",
+    url: "/dashboard",
+    icon: IconUser,
   },
-  navMain: [
-    {
-      title: "Home",
-      url: "/dashboard",
-      icon: IconHome,
-    },
-    {
-      title: "Sessions",
-      url: "/dashboard/sessions",
-      icon: IconLock,
-    },
-    {
-      title: "Account",
-      url: "#",
-      icon: IconUser,
-    },
-    {
-      title: "Settings",
-      url: "#",
-      icon: IconSettings,
-    },
-  ],
-};
+  {
+    title: "Sessions",
+    url: "/dashboard/sessions",
+    icon: IconLock,
+  },
+
+  {
+    title: "Settings",
+    url: "#",
+    icon: IconSettings,
+  },
+];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
@@ -68,10 +56,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain items={navMain} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser />
       </SidebarFooter>
     </Sidebar>
   );

@@ -18,6 +18,8 @@ import type { ApiAxiosError, ApiResponse, SignInInput } from "@/types";
 import { toast } from "sonner";
 import Spinner from "@/components/Spinner";
 import GoogleLoginButton from "@/components/GoogleLoginButton";
+import { useAuthStore } from "@/store";
+import { fetchUser } from "@/hooks/useUser";
 
 const formSchema = z.object({
   email: z.email("Invalid email format").trim(),
@@ -35,6 +37,7 @@ export const Route = createFileRoute("/(auth)/signin/")({
 });
 
 function RouteComponent() {
+  const { setUser } = useAuthStore();
   const navigate = useNavigate();
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema as any),
@@ -44,7 +47,7 @@ function RouteComponent() {
     },
   });
 
-  const { mutate: signupUser, isPending } = useMutation<
+  const { mutate: signin, isPending } = useMutation<
     ApiResponse<null>,
     ApiAxiosError,
     SignInInput
@@ -56,10 +59,16 @@ function RouteComponent() {
   });
 
   const onSubmit = (values: FormValues) => {
-    signupUser(values, {
-      onSuccess: (res) => {
+    signin(values, {
+      onSuccess: async (res) => {
         toast.success(res.message);
-        navigate({ to: "/dashboard" });
+        try {
+          const user = await fetchUser();
+          setUser(user);
+          navigate({ to: "/dashboard" });
+        } catch (err) {
+          toast.error("Failed to fetch user details");
+        }
       },
       onError: (error) => {
         toast.error(error.response?.data.message);

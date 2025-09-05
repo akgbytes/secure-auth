@@ -51,7 +51,7 @@ function RouteComponent() {
     },
   });
 
-  const { mutate: signupUser, isPending } = useMutation<
+  const { mutate: signup, isPending } = useMutation<
     ApiResponse<User>,
     ApiAxiosError,
     SignUpInput
@@ -63,7 +63,7 @@ function RouteComponent() {
   });
 
   const onSubmit = (values: FormValues) => {
-    signupUser(values, {
+    signup(values, {
       onSuccess: (res) => {
         toast.success(res.message);
         navigate({
