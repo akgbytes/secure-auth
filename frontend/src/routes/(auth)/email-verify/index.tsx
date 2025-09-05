@@ -53,7 +53,7 @@ function RouteComponent() {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-sm">
+      <div className="w-full max-w-md border rounded px-6 py-8">
         <div className="text-center mb-6">
           <h2 className="text-3xl font-semibold text-foreground">
             Verify your email
@@ -63,7 +63,7 @@ function RouteComponent() {
           </p>
         </div>
 
-        <div className="py-4 w-full space-y-5">
+        <div className="w-full space-y-5">
           <form onSubmit={onSubmit} className="space-y-6">
             <div className="space-y-2">
               <div className="flex items-center justify-center">

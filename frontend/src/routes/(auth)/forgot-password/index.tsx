@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -18,7 +18,7 @@ import type { ApiAxiosError, ApiResponse } from "@/types";
 import { toast } from "sonner";
 import Spinner from "@/components/Spinner";
 
-import { ArrowLeft, Mail, MailCheck, RefreshCw } from "lucide-react";
+import { ArrowLeft, MailCheck, RefreshCw } from "lucide-react";
 import { useState } from "react";
 
 const formSchema = z.object({
@@ -33,7 +33,6 @@ export const Route = createFileRoute("/(auth)/forgot-password/")({
 
 function RouteComponent() {
   const [emailSent, setEmailSent] = useState(false);
-  const navigate = useNavigate();
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema as any),
     defaultValues: {
@@ -41,11 +40,11 @@ function RouteComponent() {
     },
   });
 
-  const {
-    mutate: forgotPassword,
-    isPending,
-    isSuccess,
-  } = useMutation<ApiResponse<null>, ApiAxiosError, { email: string }>({
+  const { mutate: forgotPassword, isPending } = useMutation<
+    ApiResponse<null>,
+    ApiAxiosError,
+    { email: string }
+  >({
     mutationFn: async (values) => {
       const response = await api.post("/auth/password/forgot", values);
       return response.data;
@@ -67,7 +66,7 @@ function RouteComponent() {
   if (emailSent) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <div className="w-full max-w-sm">
+        <div className="w-full max-w-md border rounded px-6 py-8">
           <div className="text-center">
             <h2 className="text-3xl font-semibold text-foreground">
               Check your email
@@ -77,7 +76,7 @@ function RouteComponent() {
             </p>
           </div>
 
-          <div className="py-4 w-full space-y-3">
+          <div className="w-full space-y-3">
             <div className="flex justify-center">
               <div className="p-4 rounded-full">
                 <MailCheck className="h-12 w-12 text-green-600" />
@@ -127,7 +126,7 @@ function RouteComponent() {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-sm">
+      <div className="w-full max-w-md border rounded px-6 py-8">
         <div className="text-center mb-6">
           <h2 className="text-3xl font-semibold text-foreground">
             Forgot your password?
@@ -138,7 +137,7 @@ function RouteComponent() {
           </p>
         </div>
 
-        <div className="py-4 w-full space-y-5">
+        <div className="w-full space-y-5">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
               <div className="flex flex-col gap-6">

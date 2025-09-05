@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import api from "@/lib/axios";
 import type { ApiAxiosError, SignUpInput, SignUpResponse } from "@/types";
@@ -82,7 +81,7 @@ function RouteComponent() {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-sm">
+      <div className="w-full max-w-md border rounded px-6 py-8">
         <div className="text-center mb-6">
           <h2 className="text-3xl font-semibold text-foreground">
             Create your account
@@ -92,7 +91,7 @@ function RouteComponent() {
           </p>
         </div>
 
-        <div className="py-4 w-full space-y-5">
+        <div className="w-full space-y-5">
           <GoogleLoginButton isPending={isPending} />
 
           <div className="relative">

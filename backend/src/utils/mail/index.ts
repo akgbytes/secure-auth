@@ -23,7 +23,9 @@ export const sendResetPasswordMail = async (
   email: string,
   token: string
 ) => {
-  const link = `${env.APP_ORIGIN}/reset-password/${token}`;
+  const link = `${env.APP_ORIGIN}/reset-password?token=${encodeURIComponent(
+    token
+  )}`;
   await sendMail(
     email,
     "Reset Your Password",
