@@ -23,7 +23,7 @@ export interface User {
   emailVerified: boolean;
   avatar: string | null;
   role: "user" | "admin";
-  provider: "local" | "github" | "google";
+  provider: "local" | "google";
 }
 
 export type SignUpResponse = ApiResponse<{

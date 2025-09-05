@@ -4,8 +4,11 @@ import { useGoogleLogin } from "@react-oauth/google";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
+import { Button } from "./ui/button";
+import { FcGoogle } from "react-icons/fc";
+import { FaGoogle } from "react-icons/fa";
 
-const GoogleLoginButton = () => {
+const GoogleLoginButton = ({ isPending }: { isPending: boolean }) => {
   const navigate = useNavigate();
   const mutation = useMutation<
     ApiResponse<null>,
@@ -41,12 +44,14 @@ const GoogleLoginButton = () => {
     },
   });
   return (
-    <button
+    <Button
+      variant={"outline"}
+      className="w-full border cursor-pointer"
       onClick={() => googleLogin()}
-      className="flex items-center justify-center w-full rounded-lg border px-4 py-2 hover:bg-gray-100"
     >
+      <FaGoogle />
       Continue with Google
-    </button>
+    </Button>
   );
 };
 
