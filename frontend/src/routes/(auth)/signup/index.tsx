@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useMutation } from "@tanstack/react-query";
 import api from "@/lib/axios";
-import type { ApiAxiosError, SignUpInput, SignUpResponse } from "@/types";
+import type { ApiAxiosError, ApiResponse, SignUpInput, User } from "@/types";
 import { toast } from "sonner";
 import GoogleLoginButton from "@/components/GoogleLoginButton";
 import Spinner from "@/components/Spinner";
@@ -52,7 +52,7 @@ function RouteComponent() {
   });
 
   const { mutate: signupUser, isPending } = useMutation<
-    SignUpResponse,
+    ApiResponse<User>,
     ApiAxiosError,
     SignUpInput
   >({
@@ -67,10 +67,7 @@ function RouteComponent() {
       onSuccess: (res) => {
         toast.success(res.message);
         navigate({
-          to: "/email-verify",
-          search: {
-            token: res.data.token,
-          },
+          to: "/signin",
         });
       },
       onError: (error) => {

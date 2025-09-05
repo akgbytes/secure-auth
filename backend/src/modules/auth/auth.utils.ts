@@ -31,16 +31,6 @@ export const generateToken = () => {
   return { rawToken, tokenHash, tokenExpiry };
 };
 
-export const generateOtp = () => {
-  const otp = Array.from(crypto.randomFillSync(new Uint8Array(env.OTP_LENGTH)))
-    .map((n) => (n % 10).toString())
-    .join("");
-
-  const otpHash = hashToken(otp);
-
-  return { otp, otpHash };
-};
-
 export const generateAccessToken = ({ userId, sessionId }: TokenPayload) =>
   jwt.sign(
     {

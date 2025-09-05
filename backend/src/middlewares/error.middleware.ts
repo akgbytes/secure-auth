@@ -22,8 +22,6 @@ export const errorHandler: ErrorRequestHandler = (
     apiError.message
   );
 
-  console.log("Error from middleware: ", error);
-
   res.status(apiError.statusCode).json({
     statusCode: apiError.statusCode,
     message: apiError.message,

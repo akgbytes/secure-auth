@@ -1,34 +1,20 @@
 import { sendMail } from "@/utils/mail/mailService";
-import {
-  emailVerificationMailContent,
-  resetPasswordMailContent,
-} from "@/utils/mail/mailGenerator";
 import { env } from "@/config/env";
 import { capitalize } from "@/utils";
+import { passwordResetTemplate, verifyEmailTemplate } from "./mailTemplates";
 
-export const sendVerificationMail = async (
-  name: string,
-  email: string,
-  otp: string
-) => {
-  await sendMail(
-    email,
-    "Verify Your Email",
-    emailVerificationMailContent(capitalize(name), otp)
-  );
+export const sendVerificationMail = async (email: string, token: string) => {
+  const link = `${env.APP_ORIGIN}/email-verify?token=${encodeURIComponent(
+    token
+  )}`;
+  const { html, text, subject } = verifyEmailTemplate(link);
+  await sendMail(email, subject, text, html);
 };
 
-export const sendResetPasswordMail = async (
-  name: string,
-  email: string,
-  token: string
-) => {
+export const sendResetPasswordMail = async (email: string, token: string) => {
   const link = `${env.APP_ORIGIN}/reset-password?token=${encodeURIComponent(
     token
   )}`;
-  await sendMail(
-    email,
-    "Reset Your Password",
-    resetPasswordMailContent(capitalize(name), link)
-  );
+  const { html, text, subject } = passwordResetTemplate(link);
+  await sendMail(email, subject, text, html);
 };

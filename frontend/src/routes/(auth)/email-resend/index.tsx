@@ -47,7 +47,7 @@ function RouteComponent() {
     { email: string }
   >({
     mutationFn: async (values) => {
-      const response = await api.post("/auth/password/forgot", values);
+      const response = await api.post("/auth/email/resend", values);
       return response.data;
     },
   });
@@ -74,10 +74,10 @@ function RouteComponent() {
       <div className="w-full max-w-md border rounded px-6 py-8">
         <div className="text-center mb-6">
           <h2 className="text-3xl font-semibold text-foreground">
-            Resend verification code
+            Resend verification email
           </h2>
           <p className="text-muted-foreground text-sm pt-2">
-            Enter your email address and we'll send you a new verification code
+            Enter your email address and we'll send you a new verification link
           </p>
         </div>
 
@@ -111,7 +111,7 @@ function RouteComponent() {
                       <Spinner text="Sending" />
                     </>
                   ) : (
-                    <>Send Verification Code</>
+                    <>Send Verification Link</>
                   )}
                 </Button>
               </div>

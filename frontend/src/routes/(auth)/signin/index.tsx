@@ -50,7 +50,7 @@ function RouteComponent() {
     SignInInput
   >({
     mutationFn: async (values) => {
-      const response = await api.post("/auth/signup", values);
+      const response = await api.post("/auth/signin", values);
       return response.data;
     },
   });

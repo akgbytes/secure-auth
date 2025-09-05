@@ -1,8 +1,5 @@
 import express from "express";
-import { pinoHttp } from "pino-http";
-import { logger } from "@/core/logger";
 import cookieParser from "cookie-parser";
-import { randomUUID } from "crypto";
 import cors from "cors";
 import { env } from "@/config/env";
 
@@ -17,37 +14,6 @@ app.use(
     origin: env.APP_ORIGIN,
     credentials: true,
     methods: ["GET", "POST", "DELETE", "PUT"],
-  })
-);
-
-app.use(
-  pinoHttp({
-    logger: logger,
-    genReqId: () => randomUUID(),
-    customLogLevel: function (req, res, err) {
-      const statusCode = res.statusCode as number;
-      if (statusCode >= 400) return "error";
-      return "info";
-    },
-    serializers: {
-      req(req) {
-        return {
-          method: req.method,
-          url: req.url,
-          id: req.id,
-        };
-      },
-      res(res) {
-        return {
-          statusCode: res.statusCode,
-        };
-      },
-    },
-    customSuccessMessage: function (req, res) {
-      return `Request completed`;
-    },
-
-    autoLogging: true,
   })
 );
 

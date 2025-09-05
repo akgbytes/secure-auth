@@ -22,7 +22,6 @@ import { db } from "@/db";
 import {
   sessionExpiresAfter,
   generateAccessToken,
-  generateOtp,
   generateRefreshToken,
   generateToken,
   getGoogleTokens,
@@ -72,12 +71,10 @@ export const signup = asyncHandler(async (req, res) => {
   }
 
   const { rawToken, tokenHash, tokenExpiry } = generateToken();
-  const { otp, otpHash } = generateOtp();
 
   const [verification] = await db
     .insert(verificationTable)
     .values({
-      code: otpHash,
       token: tokenHash,
       type: "email_verify",
       userId: user.id,
@@ -95,10 +92,8 @@ export const signup = asyncHandler(async (req, res) => {
 
   emailQueue.add("sendVerifyEmail", {
     type: "verify",
-    name: user.name,
     email: user.email,
     token: rawToken,
-    otp: otp,
   });
 
   logger.info({ email }, "Signup successful, verification email queued");
@@ -109,7 +104,7 @@ export const signup = asyncHandler(async (req, res) => {
       new ApiResponse(
         HttpStatus.CREATED,
         "Signup successful, Please verify your email.",
-        { user, token: rawToken }
+        user
       )
     );
 });
@@ -120,7 +115,7 @@ export const signin = asyncHandler(async (req, res) => {
   logger.info({ email }, "Signin attempt");
 
   const userAgent = req.headers["user-agent"] || "";
-  const ipAddress = req.ip || "";
+  const ipAddress = (req.headers["x-forwarded-for"] as string) || req.ip || "";
 
   const [user] = await db
     .select()
@@ -132,23 +127,27 @@ export const signin = asyncHandler(async (req, res) => {
     throw new ApiError(HttpStatus.UNAUTHORIZED, "Invalid credentials");
   }
 
-  if (!user.emailVerified) {
-    logger.warn({ email }, "Signin blocked: Email not verified");
+  if (!user.password) {
     throw new ApiError(
-      HttpStatus.UNAUTHORIZED,
-      "Invalid credentials"
-      // "Your email is not verified. Please verify before signing in."
+      HttpStatus.BAD_REQUEST,
+      `You signed up using ${user.provider}. Please use sign-in using ${user.provider} to access your account.`
     );
   }
 
-  const isPasswordCorrect = await isPasswordValid(password, user.password!);
+  const isPasswordCorrect = await isPasswordValid(password, user.password);
 
   if (!isPasswordCorrect) {
     logger.warn({ email }, "Signin failed: Incorrect password");
     throw new ApiError(HttpStatus.UNAUTHORIZED, "Invalid credentials");
   }
 
-  //
+  if (!user.emailVerified) {
+    logger.warn({ email }, "Signin blocked: Email not verified");
+    throw new ApiError(
+      HttpStatus.UNAUTHORIZED,
+      "Your email is not verified. Please verify before signing in."
+    );
+  }
 
   const [existingSession] = await db
     .select()
@@ -237,6 +236,7 @@ export const signin = asyncHandler(async (req, res) => {
 
 export const logout = asyncHandler(async (req, res) => {
   const refreshToken = req.cookies.refreshToken as string;
+
   if (!refreshToken) {
     logger.warn("Sign out attempt without refresh token");
   } else {
@@ -284,7 +284,7 @@ export const refreshTokens = asyncHandler(async (req, res) => {
   }
 
   const incomingUserAgent = req.headers["user-agent"] || "";
-  const incomingIp = req.ip || "";
+  const incomingIp = (req.headers["x-forwarded-for"] as string) || req.ip || "";
 
   if (
     validSession.userAgent !== incomingUserAgent ||
@@ -332,10 +332,9 @@ export const refreshTokens = asyncHandler(async (req, res) => {
 });
 
 export const verifyEmail = asyncHandler(async (req, res) => {
-  const { token, otp } = handleZodError(validateVerifyEmail(req.body));
+  const { token } = handleZodError(validateVerifyEmail(req.body));
 
   const tokenHash = hashToken(token);
-  const otpHash = hashToken(otp);
 
   const [record] = await db
     .select()
@@ -343,13 +342,12 @@ export const verifyEmail = asyncHandler(async (req, res) => {
     .where(
       and(
         eq(verificationTable.token, tokenHash),
-        eq(verificationTable.code, otpHash),
         eq(verificationTable.type, "email_verify"),
         gt(verificationTable.expiresAt, new Date())
       )
     );
   if (!record) {
-    throw new ApiError(400, "Invalid or expired OTP");
+    throw new ApiError(400, "Invalid or expired link");
   }
 
   await db
@@ -365,7 +363,7 @@ export const verifyEmail = asyncHandler(async (req, res) => {
 });
 
 export const resendVerificationEmail = asyncHandler(async (req, res) => {
-  const email = handleZodError(validateEmail(req.body));
+  const email = handleZodError(validateEmail(req.body.email));
 
   const [user] = await db
     .select()
@@ -373,6 +371,10 @@ export const resendVerificationEmail = asyncHandler(async (req, res) => {
     .where(eq(userTable.email, email));
 
   if (!user) {
+    logger.warn(
+      { email },
+      "Resend verification requested for non-existing user"
+    );
     return res
       .status(200)
       .json(
@@ -385,30 +387,24 @@ export const resendVerificationEmail = asyncHandler(async (req, res) => {
   }
 
   if (user.emailVerified) {
-    return res.status(200).json(
-      new ApiResponse(
-        200,
-        // "Email is already verified."
-        "If an account exists, a verification email has been sent.",
-        null
-      )
+    logger.warn(
+      { email },
+      "Resend verification requested for already verified email"
     );
+    throw new ApiError(HttpStatus.BAD_REQUEST, "Email is already verified");
   }
 
-  //  Pehle se jo verification token db me hai usko hata do
+  // Pehle se jo verification token db me hai usko hata do
   await db
     .delete(verificationTable)
     .where(eq(verificationTable.userId, user.id));
 
   const { rawToken, tokenHash, tokenExpiry } = generateToken();
 
-  const { otp, otpHash } = generateOtp();
-
   const [verification] = await db
     .insert(verificationTable)
     .values({
       token: tokenHash,
-      code: otpHash,
       type: "email_verify",
       userId: user.id,
       expiresAt: tokenExpiry,
@@ -416,7 +412,10 @@ export const resendVerificationEmail = asyncHandler(async (req, res) => {
     .returning();
 
   if (!verification) {
-    logger.warn({ email }, "Failed to create verification record");
+    logger.error(
+      { email },
+      "Resend verification failed: Could not create verification record"
+    );
     throw new ApiError(
       HttpStatus.INTERNAL_SERVER_ERROR,
       "Something went wrong, Please try again later."
@@ -425,26 +424,25 @@ export const resendVerificationEmail = asyncHandler(async (req, res) => {
 
   emailQueue.add("sendVerifyEmail", {
     type: "verify",
-    name: user.name,
     email: user.email,
     token: rawToken,
-    otp: otp,
   });
 
   logger.info({ email }, "Verification email resent");
+
   res
     .status(HttpStatus.OK)
     .json(
       new ApiResponse(
         HttpStatus.OK,
         "If an account exists, a verification email has been sent.",
-        { token: rawToken }
+        null
       )
     );
 });
 
 export const forgotPassword = asyncHandler(async (req, res) => {
-  const email = handleZodError(validateEmail(req.body));
+  const email = handleZodError(validateEmail(req.body.email));
 
   const [user] = await db
     .select()
@@ -467,23 +465,14 @@ export const forgotPassword = asyncHandler(async (req, res) => {
     return res
       .status(HttpStatus.OK)
       .json(
-        new ApiResponse(
-          HttpStatus.OK,
-          "If an account exists, a reset link has been sent to the email.",
-          null
-        )
+        new ApiResponse(HttpStatus.OK, "Please verify your email first", null)
       );
   }
   // OAuth user password reset na kar paye
   if (user.provider !== "local") {
-    return res.status(200).json(
-      new ApiResponse(
-        200,
-        `You signed up using ${user.provider}. Please use sign-in using ${user.provider} to access your account.`,
-        {
-          code: "OAUTH_USER",
-        }
-      )
+    throw new ApiError(
+      HttpStatus.BAD_REQUEST,
+      `You signed up using ${user.provider}. Please use sign-in using ${user.provider} to access your account.`
     );
   }
 
@@ -513,7 +502,6 @@ export const forgotPassword = asyncHandler(async (req, res) => {
 
   emailQueue.add("sendResetEmail", {
     type: "reset",
-    name: user.name,
     email: user.email,
     token: rawToken,
   });
@@ -639,24 +627,104 @@ export const googleLogin = asyncHandler(async (req, res) => {
 
   const { email, name, picture } = payload;
 
-  if (!email || !name || !picture) {
+  if (!email || !name) {
     throw new ApiError(
       HttpStatus.BAD_REQUEST,
       "Missing required user information"
     );
   }
 
+  const userAgent = req.headers["user-agent"] || "";
+  const ipAddress = (req.headers["x-forwarded-for"] as string) || req.ip || "";
+
+  // Step 1: Check if user exists
   const [existingUser] = await db
     .select()
     .from(userTable)
     .where(eq(userTable.email, email));
 
-  let user;
+  let userId: string;
 
-  if (!existingUser) {
+  if (existingUser) {
+    userId = existingUser.id;
+
+    // Step 2a: Check existing session
+    const [existingSession] = await db
+      .select()
+      .from(sessionTable)
+      .where(
+        and(
+          eq(sessionTable.userId, existingUser.id),
+          eq(sessionTable.userAgent, userAgent),
+          eq(sessionTable.ipAddress, ipAddress)
+        )
+      )
+      .limit(1);
+
+    const [existingSessionsCount] = await db
+      .select({
+        count: sql<number>`cast(count(*) as integer)`,
+      })
+      .from(sessionTable)
+      .where(eq(sessionTable.userId, existingUser.id));
+
+    const totalSessions = existingSessionsCount?.count || 0;
+
+    if (!existingSession && totalSessions >= env.MAX_SESSIONS) {
+      throw new ApiError(
+        HttpStatus.TOO_MANY_REQUESTS,
+        "Maximum session limit reached. Please logout from another device first."
+      );
+    }
+
+    let sessionId: string;
+
+    if (existingSession) {
+      // Update expiry if session exists
+      await db
+        .update(sessionTable)
+        .set({ expiresAt: sessionExpiresAfter() })
+        .where(eq(sessionTable.id, existingSession.id));
+
+      sessionId = existingSession.id;
+    } else {
+      // Create new session
+      const [session] = await db
+        .insert(sessionTable)
+        .values({
+          userId: existingUser.id,
+          ipAddress,
+          userAgent,
+          expiresAt: sessionExpiresAfter(),
+        })
+        .returning();
+
+      if (!session) {
+        logger.error({ email }, "Signin failed: Session creation error");
+        throw new ApiError(
+          HttpStatus.INTERNAL_SERVER_ERROR,
+          "Something went wrong. Please try again later."
+        );
+      }
+
+      sessionId = session.id;
+    }
+
+    // Issue tokens
+    const accessToken = generateAccessToken({ userId, sessionId });
+    const refreshToken = generateRefreshToken({ userId, sessionId });
+    setAuthCookies(res, accessToken, refreshToken);
+  } else {
+    // Step 2b: Register new user
     const [newUser] = await db
       .insert(userTable)
-      .values({ name, email, provider: "google", emailVerified: true })
+      .values({
+        name,
+        email,
+        provider: "google",
+        emailVerified: true,
+        avatar: picture,
+      })
       .returning();
 
     if (!newUser) {
@@ -666,45 +734,38 @@ export const googleLogin = asyncHandler(async (req, res) => {
         "Unable to complete signup, Please try again later."
       );
     }
-    user = newUser;
-  } else {
-    user = existingUser;
+
+    userId = newUser.id;
+
+    // Create session
+    const [session] = await db
+      .insert(sessionTable)
+      .values({
+        userId: newUser.id,
+        ipAddress,
+        userAgent,
+        expiresAt: sessionExpiresAfter(),
+      })
+      .returning();
+
+    if (!session) {
+      logger.error({ email }, "Signin failed: Session creation error");
+      throw new ApiError(
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        "Something went wrong. Please try again later."
+      );
+    }
+
+    // Issue tokens
+    const accessToken = generateAccessToken({ userId, sessionId: session.id });
+    const refreshToken = generateRefreshToken({
+      userId,
+      sessionId: session.id,
+    });
+    setAuthCookies(res, accessToken, refreshToken);
   }
 
-  const userAgent = req.headers["user-agent"] || "";
-  const ipAddress = req.ip || "";
-
-  const [session] = await db
-    .insert(sessionTable)
-    .values({
-      userId: user.id,
-      ipAddress,
-      userAgent,
-      expiresAt: sessionExpiresAfter(),
-    })
-    .returning();
-
-  if (!session) {
-    logger.error({ email }, "Signin failed: Session creation error");
-    throw new ApiError(
-      HttpStatus.INTERNAL_SERVER_ERROR,
-      "Something went wrong. Please try again later."
-    );
-  }
-
-  const accessToken = generateAccessToken({
-    userId: user.id,
-    sessionId: session.id,
-  });
-
-  const refreshToken = generateRefreshToken({
-    userId: user.id,
-    sessionId: session.id,
-  });
-
-  logger.info({ email, sessionId: session.id }, "Google login successful");
-
-  setAuthCookies(res, accessToken, refreshToken);
+  logger.info({ email }, "Google login successful");
 
   res
     .status(HttpStatus.OK)

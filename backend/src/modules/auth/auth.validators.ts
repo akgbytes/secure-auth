@@ -6,10 +6,6 @@ const passwordSchema = z
   .string()
   .min(6, { error: "Password must be at least 6 characters long" })
   .max(64, { error: "Password must be at most 64 characters long" });
-// .regex(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-\[\]])/, {
-//   error:
-//     "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.",
-// });
 
 const signUpSchema = z.object({
   name: z
@@ -30,12 +26,17 @@ const signInSchema = z.object({
 });
 
 const verifyEmailSchema = z.object({
-  token: z.string().trim().min(1, "Token is required"),
-  otp: z.string().regex(/^\d{6}$/, "OTP must be a 6-digit number"),
+  token: z
+    .string("Valid token is required")
+    .trim()
+    .min(1, "Valid token is required"),
 });
 
 const resetPassword = z.object({
-  token: z.string().min(1, "Token is required"),
+  token: z
+    .string("Valid token is required")
+    .trim()
+    .min(1, "Valid token is required"),
   password: passwordSchema,
 });
 

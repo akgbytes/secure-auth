@@ -26,11 +26,6 @@ export interface User {
   provider: "local" | "google";
 }
 
-export type SignUpResponse = ApiResponse<{
-  user: User;
-  token: string;
-}>;
-
 export type SignUpInput = {
   name: string;
   email: string;
@@ -40,9 +35,4 @@ export type SignUpInput = {
 export type SignInInput = {
   email: string;
   password: string;
-};
-
-export type VerifyEmailInput = {
-  token: string;
-  otp: string;
 };

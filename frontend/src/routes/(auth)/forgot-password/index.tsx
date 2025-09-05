@@ -1,4 +1,9 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Link,
+  useNavigate,
+  useRouter,
+} from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -33,6 +38,7 @@ export const Route = createFileRoute("/(auth)/forgot-password/")({
 
 function RouteComponent() {
   const [emailSent, setEmailSent] = useState(false);
+  const navigate = useNavigate();
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema as any),
     defaultValues: {
@@ -84,7 +90,7 @@ function RouteComponent() {
             </div>
 
             <div>
-              <p className="text-muted-foreground text-sm">
+              <p className="text-muted-foreground text-sm text-center">
                 We've sent a password reset link to{" "}
                 <strong className="text-foreground font-medium">
                   {form.getValues("email")}
@@ -94,12 +100,14 @@ function RouteComponent() {
               </p>
             </div>
 
-            <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground text-center">
                 Didn't receive the email? Check your spam folder or try again.
               </p>
               <Button
-                onClick={() => setEmailSent(false)}
+                onClick={() => {
+                  setEmailSent(false);
+                }}
                 className="w-full cursor-pointer"
               >
                 <RefreshCw className="h-4 w-4 mr-2" />

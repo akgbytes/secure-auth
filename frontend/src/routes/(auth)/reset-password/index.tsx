@@ -97,7 +97,7 @@ function RouteComponent() {
                         <FormLabel>New password</FormLabel>
                         <FormControl>
                           <Input
-                            type="email"
+                            type="password"
                             placeholder="Enter new password"
                             {...field}
                           />

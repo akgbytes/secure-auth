@@ -19,7 +19,6 @@ export const Route = createFileRoute("/")({
 function App() {
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <header className="border-b border-border bg-background/95">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
@@ -27,9 +26,9 @@ function App() {
               <h1 className="text-xl font-bold">SecureAuth</h1>
             </div>
 
-            <div className="flex gap-4">
+            <div className="flex gap-4 items-center">
               <ModeToggle />
-              <Link to="/login" className={cn(buttonVariants({ size: "lg" }))}>
+              <Link to="/signin" className={cn(buttonVariants({ size: "lg" }))}>
                 Get Started
               </Link>
             </div>
@@ -51,7 +50,7 @@ function App() {
               resets, and role-based access control.
             </p>
 
-            <Link to="/login" className={cn(buttonVariants({ size: "lg" }))}>
+            <Link to="/signin" className={cn(buttonVariants({ size: "lg" }))}>
               Get Started
               <ArrowRight />
             </Link>

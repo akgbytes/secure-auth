@@ -8,7 +8,6 @@ export const verificationType = pgEnum("type", VerificationType);
 export const verificationTable = pgTable("verification", {
   id: uuid("id").defaultRandom().primaryKey(),
   token: text("token").notNull().unique(),
-  code: text("code").unique(),
   type: verificationType().notNull(),
   userId: uuid("user_id")
     .notNull()
