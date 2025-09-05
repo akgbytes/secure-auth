@@ -18,6 +18,7 @@ import api from "@/lib/axios";
 import type { ApiAxiosError, SignUpInput, SignUpResponse } from "@/types";
 import { toast } from "sonner";
 import GoogleLoginButton from "@/components/GoogleLoginButton";
+import Spinner from "@/components/Spinner";
 
 const formSchema = z.object({
   name: z
@@ -159,10 +160,7 @@ function RouteComponent() {
                 </div>
                 <Button type="submit" className="w-full" disabled={isPending}>
                   {isPending ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Creating account...
-                    </>
+                    <Spinner text="Creating account" />
                   ) : (
                     "Create Account"
                   )}

@@ -5,7 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { Button } from "./ui/button";
-import { FcGoogle } from "react-icons/fc";
+
 import { FaGoogle } from "react-icons/fa";
 
 const GoogleLoginButton = ({ isPending }: { isPending: boolean }) => {
@@ -24,7 +24,6 @@ const GoogleLoginButton = ({ isPending }: { isPending: boolean }) => {
   const googleLogin = useGoogleLogin({
     flow: "auth-code",
     onSuccess: (response) => {
-      console.log("response from google,", response);
       mutation.mutate(
         { code: response.code },
         {
@@ -38,8 +37,7 @@ const GoogleLoginButton = ({ isPending }: { isPending: boolean }) => {
         }
       );
     },
-    onError: (error) => {
-      console.log("error from google: ", error);
+    onError: () => {
       toast.error("Failed to sign in using Google");
     },
   });
@@ -48,6 +46,7 @@ const GoogleLoginButton = ({ isPending }: { isPending: boolean }) => {
       variant={"outline"}
       className="w-full border cursor-pointer"
       onClick={() => googleLogin()}
+      disabled={isPending}
     >
       <FaGoogle />
       Continue with Google
