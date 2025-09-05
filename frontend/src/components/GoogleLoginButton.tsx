@@ -7,8 +7,10 @@ import { toast } from "sonner";
 import { Button } from "./ui/button";
 
 import { FaGoogle } from "react-icons/fa";
+import { useAuthStore } from "@/store";
 
 const GoogleLoginButton = ({ isPending }: { isPending: boolean }) => {
+  const { setUser } = useAuthStore();
   const navigate = useNavigate();
   const mutation = useMutation<
     ApiResponse<null>,

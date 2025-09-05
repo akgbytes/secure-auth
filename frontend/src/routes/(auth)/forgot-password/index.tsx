@@ -1,9 +1,4 @@
-import {
-  createFileRoute,
-  Link,
-  useNavigate,
-  useRouter,
-} from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -38,7 +33,6 @@ export const Route = createFileRoute("/(auth)/forgot-password/")({
 
 function RouteComponent() {
   const [emailSent, setEmailSent] = useState(false);
-  const navigate = useNavigate();
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema as any),
     defaultValues: {
