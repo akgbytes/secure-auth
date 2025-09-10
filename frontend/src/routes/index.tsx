@@ -11,14 +11,12 @@ import { Badge } from "@/components/ui/badge";
 import { ModeToggle } from "@/components/mode-toggle";
 import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import useUser from "@/hooks/useUser";
 
 export const Route = createFileRoute("/")({
   component: App,
 });
 
 function App() {
-  useUser();
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-background/95">

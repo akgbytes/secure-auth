@@ -1,25 +1,27 @@
+import "./styles.css";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { ThemeProvider } from "@/components/theme-provider";
-import { StrictMode } from "react";
+import { StrictMode, useEffect } from "react";
 import ReactDOM from "react-dom/client";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
 
 import * as TanStackQueryProvider from "./integrations/tanstack-query/root-provider.tsx";
-
-// Import the generated route tree
 import { routeTree } from "./routeTree.gen";
 
-import "./styles.css";
-import reportWebVitals from "./reportWebVitals.ts";
 import { Toaster } from "./components/ui/sonner.tsx";
 
-// Create a new router instance
+import reportWebVitals from "./reportWebVitals.ts";
+import { useAuthStore } from "./store/index.ts";
+import { ThemedBackground } from "./components/themed-background.tsx";
 
 const TanStackQueryProviderContext = TanStackQueryProvider.getContext();
+
 const router = createRouter({
   routeTree,
   context: {
     ...TanStackQueryProviderContext,
+
+    auth: undefined!,
   },
   defaultPreload: "intent",
   scrollRestoration: true,
@@ -27,11 +29,32 @@ const router = createRouter({
   defaultPreloadStaleTime: 0,
 });
 
-// Register the router instance for type safety
 declare module "@tanstack/react-router" {
   interface Register {
     router: typeof router;
   }
+}
+
+function InnerApp() {
+  const auth = useAuthStore();
+
+  useEffect(() => {
+    auth.checkAuth(); // Restore auth state on app load
+  }, []);
+
+  if (auth.loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        Checking auth...
+      </div>
+    );
+  }
+
+  return (
+    <ThemedBackground>
+      <RouterProvider router={router} context={{ auth }} />
+    </ThemedBackground>
+  );
 }
 
 const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
@@ -44,7 +67,7 @@ if (rootElement && !rootElement.innerHTML) {
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <GoogleOAuthProvider clientId={CLIENT_ID}>
           <TanStackQueryProvider.Provider {...TanStackQueryProviderContext}>
-            <RouterProvider router={router} />
+            <InnerApp />
           </TanStackQueryProvider.Provider>
           <Toaster />
         </GoogleOAuthProvider>
@@ -53,7 +76,4 @@ if (rootElement && !rootElement.innerHTML) {
   );
 }
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();

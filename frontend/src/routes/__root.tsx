@@ -3,9 +3,11 @@ import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { TanstackDevtools } from "@tanstack/react-devtools";
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 import type { QueryClient } from "@tanstack/react-query";
+import type { AuthStore } from "@/store";
 
 interface MyRouterContext {
   queryClient: QueryClient;
+  auth: AuthStore;
 }
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({

@@ -1,14 +1,27 @@
-import useUser from "@/hooks/useUser";
 import { useAuthStore } from "@/store";
-import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Outlet,
+  redirect,
+  useNavigate,
+} from "@tanstack/react-router";
 import { useEffect } from "react";
 
 export const Route = createFileRoute("/_protectedRoutes")({
+  beforeLoad({ context, location }) {
+    if (!context.auth.isAuthenticated) {
+      throw redirect({
+        to: "/signin",
+        search: {
+          redirect: location.href,
+        },
+      });
+    }
+  },
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  useUser();
   const { isAuthenticated } = useAuthStore();
   const navigate = useNavigate();
 

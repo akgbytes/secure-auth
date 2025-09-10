@@ -1,5 +1,3 @@
-import useUser from "@/hooks/useUser";
-import { useAuthStore } from "@/store";
 import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 
@@ -8,15 +6,15 @@ export const Route = createFileRoute("/(auth)")({
 });
 
 function RouteComponent() {
-  useUser();
-  const { isAuthenticated } = useAuthStore();
+  const { auth } = Route.useRouteContext();
+
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (auth.isAuthenticated) {
       navigate({ to: "/dashboard" });
     }
-  }, [isAuthenticated]);
+  }, [auth.isAuthenticated, navigate]);
 
-  return !isAuthenticated ? <Outlet /> : null;
+  return !auth.isAuthenticated ? <Outlet /> : null;
 }
