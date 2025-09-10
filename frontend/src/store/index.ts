@@ -1,4 +1,4 @@
-import { fetchUser } from "@/hooks/useUser";
+import { fetchUser } from "@/lib/axios";
 import type { User } from "@/types";
 import { create } from "zustand";
 

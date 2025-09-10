@@ -8,7 +8,7 @@ import { Button } from "./ui/button";
 
 import { FaGoogle } from "react-icons/fa";
 import { useAuthStore } from "@/store";
-import { fetchUser } from "@/hooks/useUser";
+import { fetchUser } from "@/lib/axios";
 
 const GoogleLoginButton = ({ isPending }: { isPending: boolean }) => {
   const { setUser } = useAuthStore();

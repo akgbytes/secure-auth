@@ -1,6 +1,6 @@
 import "./styles.css";
 import { GoogleOAuthProvider } from "@react-oauth/google";
-import { ThemeProvider } from "@/components/theme-provider";
+
 import { StrictMode, useEffect } from "react";
 import ReactDOM from "react-dom/client";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
@@ -12,7 +12,8 @@ import { Toaster } from "./components/ui/sonner.tsx";
 
 import reportWebVitals from "./reportWebVitals.ts";
 import { useAuthStore } from "./store/index.ts";
-import { ThemedBackground } from "./components/themed-background.tsx";
+import { CLIENT_ID } from "./constants/env.ts";
+import Spinner from "./components/Spinner.tsx";
 
 const TanStackQueryProviderContext = TanStackQueryProvider.getContext();
 
@@ -44,34 +45,65 @@ function InnerApp() {
 
   if (auth.loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        Checking auth...
+      <div className="min-h-screen w-full relative text-neutral-100">
+        <div
+          className="absolute inset-0 z-0"
+          style={{
+            backgroundColor: "#0a0a0a",
+            backgroundImage: `
+       radial-gradient(circle at 25% 25%, #222222 0.5px, transparent 1px),
+       radial-gradient(circle at 75% 75%, #111111 0.5px, transparent 1px)
+     `,
+            backgroundSize: "10px 10px",
+            imageRendering: "pixelated",
+          }}
+        />
+        <div className="relative z-10">
+          <div className="flex items-center justify-center h-screen">
+            <div className="flex flex-col items-center gap-2">
+              <Spinner
+                text="Checking authentication..."
+                className="text-sky-600 size-6"
+              />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <ThemedBackground>
-      <RouterProvider router={router} context={{ auth }} />
-    </ThemedBackground>
+    <div className="min-h-screen w-full relative text-neutral-100">
+      <div
+        className="absolute inset-0 z-0"
+        style={{
+          backgroundColor: "#0a0a0a",
+          backgroundImage: `
+       radial-gradient(circle at 25% 25%, #222222 0.5px, transparent 1px),
+       radial-gradient(circle at 75% 75%, #111111 0.5px, transparent 1px)
+     `,
+          backgroundSize: "10px 10px",
+          imageRendering: "pixelated",
+        }}
+      />
+      <div className="relative z-10">
+        <RouterProvider router={router} context={{ auth }} />
+      </div>
+    </div>
   );
 }
-
-const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 const rootElement = document.getElementById("app");
 if (rootElement && !rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement);
   root.render(
     <StrictMode>
-      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-        <GoogleOAuthProvider clientId={CLIENT_ID}>
-          <TanStackQueryProvider.Provider {...TanStackQueryProviderContext}>
-            <InnerApp />
-          </TanStackQueryProvider.Provider>
-          <Toaster />
-        </GoogleOAuthProvider>
-      </ThemeProvider>
+      <GoogleOAuthProvider clientId={CLIENT_ID}>
+        <TanStackQueryProvider.Provider {...TanStackQueryProviderContext}>
+          <InnerApp />
+        </TanStackQueryProvider.Provider>
+        <Toaster />
+      </GoogleOAuthProvider>
     </StrictMode>
   );
 }

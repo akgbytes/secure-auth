@@ -19,7 +19,7 @@ import { toast } from "sonner";
 import Spinner from "@/components/Spinner";
 import GoogleLoginButton from "@/components/GoogleLoginButton";
 import { useAuthStore } from "@/store";
-import { fetchUser } from "@/hooks/useUser";
+import { fetchUser } from "@/lib/axios";
 
 const formSchema = z.object({
   email: z.email("Invalid email format").trim(),

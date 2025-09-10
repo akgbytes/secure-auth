@@ -1,6 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouteContext } from "@tanstack/react-router";
 
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardDescription,
@@ -8,7 +8,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ModeToggle } from "@/components/mode-toggle";
+
+import { FiGithub } from "react-icons/fi";
+
 import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -17,21 +19,21 @@ export const Route = createFileRoute("/")({
 });
 
 function App() {
+  const { auth } = Route.useRouteContext();
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-background/95">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen">
+      <header>
+        <div className="container mx-auto px-16 sm:px-24 lg:px-32">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center">
               <h1 className="text-xl font-bold">SecureAuth</h1>
             </div>
 
-            <div className="flex gap-4 items-center">
-              <ModeToggle />
-              <Link to="/signin" className={cn(buttonVariants({ size: "lg" }))}>
-                Get Started
-              </Link>
-            </div>
+            <a href="#" aria-label="GitHub Repository">
+              <Button variant={"ghost"} className="cursor-pointer">
+                <FiGithub />
+              </Button>
+            </a>
           </div>
         </div>
       </header>
@@ -44,34 +46,60 @@ function App() {
               Secure Authentication
               <span className="text-primary block">Made Simple</span>
             </h1>
-            <p className="text-xl text-muted-foreground text-pretty mb-8 max-w-2xl mx-auto">
+            <p className="text-xl text-zinc-300 mb-8 max-w-2xl mx-auto">
               A powerful authentication system built with modern technologies.
               Complete flows for login, signup, email verification, password
               resets, and role-based access control.
             </p>
 
-            <Link to="/signin" className={cn(buttonVariants({ size: "lg" }))}>
-              Get Started
-              <ArrowRight />
-            </Link>
+            {auth.isAuthenticated ? (
+              <>
+                <Link
+                  to="/dashboard"
+                  className={cn(
+                    buttonVariants({
+                      size: "lg",
+                      className:
+                        "dark:bg-blue-600 hover:dark:bg-blue-700 transition-colors duration-200 dark:text-neutral-100",
+                    })
+                  )}
+                >
+                  Go to Dashboard
+                  <ArrowRight />
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/signin"
+                  className={cn(
+                    buttonVariants({
+                      size: "lg",
+                      className:
+                        "dark:bg-blue-600 hover:dark:bg-blue-700 transition-colors duration-200 dark:text-neutral-100",
+                    })
+                  )}
+                >
+                  Get Started
+                  <ArrowRight />
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-20 bg-muted/30">
+      <section id="features" className="py-5">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl mx-auto text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold mb-4">
               Everything You Need for Authentication
             </h2>
-            <p className="text-lg text-muted-foreground">
-              Built-in security features and modern authentication flows
-            </p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            <Card className="border-0 shadow-sm">
+            <Card className="border shadow-sm bg-transparent">
               <CardHeader>
                 <CardTitle className="text-xl">
                   Secure Login & Registration
@@ -83,7 +111,7 @@ function App() {
               </CardHeader>
             </Card>
 
-            <Card className="border-0 shadow-sm">
+            <Card className="border shadow-sm bg-transparent">
               <CardHeader>
                 <CardTitle className="text-xl">Email Verification</CardTitle>
                 <CardDescription>
@@ -93,7 +121,7 @@ function App() {
               </CardHeader>
             </Card>
 
-            <Card className="border-0 shadow-sm">
+            <Card className="border shadow-sm bg-transparent">
               <CardHeader>
                 <CardTitle className="text-xl">Password Recovery</CardTitle>
                 <CardDescription>
@@ -103,7 +131,7 @@ function App() {
               </CardHeader>
             </Card>
 
-            <Card className="border-0 shadow-sm">
+            <Card className="border shadow-sm bg-transparent">
               <CardHeader>
                 <CardTitle className="text-xl">
                   Role-Based Access Control
@@ -114,7 +142,7 @@ function App() {
               </CardHeader>
             </Card>
 
-            <Card className="border-0 shadow-sm">
+            <Card className="border shadow-sm bg-transparent">
               <CardHeader>
                 <CardTitle className="text-xl">Auto Token Refresh</CardTitle>
                 <CardDescription>
@@ -124,7 +152,7 @@ function App() {
               </CardHeader>
             </Card>
 
-            <Card className="border-0 shadow-sm">
+            <Card className="border shadow-sm bg-transparent">
               <CardHeader>
                 <CardTitle className="text-xl">
                   Role-Based Access Control
@@ -150,46 +178,22 @@ function App() {
               experience
             </p>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-              <div className="text-center">
-                <div className="bg-card rounded-lg p-6 mb-4">
-                  <h3 className="font-semibold text-lg">React</h3>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    Modern UI Library
-                  </p>
-                </div>
-              </div>
-
-              <div className="text-center">
-                <div className="bg-card rounded-lg p-6 mb-4">
-                  <h3 className="font-semibold text-lg">shadcn/ui</h3>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    Component Library
-                  </p>
-                </div>
-              </div>
-
-              <div className="text-center">
-                <div className="bg-card rounded-lg p-6 mb-4">
-                  <h3 className="font-semibold text-lg">Node.js</h3>
-                  <p className="text-sm text-muted-foreground mt-2">Backend</p>
-                </div>
-              </div>
-
-              <div className="text-center">
-                <div className="bg-card rounded-lg p-6 mb-4">
-                  <h3 className="font-semibold text-lg">PostgreSQL</h3>
-                  <p className="text-sm text-muted-foreground mt-2">Database</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap justify-center gap-3 mt-12">
-              <Badge variant="secondary">Tanstack Query</Badge>
-              <Badge variant="secondary">Tanstack Router</Badge>
-              <Badge variant="secondary">Drizzle ORM</Badge>
-              <Badge variant="secondary">JWT Tokens</Badge>
-              <Badge variant="secondary">Mailtrap</Badge>
+            <div className="flex flex-wrap justify-center gap-3">
+              <Badge variant="secondary" className="dark:bg-blue-600">
+                Tanstack Query
+              </Badge>
+              <Badge variant="secondary" className="dark:bg-blue-600">
+                Tanstack Router
+              </Badge>
+              <Badge variant="secondary" className="dark:bg-blue-600">
+                Drizzle ORM
+              </Badge>
+              <Badge variant="secondary" className="dark:bg-blue-600">
+                JWT Tokens
+              </Badge>
+              <Badge variant="secondary" className="dark:bg-blue-600">
+                Mailtrap
+              </Badge>
             </div>
           </div>
         </div>
