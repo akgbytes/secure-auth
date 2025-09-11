@@ -31,8 +31,9 @@ import {
   verifyGoogleToken,
   verifyRefreshJWT,
 } from "./auth.utils";
-import { emailQueue } from "@/queues/email";
+
 import { env } from "@/config/env";
+import { sendResetPasswordMail, sendVerificationMail } from "@/utils/mail";
 
 export const signup = asyncHandler(async (req, res) => {
   const { name, email, password } = handleZodError(validateSignUp(req.body));
@@ -90,13 +91,9 @@ export const signup = asyncHandler(async (req, res) => {
     );
   }
 
-  emailQueue.add("sendVerifyEmail", {
-    type: "verify",
-    email: user.email,
-    token: rawToken,
-  });
+  await sendVerificationMail(user.email, rawToken);
 
-  logger.info({ email }, "Signup successful, verification email queued");
+  logger.info({ email }, "Signup successful, verification email sent");
 
   res
     .status(HttpStatus.CREATED)
@@ -422,11 +419,7 @@ export const resendVerificationEmail = asyncHandler(async (req, res) => {
     );
   }
 
-  emailQueue.add("sendVerifyEmail", {
-    type: "verify",
-    email: user.email,
-    token: rawToken,
-  });
+  await sendVerificationMail(user.email, rawToken);
 
   logger.info({ email }, "Verification email resent");
 
@@ -500,11 +493,7 @@ export const forgotPassword = asyncHandler(async (req, res) => {
     );
   }
 
-  emailQueue.add("sendResetEmail", {
-    type: "reset",
-    email: user.email,
-    token: rawToken,
-  });
+  await sendResetPasswordMail(user.email, rawToken);
 
   logger.info({ email }, "Password reset email sent");
   res
@@ -646,6 +635,16 @@ export const googleLogin = asyncHandler(async (req, res) => {
   let userId: string;
 
   if (existingUser) {
+    // Agar user sign up ke baad bina verify ke google login kre to pehle usko verify kro then login
+    if (!existingUser.emailVerified) {
+      await db
+        .update(userTable)
+        .set({
+          emailVerified: true,
+        })
+        .where(eq(userTable.id, existingUser.id));
+    }
+
     userId = existingUser.id;
 
     // Step 2a: Check existing session

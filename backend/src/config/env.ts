@@ -40,10 +40,6 @@ const envSchema = z.object({
     error: "Verification Token Expiry must be a valid number",
   }),
 
-  OTP_LENGTH: z.coerce.number<number>({
-    error: "OTP Length must be a valid number",
-  }),
-
   MAX_SESSIONS: z.coerce.number<number>({
     error: "Max Sessions must be a valid number",
   }),

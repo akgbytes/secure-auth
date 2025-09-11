@@ -20,5 +20,6 @@ export const isLoggedIn = asyncHandler(async (req, res, next) => {
   }
 
   req.user = user;
+  req.userSessionId = payload.sessionId;
   next();
 });
