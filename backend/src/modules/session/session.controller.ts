@@ -12,7 +12,7 @@ import { and, desc, eq, ne } from "drizzle-orm";
 import { clearAuthCookies } from "@/utils/cookies";
 import { transformSessions } from "./session.utils";
 
-export const logoutOtherSessions = asyncHandler(async (req, res) => {
+export const logoutAllOtherSessions = asyncHandler(async (req, res) => {
   const user = req.user;
   const sessionId = req.userSessionId;
 
@@ -28,8 +28,6 @@ export const logoutOtherSessions = asyncHandler(async (req, res) => {
 
   logger.info({ email: user.email }, "Signed out from all other sessions");
 
-  clearAuthCookies(res);
-
   res
     .status(HttpStatus.OK)
     .json(
@@ -42,10 +40,50 @@ export const logoutFromSpecificSession = asyncHandler(async (req, res) => {
   if (!user) {
     throw new ApiError(HttpStatus.UNAUTHORIZED, "Unauthorized");
   }
-  const { sessionId } = req.params;
+  const sessionId = req.params.id as string;
+
+  if (!user || !sessionId) {
+    throw new ApiError(HttpStatus.UNAUTHORIZED, "Unauthorized");
+  }
+
+  await db
+    .delete(sessionTable)
+    .where(
+      and(eq(sessionTable.userId, user.id), eq(sessionTable.id, sessionId))
+    );
+
+  logger.info({ email: user.email }, "Signed out successfully");
+
+  res
+    .status(HttpStatus.OK)
+    .json(new ApiResponse(HttpStatus.OK, "Signed out successfully", null));
 });
 
-export const getActiveSessions = asyncHandler(async (req, res) => {
+export const getSession = asyncHandler(async (req, res) => {
+  const user = req.user;
+  const sessionId = req.params.id as string;
+
+  if (!user) {
+    throw new ApiError(HttpStatus.UNAUTHORIZED, "Unauthorized");
+  }
+
+  const [session] = await db
+    .select()
+    .from(sessionTable)
+    .where(eq(sessionTable.id, sessionId));
+
+  if (!session) {
+    throw new ApiError(HttpStatus.NOT_FOUND, "Session not found");
+  }
+
+  res
+    .status(200)
+    .json(
+      new ApiResponse(HttpStatus.OK, "Fetched session successfully", session)
+    );
+});
+
+export const getAllSessions = asyncHandler(async (req, res) => {
   const user = req.user;
   const currentSessionId = req.userSessionId;
 
@@ -74,7 +112,7 @@ export const getActiveSessions = asyncHandler(async (req, res) => {
     .json(
       new ApiResponse(
         HttpStatus.OK,
-        "Fetched all active sessions successfully",
+        "Fetched all sessions successfully",
         formattedSessions
       )
     );
