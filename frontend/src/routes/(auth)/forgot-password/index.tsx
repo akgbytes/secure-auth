@@ -65,13 +65,13 @@ function RouteComponent() {
 
   if (emailSent) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <div className="w-full max-w-md border rounded px-6 py-8">
+      <div className="min-h-screen bg-transparent flex items-center justify-center p-4">
+        <div className="w-full max-w-md border dark:border-neutral-900 rounded px-6 py-8 shadow-2xl">
           <div className="text-center">
             <h2 className="text-3xl font-semibold text-foreground">
               Check your email
             </h2>
-            <p className="text-muted-foreground text-sm pt-2">
+            <p className="text-zinc-300 text-sm pt-2">
               We've sent password reset instructions to your email
             </p>
           </div>
@@ -84,7 +84,7 @@ function RouteComponent() {
             </div>
 
             <div>
-              <p className="text-muted-foreground text-sm text-center">
+              <p className="text-zinc-400 text-sm text-center">
                 We've sent a password reset link to{" "}
                 <strong className="text-foreground font-medium">
                   {form.getValues("email")}
@@ -127,13 +127,13 @@ function RouteComponent() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md border rounded px-6 py-8">
+    <div className="min-h-screen bg-transparent flex items-center justify-center p-4">
+      <div className="w-full max-w-md border dark:border-neutral-900 rounded px-6 py-8 shadow-2xl">
         <div className="text-center mb-6">
           <h2 className="text-3xl font-semibold text-foreground">
             Forgot your password?
           </h2>
-          <p className="text-muted-foreground text-sm pt-2">
+          <p className="text-zinc-300 text-sm pt-2">
             Enter your email address and we'll send you a link to reset your
             password
           </p>

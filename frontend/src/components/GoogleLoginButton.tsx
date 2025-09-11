@@ -53,8 +53,8 @@ const GoogleLoginButton = ({ isPending }: { isPending: boolean }) => {
   });
   return (
     <Button
-      variant={"outline"}
-      className="w-full border cursor-pointer"
+      variant={"secondary"}
+      className="w-full cursor-pointer"
       onClick={() => googleLogin()}
       disabled={isPending}
     >

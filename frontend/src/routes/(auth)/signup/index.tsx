@@ -77,13 +77,13 @@ function RouteComponent() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md border rounded px-6 py-8">
+    <div className="min-h-screen bg-transparent flex items-center justify-center p-4">
+      <div className="w-full max-w-md border dark:border-neutral-900 rounded px-6 py-8 shadow-2xl">
         <div className="text-center mb-6">
           <h2 className="text-3xl font-semibold text-foreground">
             Create your account
           </h2>
-          <p className="text-muted-foreground text-sm pt-2">
+          <p className="text-zinc-300 text-sm pt-2">
             Get started with SecureAuth today
           </p>
         </div>
@@ -96,7 +96,7 @@ function RouteComponent() {
               <span className="w-full border-t border-border" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground font-semibold">
+              <span className="bg-neutral-900 px-2 text-muted-foreground font-semibold">
                 OR
               </span>
             </div>

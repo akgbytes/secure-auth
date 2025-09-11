@@ -73,13 +73,13 @@ function RouteComponent() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md border rounded px-6 py-8">
+    <div className="min-h-screen bg-transparent flex items-center justify-center p-4">
+      <div className="w-full max-w-md border dark:border-neutral-900 rounded px-6 py-8 shadow-2xl">
         <div className="text-center mb-6">
           <h2 className="text-3xl font-semibold text-foreground">
             Reset your password
           </h2>
-          <p className="text-muted-foreground text-sm pt-2">
+          <p className="text-zinc-300 text-sm pt-2">
             Enter your new password below, it must be different from old one
           </p>
         </div>

@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useRouteContext } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
@@ -29,7 +29,10 @@ function App() {
               <h1 className="text-xl font-bold">SecureAuth</h1>
             </div>
 
-            <a href="#" aria-label="GitHub Repository">
+            <a
+              href="https://github.com/akgbytes/"
+              aria-label="GitHub Repository"
+            >
               <Button variant={"ghost"} className="cursor-pointer">
                 <FiGithub />
               </Button>

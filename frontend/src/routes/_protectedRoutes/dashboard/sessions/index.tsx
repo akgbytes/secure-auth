@@ -41,19 +41,19 @@ function RouteComponent() {
     <div className="max-w-2xl px-4 space-y-6">
       <div>
         <h2 className="text-xl font-semibold">Sessions</h2>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-zinc-300">
           Sessions are the devices you are using or have used your SecureAuth
           account on. You can log out of each session individually.
         </p>
       </div>
 
       {/* Current active session */}
-      <Card>
+      <Card className="bg-transparent">
         <CardHeader>
           <CardTitle>Current active session</CardTitle>
-          <p className="text-sm text-muted-foreground">
-            You’re logged into this SecureAuth account on this device and are
-            currently using it.
+          <p className="text-sm text-zinc-300">
+            You&apos;re logged into this SecureAuth account on this device and
+            are currently using it.
           </p>
         </CardHeader>
         <CardContent>
@@ -84,7 +84,7 @@ function RouteComponent() {
       </Card>
 
       {/* Other sessions */}
-      <Card>
+      <Card className="bg-transparent">
         <CardHeader>
           <CardTitle>Other sessions</CardTitle>
         </CardHeader>

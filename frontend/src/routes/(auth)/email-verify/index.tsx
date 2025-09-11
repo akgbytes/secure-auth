@@ -53,7 +53,7 @@ function RouteComponent() {
           </div>
           <div>
             <h2 className="text-base font-semibold">Verifying your email</h2>
-            <p className="text-muted-foreground text-sm mt-1">
+            <p className="text-zinc-300 text-sm mt-1">
               Please wait while we verify your email address
             </p>
           </div>
@@ -67,7 +67,7 @@ function RouteComponent() {
           </div>
           <div>
             <h2 className="text-xl font-semibold mb-2">Email Verified</h2>
-            <p className="">
+            <p className="text-zinc-300">
               Your email has been successfully verified. You can now access all
               features of your account.
             </p>
@@ -85,7 +85,7 @@ function RouteComponent() {
           </div>
           <div>
             <h2 className="text-xl font-semibold mb-2">Verification Failed</h2>
-            <p className="text-muted-foreground">
+            <p className="text-zinc-400">
               We couldn't verify your email. The link may be invalid or expired.
             </p>
           </div>
@@ -102,13 +102,13 @@ function RouteComponent() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md border rounded px-6 py-8">
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="w-full max-w-md border dark:border-neutral-900 rounded px-6 py-8 shadow-2xl">
         <div className="text-center mb-6">
           <h2 className="text-3xl font-semibold text-foreground">
             Email Verification
           </h2>
-          <p className="pt-2 text-muted-foreground text-sm">
+          <p className="pt-2 text-zinc-300 text-sm">
             Verify your email address to complete registration
           </p>
         </div>

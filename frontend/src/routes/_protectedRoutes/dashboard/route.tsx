@@ -19,7 +19,7 @@ function RouteComponent() {
         }
       >
         <AppSidebar variant="inset" />
-        <SidebarInset className="bg-sidebar">
+        <SidebarInset className="bg-transparent">
           <SiteHeader />
           <div className="flex flex-1 flex-col">
             <div className="@container/main flex flex-1 flex-col gap-2">

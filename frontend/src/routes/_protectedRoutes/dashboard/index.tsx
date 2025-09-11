@@ -1,3 +1,4 @@
+import { Badge } from "@/components/ui/badge";
 import { capitalize } from "@/lib/utils";
 
 import { createFileRoute } from "@tanstack/react-router";
@@ -9,31 +10,32 @@ export const Route = createFileRoute("/_protectedRoutes/dashboard/")({
 function RouteComponent() {
   const { auth } = Route.useRouteContext();
   return (
-    <div className="flex flex-col px-4 py-2">
-      <h1 className="text-2xl d:text-3xl">Basic Information</h1>
-
-      <div className="py-4 space-y-4">
+    <div className="max-w-2xl rounded-xl shadow p-6">
+      <h2 className="text-3xl font-semibold mb-4">Basic Information</h2>
+      <div className="grid grid-cols-2 gap-12 justify-center items-center">
         <div>
-          <div className="text-lg">ID</div>
-          <div className="text-muted-foreground text-sm">{auth.user?.id}</div>
+          <p className="text-lg font-medium text-zinc-300">User ID</p>
+          <p className="text-sm">{auth.user?.id}</p>
         </div>
         <div>
-          <div className="text-lg">Name</div>
-          <div className="text-muted-foreground text-sm">
-            {capitalize(auth.user?.name || "")}
-          </div>
+          <p className="text-lg font-medium text-zinc-300">Name</p>
+          <p className="text-sm">{capitalize(auth.user?.name || "")}</p>
         </div>
         <div>
-          <div className="text-lg">Email</div>
-          <div className="text-muted-foreground text-sm">
-            {auth.user?.email}
-          </div>
+          <p className="text-lg font-medium text-zinc-300">Email</p>
+          <p className="text-sm">{auth.user?.email}</p>
         </div>
         <div>
-          <div className="text-lg">Role</div>
-          <div className="text-muted-foreground text-sm">
-            {capitalize(auth.user?.role || "")}
-          </div>
+          <p className="text-lg font-medium text-zinc-300">Role</p>
+          <Badge
+            className={
+              auth.user?.role === "admin"
+                ? "bg-green-600 text-neutral-100"
+                : "bg-blue-600 text-neutral-100"
+            }
+          >
+            {auth.user?.role}
+          </Badge>
         </div>
       </div>
     </div>

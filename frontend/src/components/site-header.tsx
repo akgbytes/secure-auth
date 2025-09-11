@@ -1,5 +1,7 @@
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Button } from "./ui/button";
+import { FiGithub } from "react-icons/fi";
 
 export function SiteHeader() {
   return (
@@ -12,7 +14,11 @@ export function SiteHeader() {
         />
         <h1 className="text-base font-medium">SecureAuth</h1>
         <div className="ml-auto flex items-center gap-2">
-          <h1>Github</h1>
+          <a href="https://github.com/akgbytes/" aria-label="GitHub Repository">
+            <Button variant={"ghost"} className="cursor-pointer">
+              <FiGithub />
+            </Button>
+          </a>
         </div>
       </div>
     </header>

@@ -77,8 +77,8 @@ function RouteComponent() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md border rounded px-6 py-8">
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="w-full max-w-md border dark:border-neutral-900 rounded px-6 py-8 shadow-2xl">
         <div className="text-center mb-6">
           <h2 className="text-3xl font-semibold text-foreground">
             Welcome back
