@@ -13,7 +13,7 @@ import { Toaster } from "./components/ui/sonner.tsx";
 import reportWebVitals from "./reportWebVitals.ts";
 import { useAuthStore } from "./store/index.ts";
 
-import Spinner from "./components/Spinner.tsx";
+import { LoaderCircle } from "lucide-react";
 
 const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
@@ -64,10 +64,8 @@ function InnerApp() {
         <div className="relative z-10">
           <div className="flex items-center justify-center h-screen">
             <div className="flex flex-col items-center gap-2">
-              <Spinner
-                text="Checking auth status..."
-                className="text-sky-600 size-6"
-              />
+              <LoaderCircle className="animate-spin text-sky-600 size-6" />
+              <span>Authenticating</span>
             </div>
           </div>
         </div>

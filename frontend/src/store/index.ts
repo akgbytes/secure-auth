@@ -22,7 +22,6 @@ export const useAuthStore = create<AuthStore>()((set) => ({
       const user = await fetchUser();
       set({ user, isAuthenticated: true, loading: false });
     } catch (error: any) {
-      console.log("Bhai login krle");
       set({ user: null, isAuthenticated: false, loading: false });
     }
   },

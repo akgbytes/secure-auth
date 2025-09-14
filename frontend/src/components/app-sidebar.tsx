@@ -2,7 +2,6 @@ import * as React from "react";
 import {
   IconInnerShadowTop,
   IconLock,
-  IconSettings,
   IconUser,
   IconUsers,
 } from "@tabler/icons-react";

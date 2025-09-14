@@ -22,7 +22,6 @@ api.interceptors.response.use(
         await api.post("/auth/refresh");
         return api(originalRequest!);
       } catch (err: any) {
-        console.error("error while refreshing:", err.message);
         window.location.href = "/login";
       }
     }
