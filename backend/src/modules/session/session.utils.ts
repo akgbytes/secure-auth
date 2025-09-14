@@ -3,7 +3,7 @@ import { format } from "date-fns";
 import { logger } from "@/core";
 
 interface SessionWithUserAgent {
-  current: boolean;
+  current?: boolean;
   createdAt: Date;
   updatedAt: Date;
   id: string;
@@ -49,7 +49,7 @@ interface TransformedSession {
   ip: string;
   lastActive: string;
   status: "expired" | "active";
-  current: boolean;
+  current?: boolean;
 }
 
 export const transformSessions = async (sessions: SessionWithUserAgent[]) => {
@@ -71,7 +71,7 @@ export const transformSessions = async (sessions: SessionWithUserAgent[]) => {
       id: session.id,
       current: session.current,
       device,
-      ip: session.id,
+      ip: session.ipAddress,
       lastActive,
       location,
       status,

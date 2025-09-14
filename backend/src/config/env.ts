@@ -10,10 +10,10 @@ const envSchema = z.object({
   }),
   APP_ORIGIN: z.url({ error: "APP ORIGIN must be a valid URL" }),
 
-  REDIS_HOST: z.string({}),
-  REDIS_PORT: z.coerce.number<number>({
-    error: "Redis PORT must be a valid number",
-  }),
+  // REDIS_HOST: z.string({}),
+  // REDIS_PORT: z.coerce.number<number>({
+  //   error: "Redis PORT must be a valid number",
+  // }),
 
   MAILTRAP_API_TOKEN: z
     .string()

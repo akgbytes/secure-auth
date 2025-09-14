@@ -1,3 +1,4 @@
+import type { ApiResponse, Session, User } from "@/types";
 import axios, { AxiosError } from "axios";
 
 export const api = axios.create({
@@ -34,6 +35,21 @@ api.interceptors.response.use(
 
 export const fetchUser = async () => {
   const res = await api.get("/auth/me");
+  return res.data.data;
+};
+
+export const fetchUsers = async () => {
+  const res = await api.get<ApiResponse<Array<User>>>("/admin/users");
+  return res.data.data;
+};
+
+export const fetchUserSessionById = async (userId: string) => {
+  const res = await api.get<ApiResponse<Session>>(`/users/${userId}/sessions`);
+  return res.data.data;
+};
+
+export const fetchSessions = async () => {
+  const res = await api.get<ApiResponse<Array<Session>>>("/sessions");
   return res.data.data;
 };
 

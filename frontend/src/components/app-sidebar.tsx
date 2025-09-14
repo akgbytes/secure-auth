@@ -1,5 +1,6 @@
 import * as React from "react";
 import {
+  IconHomeEco,
   IconInnerShadowTop,
   IconLock,
   IconSettings,
@@ -19,10 +20,15 @@ import {
 } from "@/components/ui/sidebar";
 
 const navMain = [
+  // {
+  //   title: "User",
+  //   url: "/dashboard",
+  //   icon: IconUser,
+  // },
   {
-    title: "User",
+    title: "Personal Information",
     url: "/dashboard",
-    icon: IconUser,
+    icon: IconHomeEco,
   },
   {
     title: "Sessions",

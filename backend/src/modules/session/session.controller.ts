@@ -9,7 +9,7 @@ import {
 import { db } from "@/db";
 import { sessionTable } from "@/db/schema";
 import { and, desc, eq, ne } from "drizzle-orm";
-import { clearAuthCookies } from "@/utils/cookies";
+
 import { transformSessions } from "./session.utils";
 
 export const logoutAllOtherSessions = asyncHandler(async (req, res) => {

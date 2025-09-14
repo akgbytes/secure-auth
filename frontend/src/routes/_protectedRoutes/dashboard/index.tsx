@@ -10,7 +10,7 @@ export const Route = createFileRoute("/_protectedRoutes/dashboard/")({
 function RouteComponent() {
   const { auth } = Route.useRouteContext();
   return (
-    <div className="max-w-2xl rounded-xl shadow p-6">
+    <div className="max-w-2xl p-6">
       <h2 className="text-3xl font-semibold mb-4">Basic Information</h2>
       <div className="grid grid-cols-2 gap-12 justify-center items-center">
         <div>

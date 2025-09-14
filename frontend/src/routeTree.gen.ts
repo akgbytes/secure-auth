@@ -20,6 +20,7 @@ import { Route as authResetPasswordIndexRouteImport } from './routes/(auth)/rese
 import { Route as authForgotPasswordIndexRouteImport } from './routes/(auth)/forgot-password/index'
 import { Route as authEmailVerifyIndexRouteImport } from './routes/(auth)/email-verify/index'
 import { Route as authEmailResendIndexRouteImport } from './routes/(auth)/email-resend/index'
+import { Route as ProtectedRoutesDashboardUsersIndexRouteImport } from './routes/_protectedRoutes/dashboard/users/index'
 import { Route as ProtectedRoutesDashboardSessionsIndexRouteImport } from './routes/_protectedRoutes/dashboard/sessions/index'
 
 const ProtectedRoutesRouteRoute = ProtectedRoutesRouteRouteImport.update({
@@ -77,6 +78,12 @@ const authEmailResendIndexRoute = authEmailResendIndexRouteImport.update({
   path: '/email-resend/',
   getParentRoute: () => authRouteRoute,
 } as any)
+const ProtectedRoutesDashboardUsersIndexRoute =
+  ProtectedRoutesDashboardUsersIndexRouteImport.update({
+    id: '/users/',
+    path: '/users/',
+    getParentRoute: () => ProtectedRoutesDashboardRouteRoute,
+  } as any)
 const ProtectedRoutesDashboardSessionsIndexRoute =
   ProtectedRoutesDashboardSessionsIndexRouteImport.update({
     id: '/sessions/',
@@ -95,6 +102,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof authSignupIndexRoute
   '/dashboard/': typeof ProtectedRoutesDashboardIndexRoute
   '/dashboard/sessions': typeof ProtectedRoutesDashboardSessionsIndexRoute
+  '/dashboard/users': typeof ProtectedRoutesDashboardUsersIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof authRouteRouteWithChildren
@@ -106,6 +114,7 @@ export interface FileRoutesByTo {
   '/signup': typeof authSignupIndexRoute
   '/dashboard': typeof ProtectedRoutesDashboardIndexRoute
   '/dashboard/sessions': typeof ProtectedRoutesDashboardSessionsIndexRoute
+  '/dashboard/users': typeof ProtectedRoutesDashboardUsersIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -121,6 +130,7 @@ export interface FileRoutesById {
   '/(auth)/signup/': typeof authSignupIndexRoute
   '/_protectedRoutes/dashboard/': typeof ProtectedRoutesDashboardIndexRoute
   '/_protectedRoutes/dashboard/sessions/': typeof ProtectedRoutesDashboardSessionsIndexRoute
+  '/_protectedRoutes/dashboard/users/': typeof ProtectedRoutesDashboardUsersIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -135,6 +145,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/dashboard/'
     | '/dashboard/sessions'
+    | '/dashboard/users'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -146,6 +157,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/dashboard'
     | '/dashboard/sessions'
+    | '/dashboard/users'
   id:
     | '__root__'
     | '/'
@@ -160,6 +172,7 @@ export interface FileRouteTypes {
     | '/(auth)/signup/'
     | '/_protectedRoutes/dashboard/'
     | '/_protectedRoutes/dashboard/sessions/'
+    | '/_protectedRoutes/dashboard/users/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -247,6 +260,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authEmailResendIndexRouteImport
       parentRoute: typeof authRouteRoute
     }
+    '/_protectedRoutes/dashboard/users/': {
+      id: '/_protectedRoutes/dashboard/users/'
+      path: '/users'
+      fullPath: '/dashboard/users'
+      preLoaderRoute: typeof ProtectedRoutesDashboardUsersIndexRouteImport
+      parentRoute: typeof ProtectedRoutesDashboardRouteRoute
+    }
     '/_protectedRoutes/dashboard/sessions/': {
       id: '/_protectedRoutes/dashboard/sessions/'
       path: '/sessions'
@@ -282,6 +302,7 @@ const authRouteRouteWithChildren = authRouteRoute._addFileChildren(
 interface ProtectedRoutesDashboardRouteRouteChildren {
   ProtectedRoutesDashboardIndexRoute: typeof ProtectedRoutesDashboardIndexRoute
   ProtectedRoutesDashboardSessionsIndexRoute: typeof ProtectedRoutesDashboardSessionsIndexRoute
+  ProtectedRoutesDashboardUsersIndexRoute: typeof ProtectedRoutesDashboardUsersIndexRoute
 }
 
 const ProtectedRoutesDashboardRouteRouteChildren: ProtectedRoutesDashboardRouteRouteChildren =
@@ -289,6 +310,8 @@ const ProtectedRoutesDashboardRouteRouteChildren: ProtectedRoutesDashboardRouteR
     ProtectedRoutesDashboardIndexRoute: ProtectedRoutesDashboardIndexRoute,
     ProtectedRoutesDashboardSessionsIndexRoute:
       ProtectedRoutesDashboardSessionsIndexRoute,
+    ProtectedRoutesDashboardUsersIndexRoute:
+      ProtectedRoutesDashboardUsersIndexRoute,
   }
 
 const ProtectedRoutesDashboardRouteRouteWithChildren =

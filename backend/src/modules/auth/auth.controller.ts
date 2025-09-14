@@ -787,6 +787,8 @@ export const getMe = asyncHandler(async (req, res) => {
       avatar: user.avatar,
       role: user.role,
       provider: user.provider,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
     })
   );
 });

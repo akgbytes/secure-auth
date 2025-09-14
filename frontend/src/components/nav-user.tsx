@@ -43,6 +43,7 @@ export function NavUser() {
     onSuccess: (res) => {
       clearUser();
       toast.success(res.message);
+      navigate({ to: "/signin" });
     },
   });
 
