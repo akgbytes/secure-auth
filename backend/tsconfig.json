@@ -26,10 +26,7 @@
     "baseUrl": "./src",
     "paths": {
       "@/*": ["*"]
-    },
-
-    "sourceMap": true,
-    "inlineSources": true
+    }
   },
 
   "include": ["src", "types"],
