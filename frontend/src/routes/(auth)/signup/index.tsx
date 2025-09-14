@@ -13,7 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useMutation } from "@tanstack/react-query";
-import api from "@/lib/axios";
+import { api } from "@/lib/axios";
 import type { ApiAxiosError, ApiResponse, SignUpInput, User } from "@/types";
 import { toast } from "sonner";
 import GoogleLoginButton from "@/components/GoogleLoginButton";
@@ -115,7 +115,7 @@ function RouteComponent() {
                         <FormControl>
                           <Input
                             type="text"
-                            placeholder="Email your name"
+                            placeholder="Enter your name"
                             {...field}
                           />
                         </FormControl>

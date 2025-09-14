@@ -13,7 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useMutation } from "@tanstack/react-query";
-import api from "@/lib/axios";
+import { api } from "@/lib/axios";
 import type { ApiAxiosError, ApiResponse } from "@/types";
 import { toast } from "sonner";
 import Spinner from "@/components/Spinner";

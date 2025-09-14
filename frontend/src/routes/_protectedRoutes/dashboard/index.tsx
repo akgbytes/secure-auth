@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { capitalize } from "@/lib/utils";
+import { capitalize } from "@/utils/capitalize";
 
 import { createFileRoute } from "@tanstack/react-router";
 
@@ -27,13 +27,7 @@ function RouteComponent() {
         </div>
         <div>
           <p className="text-lg font-medium text-zinc-300">Role</p>
-          <Badge
-            className={
-              auth.user?.role === "admin"
-                ? "bg-green-600 text-neutral-100"
-                : "bg-blue-600 text-neutral-100"
-            }
-          >
+          <Badge className="bg-blue-600 text-neutral-100">
             {auth.user?.role}
           </Badge>
         </div>

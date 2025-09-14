@@ -1,4 +1,4 @@
-import { Queue } from "bullmq";
-import { connection } from "@/config/redis";
+// import { Queue } from "bullmq";
+// import { connection } from "@/config/redis";
 
-export const emailQueue = new Queue("email", { connection });
+// export const emailQueue = new Queue("email", { connection });

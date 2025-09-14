@@ -1,13 +1,17 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import api from "@/lib/axios";
-import { sessionsQueryOptions } from "@/lib/queryOptions";
+import { api } from "@/lib/axios";
+import { sessionsQueryOptions } from "@/services/queryOptions";
 import type { ApiAxiosError, ApiResponse } from "@/types";
 import { getDeviceIcon } from "@/utils/getDeviceIcon";
-import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQueryClient,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { Clock, Laptop, MapPin, Monitor, Smartphone, Wifi } from "lucide-react";
+import { Clock, MapPin, Wifi } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_protectedRoutes/dashboard/sessions/")({
@@ -20,6 +24,8 @@ function RouteComponent() {
   const sessionsData = useSuspenseQuery(sessionsQueryOptions);
   const sessions = sessionsData.data;
 
+  const queryClient = useQueryClient();
+
   const { mutate: logout } = useMutation<
     ApiResponse<null>,
     ApiAxiosError,
@@ -31,12 +37,14 @@ function RouteComponent() {
     },
     onSuccess: (res) => {
       toast.success(res.message);
+      queryClient.invalidateQueries({
+        queryKey: ["sessions"],
+      });
     },
     onError: () => {
       toast.error("Error while logging out, Please try again.");
     },
   });
-  const handleLogout = (sessionId: string) => {};
 
   const currentSession = sessions.find((session) => session.current);
   const otherSessions = sessions.filter((session) => !session.current);
@@ -115,7 +123,7 @@ function RouteComponent() {
                 key={session.id}
                 className="border-border bg-transparent p-6"
               >
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col space-y-3 sm:flex-row items-center justify-between">
                   <div className="flex items-center gap-4">
                     {getDeviceIcon(session.device)}
                     <div className="space-y-1">
@@ -166,7 +174,7 @@ function RouteComponent() {
 
       {/* Empty State */}
       {otherSessions.length === 0 && !currentSession && (
-        <Card className="border-border bg-card p-12 text-center">
+        <Card className="border-border bg-transparent p-12 text-center">
           <div className="space-y-2">
             <h3 className="text-lg font-medium text-card-foreground">
               No sessions found
@@ -180,41 +188,3 @@ function RouteComponent() {
     </div>
   );
 }
-
-/**
- * 
- * @returns  <Card className="border-green-200 bg-green-50/50 dark:border-green-800 dark:bg-green-950/20">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  {getDeviceIcon(currentSession.device)}
-                  <div>
-                    <h5 className="font-medium text-foreground">
-                      {currentSession.device}
-                    </h5>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
-                      <div className="flex items-center gap-1">
-                        <MapPin className="h-3 w-3" />
-                        {currentSession.location}
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Wifi className="h-3 w-3" />
-                        {currentSession.ip}
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        {currentSession.lastActive}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <Badge
-                  variant="default"
-                  className="bg-green-500 hover:bg-green-600"
-                >
-                  Active now
-                </Badge>
-              </div>
-            </CardContent>
-          </Card>
- */

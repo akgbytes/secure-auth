@@ -1,7 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -11,7 +11,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { UserSessionsModal } from "@/components/user-sessions-modal";
-import { usersQueryOptions } from "@/lib/queryOptions";
+import { capitalize } from "@/utils/capitalize";
+import { usersQueryOptions } from "@/services/queryOptions";
 import { type User } from "@/types";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
@@ -23,21 +24,21 @@ import {
   Settings,
   User as UserIcon,
   Users,
-  XCircle,
 } from "lucide-react";
 import { useState } from "react";
 
-export const Route = createFileRoute("/_protectedRoutes/dashboard/users/")({
+export const Route = createFileRoute(
+  "/_protectedRoutes/dashboard/admin/users/"
+)({
   loader: ({ context: { queryClient } }) =>
     queryClient.ensureQueryData(usersQueryOptions),
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  const { queryClient } = Route.useRouteContext();
-
   const usersData = useSuspenseQuery(usersQueryOptions);
   const users = usersData.data;
+
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
@@ -49,10 +50,10 @@ function RouteComponent() {
 
   const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat("en-US", {
-      year: "numeric",
       month: "short",
-      day: "numeric",
-    }).format(date);
+      day: "2-digit",
+      year: "numeric",
+    }).format(new Date(date));
   };
 
   const getInitials = (name: string) => {
@@ -64,7 +65,7 @@ function RouteComponent() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <div className="container mx-auto p-6 max-w-7xl">
         {/* Header */}
         <div className="mb-8">
@@ -76,77 +77,17 @@ function RouteComponent() {
           </p>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <Users className="h-8 w-8 text-blue-500" />
-                <div>
-                  <p className="text-sm text-muted-foreground">Total Users</p>
-                  <p className="text-2xl font-bold">{users.length}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <div>
-                  <p className="text-sm text-muted-foreground">Admins</p>
-                  <p className="text-2xl font-bold">
-                    {users.filter((u) => u.role === "admin").length}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <div>
-                  <p className="text-sm text-muted-foreground">Verified</p>
-                  <p className="text-2xl font-bold">
-                    {users.filter((u) => u.emailVerified).length}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <div>
-                  <p className="text-sm text-muted-foreground">Unverified</p>
-                  <p className="text-2xl font-bold">
-                    {users.filter((u) => !u.emailVerified).length}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
         {/* Search and Users Table */}
-        <Card>
+        <Card className="bg-transparent">
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                User Management
-              </CardTitle>
-              <div className="relative w-80">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search users by name or email..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
+            <div className="relative w-full">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search users by name or email..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
             </div>
           </CardHeader>
           <CardContent>
@@ -154,11 +95,11 @@ function RouteComponent() {
               {filteredUsers.map((user) => (
                 <div
                   key={user.id}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                  className="flex flex-col lg:flex-row space-y-2 items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
                 >
                   <div className="flex items-center gap-4">
                     <Avatar className="h-12 w-12">
-                      <AvatarImage src={user.avatar || undefined} />
+                      <AvatarImage src={user.avatar as string} />
                       <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
                         {getInitials(user.name)}
                       </AvatarFallback>
@@ -178,18 +119,16 @@ function RouteComponent() {
                         </Badge>
                         {user.emailVerified ? (
                           <CheckCircle className="h-4 w-4 text-green-500" />
-                        ) : (
-                          <XCircle className="h-4 w-4 text-red-500" />
-                        )}
+                        ) : null}
                       </div>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground  flex-wrap">
                         <div className="flex items-center gap-1">
                           <Mail className="h-3 w-3" />
                           {user.email}
                         </div>
                         <div className="flex items-center gap-1">
                           <UserIcon className="h-3 w-3" />
-                          {user.provider}
+                          {capitalize(user.provider)}
                         </div>
                         <div className="flex items-center gap-1">
                           <Calendar className="h-3 w-3" />
@@ -199,7 +138,7 @@ function RouteComponent() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex mt-3 md:mt-0 items-center gap-2">
                     <Dialog>
                       <DialogTrigger asChild>
                         <Button

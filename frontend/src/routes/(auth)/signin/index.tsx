@@ -13,13 +13,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useMutation } from "@tanstack/react-query";
-import api from "@/lib/axios";
+
 import type { ApiAxiosError, ApiResponse, SignInInput } from "@/types";
 import { toast } from "sonner";
 import Spinner from "@/components/Spinner";
 import GoogleLoginButton from "@/components/GoogleLoginButton";
 import { useAuthStore } from "@/store";
-import { fetchUser } from "@/lib/axios";
+import { api } from "@/lib/axios";
+import { fetchUser } from "@/services/user.service";
 
 const formSchema = z.object({
   email: z.email("Invalid email format").trim(),

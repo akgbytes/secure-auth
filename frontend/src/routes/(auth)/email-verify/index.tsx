@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import api from "@/lib/axios";
+import { api } from "@/lib/axios";
 import type { ApiAxiosError, ApiResponse } from "@/types";
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";

@@ -1,4 +1,3 @@
-import api from "@/lib/axios";
 import type { ApiAxiosError, ApiResponse } from "@/types";
 import { useGoogleLogin } from "@react-oauth/google";
 import { useMutation } from "@tanstack/react-query";
@@ -8,7 +7,8 @@ import { Button } from "./ui/button";
 
 import { FaGoogle } from "react-icons/fa";
 import { useAuthStore } from "@/store";
-import { fetchUser } from "@/lib/axios";
+import { api } from "@/lib/axios";
+import { fetchUser } from "@/services/user.service";
 
 const GoogleLoginButton = ({ isPending }: { isPending: boolean }) => {
   const { setUser } = useAuthStore();

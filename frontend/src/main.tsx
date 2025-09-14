@@ -12,8 +12,10 @@ import { Toaster } from "./components/ui/sonner.tsx";
 
 import reportWebVitals from "./reportWebVitals.ts";
 import { useAuthStore } from "./store/index.ts";
-import { CLIENT_ID } from "./constants/env.ts";
+
 import Spinner from "./components/Spinner.tsx";
+
+const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 const TanStackQueryProviderContext = TanStackQueryProvider.getContext();
 
@@ -63,7 +65,7 @@ function InnerApp() {
           <div className="flex items-center justify-center h-screen">
             <div className="flex flex-col items-center gap-2">
               <Spinner
-                text="Checking authentication..."
+                text="Checking auth status..."
                 className="text-sky-600 size-6"
               />
             </div>

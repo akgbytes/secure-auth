@@ -13,6 +13,7 @@ import { FiGithub } from "react-icons/fi";
 
 import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { IconInnerShadowTop } from "@tabler/icons-react";
 
 export const Route = createFileRoute("/")({
   component: App,
@@ -25,13 +26,15 @@ function App() {
       <header>
         <div className="container mx-auto px-16 sm:px-24 lg:px-32">
           <div className="flex h-16 items-center justify-between">
-            <div className="flex items-center">
+            <div className="flex items-center gap-2">
+              <IconInnerShadowTop className="!size-5" />
               <h1 className="text-xl font-bold">SecureAuth</h1>
             </div>
 
             <a
-              href="https://github.com/akgbytes/"
+              href="https://github.com/akgbytes/secure-auth"
               aria-label="GitHub Repository"
+              target="_blank"
             >
               <Button variant={"ghost"} className="cursor-pointer">
                 <FiGithub />

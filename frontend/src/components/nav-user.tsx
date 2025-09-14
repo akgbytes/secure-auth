@@ -1,11 +1,4 @@
-import {
-  IconCreditCard,
-  IconDotsVertical,
-  IconHome,
-  IconLogout,
-  IconNotification,
-  IconUserCircle,
-} from "@tabler/icons-react";
+import { IconDotsVertical, IconHome, IconLogout } from "@tabler/icons-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -24,10 +17,10 @@ import {
 } from "@/components/ui/sidebar";
 import { useAuthStore } from "@/store";
 import { useMutation } from "@tanstack/react-query";
-import api from "@/lib/axios";
+import { api } from "@/lib/axios";
 import { toast } from "sonner";
 import type { ApiAxiosError, ApiResponse } from "@/types";
-import { capitalize } from "@/lib/utils";
+import { capitalize } from "@/utils/capitalize";
 import { useNavigate } from "@tanstack/react-router";
 
 export function NavUser() {
@@ -57,7 +50,7 @@ export function NavUser() {
               className="data-[state=open]:bg-transparent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={user?.avatar || ""} alt={user?.name} />
+                <AvatarImage src={user?.avatar as string} alt={user?.name} />
                 <AvatarFallback className="rounded-lg">CN</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
@@ -80,7 +73,7 @@ export function NavUser() {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user?.avatar || ""} alt={user?.name} />
+                  <AvatarImage src={user?.avatar as string} alt={user?.name} />
                   <AvatarFallback className="rounded-lg">CN</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">

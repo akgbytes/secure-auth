@@ -14,7 +14,11 @@ export function SiteHeader() {
         />
         <h1 className="text-base font-medium">SecureAuth</h1>
         <div className="ml-auto flex items-center gap-2">
-          <a href="https://github.com/akgbytes/" aria-label="GitHub Repository">
+          <a
+            href="https://github.com/akgbytes/secure-auth"
+            aria-label="GitHub Repository"
+            target="_blank"
+          >
             <Button variant={"ghost"} className="cursor-pointer">
               <FiGithub />
             </Button>

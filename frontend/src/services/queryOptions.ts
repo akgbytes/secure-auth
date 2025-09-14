@@ -1,5 +1,6 @@
 import { queryOptions } from "@tanstack/react-query";
-import { fetchSessions, fetchUsers, fetchUserSessionById } from "./axios";
+import { fetchSessions } from "./session.service";
+import { fetchUsers, fetchUserSessionsById } from "./admin.service";
 
 export const sessionsQueryOptions = queryOptions({
   queryKey: ["sessions"],
@@ -13,6 +14,6 @@ export const usersQueryOptions = queryOptions({
 
 export const userSessionsQueryOptions = (userId: string) =>
   queryOptions({
-    queryKey: ["users", { userId }],
-    queryFn: () => fetchUserSessionById(userId),
+    queryKey: ["user-sessions"],
+    queryFn: () => fetchUserSessionsById(userId),
   });
