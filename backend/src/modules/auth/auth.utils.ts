@@ -78,7 +78,7 @@ export const verifyRefreshJWT = (refreshToken: string): TokenPayload => {
 const googleClient = new OAuth2Client(
   env.GOOGLE_CLIENT_ID,
   env.GOOGLE_CLIENT_SECRET,
-  "http://localhost:3000"
+  env.APP_ORIGIN
 );
 
 export const getGoogleTokens = async (code: string) => {
