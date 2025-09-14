@@ -40,8 +40,4 @@ router.post("/google", googleLogin);
 
 router.get("/me", isLoggedIn, getMe);
 
-// router.post("/logout/all", isLoggedIn, logoutAllSessions);
-// router.get("/sessions", isLoggedIn, getActiveSessions);
-// router.post("/sessions/:sessionId", isLoggedIn, logoutSpecificSession);
-
 export default router;

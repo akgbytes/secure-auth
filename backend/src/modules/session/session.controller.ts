@@ -59,30 +59,6 @@ export const logoutFromSpecificSession = asyncHandler(async (req, res) => {
     .json(new ApiResponse(HttpStatus.OK, "Signed out successfully", null));
 });
 
-export const getSession = asyncHandler(async (req, res) => {
-  const user = req.user;
-  const sessionId = req.params.id as string;
-
-  if (!user) {
-    throw new ApiError(HttpStatus.UNAUTHORIZED, "Unauthorized");
-  }
-
-  const [session] = await db
-    .select()
-    .from(sessionTable)
-    .where(eq(sessionTable.id, sessionId));
-
-  if (!session) {
-    throw new ApiError(HttpStatus.NOT_FOUND, "Session not found");
-  }
-
-  res
-    .status(200)
-    .json(
-      new ApiResponse(HttpStatus.OK, "Fetched session successfully", session)
-    );
-});
-
 export const getAllSessions = asyncHandler(async (req, res) => {
   const user = req.user;
   const currentSessionId = req.userSessionId;

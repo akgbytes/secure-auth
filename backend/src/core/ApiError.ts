@@ -1,5 +1,3 @@
-import { ApiResponse } from "./ApiResponse";
-
 export class ApiError<T = unknown> extends Error {
   public readonly success = false;
   public readonly statusCode: number;
@@ -14,5 +12,3 @@ export class ApiError<T = unknown> extends Error {
     Error.captureStackTrace(this, this.constructor);
   }
 }
-
-const kk = new ApiError(200, "dfdf");

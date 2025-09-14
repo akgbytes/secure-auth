@@ -1,6 +1,5 @@
 import { sendMail } from "@/utils/mail/mailService";
 import { env } from "@/config/env";
-import { capitalize } from "@/utils";
 import { passwordResetTemplate, verifyEmailTemplate } from "./mailTemplates";
 
 export const sendVerificationMail = async (email: string, token: string) => {
