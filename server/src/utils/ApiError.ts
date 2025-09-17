@@ -1,9 +1,12 @@
 export class ApiError<T = unknown> extends Error {
   public readonly success = false;
-  public readonly statusCode: number;
-  public readonly data: T | null;
 
-  constructor(statusCode: number, message: string, data: T | null = null) {
+  constructor(
+    public readonly statusCode: number,
+    message: string,
+    public readonly data: T | null = null,
+    public readonly errors?: Array<unknown>
+  ) {
     super(message);
     this.statusCode = statusCode;
     this.data = data;
