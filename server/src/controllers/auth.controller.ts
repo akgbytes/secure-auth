@@ -26,6 +26,7 @@ import {
   validateEmail,
   validateLogin,
   validateRegister,
+  validateResetPassword,
   validateVerifyEmail,
 } from "@/validations/auth.validations";
 import { and, eq, gt } from "drizzle-orm";
@@ -377,6 +378,94 @@ export const forgotPassword = asyncHandler(async (req, res) => {
         null
       )
     );
+});
+
+export const resetPassword = asyncHandler(async (req, res) => {
+  const { token, password } = handleZodError(validateResetPassword(req.body));
+
+  const tokenHash = hashToken(token);
+
+  const [tokenInDb] = await db
+    .select({
+      token: tokenTable,
+      user: {
+        id: userTable.id,
+        email: userTable.email,
+        password: userTable.password,
+        isEmailVerified: userTable.emailVerified,
+      },
+    })
+    .from(tokenTable)
+    .innerJoin(userTable, eq(tokenTable.userId, userTable.id))
+    .where(
+      and(
+        eq(tokenTable.token, tokenHash),
+        eq(tokenTable.type, "reset_password"),
+        gt(tokenTable.expiresAt, new Date())
+      )
+    );
+
+  if (!tokenInDb) {
+    throw new ApiError(
+      HttpStatus.UNAUTHORIZED,
+      "Reset link has expired or is invalid"
+    );
+  }
+
+  // if user have valid token for password reset means we can also verify his email
+  await db
+    .update(userTable)
+    .set({ emailVerified: true })
+    .where(eq(userTable.id, tokenInDb.user.id));
+
+  // check if old and new password are same
+  const isSamePassword = await verifyPasswordHash(
+    password,
+    tokenInDb.user.password || ""
+  );
+
+  if (isSamePassword) {
+    throw new ApiError(
+      HttpStatus.BAD_REQUEST,
+      "New password cannot be the same as the old password"
+    );
+  }
+
+  const hashedPassword = await hashPassword(password);
+
+  await db
+    .transaction(async (tx) => {
+      // update password
+      await tx
+        .update(userTable)
+        .set({
+          password: hashedPassword,
+        })
+        .where(eq(userTable.id, tokenInDb.user.id));
+
+      // delete token
+      await tx.delete(tokenTable).where(eq(tokenTable.id, tokenInDb.token.id));
+
+      // delete all existing sessions
+      await tx
+        .delete(sessionTable)
+        .where(eq(sessionTable.userId, tokenInDb.user.id));
+    })
+    .catch((error) => {
+      logger.error("Error during password reset transaction", {
+        email: tokenInDb.user.email,
+        error,
+      });
+      throw new ApiError(
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        "Unable to reset password. Please try again later."
+      );
+    });
+
+  logger.info("Password reset successful", { email: tokenInDb.user.email });
+  res
+    .status(HttpStatus.OK)
+    .json(new ApiResponse(HttpStatus.OK, "Password reset successful", null));
 });
 
 export const example = asyncHandler(async (req, res) => {
