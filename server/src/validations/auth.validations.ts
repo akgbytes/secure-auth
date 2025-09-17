@@ -17,5 +17,12 @@ const registerSchema = z.object({
   password: passwordSchema,
 });
 
+const loginSchema = z.object({
+  email: emailSchema,
+  password: passwordSchema,
+});
+
 export const validateRegister = (data: unknown) =>
   registerSchema.safeParse(data);
+
+export const validateLogin = (data: unknown) => loginSchema.safeParse(data);

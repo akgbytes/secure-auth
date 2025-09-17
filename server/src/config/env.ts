@@ -11,6 +11,12 @@ const envSchema = z.object({
   TOKEN_EXPIRY_IN_MINUTES: z.coerce.number<number>(),
   MAILTRAP_API_TOKEN: z.string().nonempty(),
   MAILTRAP_SENDER_EMAIL: z.email(),
+
+  ACCESS_TOKEN_SECRET: z.string().nonempty(),
+  ACCESS_TOKEN_EXPIRY: z.string().nonempty(),
+
+  REFRESH_TOKEN_SECRET: z.string().nonempty(),
+  REFRESH_TOKEN_EXPIRY: z.string().nonempty(),
 });
 
 const createEnv = (env: NodeJS.ProcessEnv) => {
