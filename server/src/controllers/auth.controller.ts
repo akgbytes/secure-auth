@@ -468,6 +468,76 @@ export const resetPassword = asyncHandler(async (req, res) => {
     .json(new ApiResponse(HttpStatus.OK, "Password reset successful", null));
 });
 
+export const refreshTokens = asyncHandler(async (req, res) => {
+  const incomingRefreshToken = req.cookies.refreshToken as string;
+
+  if (!incomingRefreshToken) {
+    throw new ApiError(HttpStatus.UNAUTHORIZED, "Refresh token is missing");
+  }
+
+  const payload = verifyRefreshJWT(incomingRefreshToken);
+
+  const [validSession] = await db
+    .select()
+    .from(sessionTable)
+    .where(eq(sessionTable.id, payload.sessionId));
+
+  if (!validSession) {
+    throw new ApiError(401, "Refresh token has been used or is invalid");
+  }
+
+  if (new Date(validSession.expiresAt) < new Date()) {
+    throw new ApiError(401, "Session expired. Please login again.");
+  }
+
+  const incomingUserAgent = req.headers["user-agent"] || "";
+  const incomingIp = (req.headers["x-forwarded-for"] as string) || req.ip || "";
+
+  if (
+    validSession.userAgent !== incomingUserAgent ||
+    validSession.ipAddress !== incomingIp
+  ) {
+    await db.delete(sessionTable).where(eq(sessionTable.id, validSession.id));
+    logger.warn("Session mismatch detected. Possible stolen token.", {
+      sessionId: validSession.id,
+      userId: validSession.userId,
+    });
+    throw new ApiError(
+      HttpStatus.UNAUTHORIZED,
+      "Session mismatch. Please log in again."
+    );
+  }
+
+  await db
+    .update(sessionTable)
+    .set({
+      expiresAt: sessionExpiresAfter(),
+    })
+    .where(eq(sessionTable.id, validSession.id));
+
+  const accessToken = generateAccessToken({
+    userId: validSession.userId,
+    sessionId: validSession.id,
+  });
+
+  const newRefreshToken = generateRefreshToken({
+    userId: validSession.userId,
+    sessionId: validSession.id,
+  });
+
+  setAuthCookies(res, accessToken, newRefreshToken);
+
+  res
+    .status(HttpStatus.OK)
+    .json(
+      new ApiResponse(
+        HttpStatus.OK,
+        "Access token refreshed successfully",
+        null
+      )
+    );
+});
+
 export const example = asyncHandler(async (req, res) => {
   res.status(HttpStatus.OK).json(new ApiResponse(HttpStatus.OK, "", null));
 });
