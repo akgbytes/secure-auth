@@ -3,7 +3,7 @@ import { db } from "@/db";
 import { sessionTable } from "@/db/schema/session.schema";
 import { tokenTable } from "@/db/schema/token.schema";
 import { userTable } from "@/db/schema/user.schema";
-import { setAuthCookies } from "@/utils/cookies";
+import { clearAuthCookies, setAuthCookies } from "@/utils/cookies";
 import {
   ApiError,
   ApiResponse,
