@@ -23,6 +23,7 @@ import {
 } from "@/utils/token";
 
 import {
+  validateEmail,
   validateLogin,
   validateRegister,
   validateVerifyEmail,
@@ -245,6 +246,81 @@ export const verifyEmail = asyncHandler(async (req, res) => {
   res
     .status(HttpStatus.OK)
     .json(new ApiResponse(HttpStatus.OK, "Email verified successfully", null));
+});
+
+export const resendVerificationEmail = asyncHandler(async (req, res) => {
+  const email = handleZodError(validateEmail(req.body.email));
+
+  logger.info("Request for resend verification email", { email });
+
+  const [user] = await db
+    .select()
+    .from(userTable)
+    .where(eq(userTable.email, email));
+
+  if (!user) {
+    logger.warn("Resend verification requested for non-existing user", {
+      email,
+    });
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          "If an account exists, a verification email has been sent.",
+          null
+        )
+      );
+  }
+
+  if (user.emailVerified) {
+    logger.warn("Resend verification requested for already verified email", {
+      email,
+    });
+
+    throw new ApiError(HttpStatus.BAD_REQUEST, "Email is already verified");
+  }
+
+  // delete if there is already token for email verification in db
+  await db.delete(tokenTable).where(eq(tokenTable.userId, user.id));
+
+  const { rawToken, tokenHash, tokenExpiry } = generateToken();
+
+  const [token] = await db
+    .insert(tokenTable)
+    .values({
+      token: tokenHash,
+      type: "verify_email",
+      userId: user.id,
+      expiresAt: tokenExpiry,
+    })
+    .returning();
+
+  if (!token) {
+    logger.error(
+      "Failed to resend verification mail: Could not create verification token",
+      { email }
+    );
+    throw new ApiError(
+      HttpStatus.INTERNAL_SERVER_ERROR,
+      "Something went wrong, Please try again later."
+    );
+  }
+
+  await sendVerificationMail(user.email, rawToken);
+
+  logger.info("Verification email resent", { email });
+
+  res
+    .status(HttpStatus.OK)
+    .json(
+      new ApiResponse(
+        HttpStatus.OK,
+        "If an account exists, a verification email has been sent.",
+        null
+      )
+    );
 });
 
 export const example = asyncHandler(async (req, res) => {

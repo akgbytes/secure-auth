@@ -33,3 +33,5 @@ export const validateLogin = (data: unknown) => loginSchema.safeParse(data);
 
 export const validateVerifyEmail = (data: unknown) =>
   verifyEmailSchema.safeParse(data);
+
+export const validateEmail = (data: unknown) => emailSchema.safeParse(data);
