@@ -18,6 +18,7 @@ import {
   generateAccessToken,
   generateRefreshToken,
   generateToken,
+  verifyRefreshJWT,
 } from "@/utils/token";
 
 import {
@@ -181,4 +182,31 @@ export const login = asyncHandler(async (req, res) => {
   res
     .status(HttpStatus.CREATED)
     .json(new ApiResponse(HttpStatus.CREATED, "Logged in successfully", null));
+});
+
+export const logout = asyncHandler(async (req, res) => {
+  const refreshToken = req.cookies.refreshToken as string;
+
+  if (!refreshToken) {
+    logger.warn("Logout attempt without refresh token");
+  } else {
+    try {
+      const payload = verifyRefreshJWT(refreshToken);
+      await db
+        .delete(sessionTable)
+        .where(eq(sessionTable.id, payload.sessionId));
+
+      logger.info("Logged out successfully", { userId: payload.userId });
+    } catch (err: any) {
+      const errorMsg =
+        err instanceof ApiError ? err.message : "Invalid session";
+      logger.warn("Error verifying or deleting session", { error: errorMsg });
+    }
+  }
+
+  clearAuthCookies(res);
+
+  res
+    .status(HttpStatus.OK)
+    .json(new ApiResponse(HttpStatus.OK, "Logged out successfully", null));
 });
