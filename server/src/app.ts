@@ -19,7 +19,9 @@ app.use(
 );
 
 import healthRoutes from "@/routes/health.routes";
+import authRoutes from "@/routes/auth.routes";
 
 app.use("/api/v1/health", healthRoutes);
+app.use("/api/v1/auth", authRoutes);
 
 app.use(errorHandler);

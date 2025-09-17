@@ -8,6 +8,7 @@ const envSchema = z.object({
     error: (issue) => `NODE ENV must be ${issue.values.join(" | ")}`,
   }),
   APP_ORIGIN: z.url(),
+  TOKEN_EXPIRY_IN_MINUTES: z.coerce.number<number>(),
 });
 
 const createEnv = (env: NodeJS.ProcessEnv) => {

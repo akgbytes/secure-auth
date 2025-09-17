@@ -1,0 +1,21 @@
+import * as z from "zod";
+
+const emailSchema = z.email({ error: "Invalid email address" });
+
+const passwordSchema = z
+  .string()
+  .min(6, { error: "Password must be at least 6 characters" })
+  .max(64, { error: "Password must be at most 64 characters" });
+
+const registerSchema = z.object({
+  name: z
+    .string()
+    .min(2, { error: "Name must be at least 2 characters" })
+    .max(50, { error: "Name must be less than 50 characters" }),
+
+  email: emailSchema,
+  password: passwordSchema,
+});
+
+export const validateRegister = (data: unknown) =>
+  registerSchema.safeParse(data);

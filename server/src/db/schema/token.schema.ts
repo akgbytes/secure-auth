@@ -5,7 +5,7 @@ import { TokenType } from "@/utils/constants";
 
 export const tokenType = pgEnum("type", TokenType);
 
-export const tokenTables = pgTable("token", {
+export const tokenTable = pgTable("token", {
   id: uuid("id").defaultRandom().primaryKey(),
   token: text("token").notNull().unique(),
   type: tokenType().notNull(),
