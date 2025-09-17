@@ -26,6 +26,11 @@ const verifyEmailSchema = z.object({
   token: z.string().trim().min(1, "Token is required"),
 });
 
+const resetPasswordSchema = z.object({
+  token: z.string().trim().min(1, "Token is required"),
+  password: passwordSchema,
+});
+
 export const validateRegister = (data: unknown) =>
   registerSchema.safeParse(data);
 
@@ -33,5 +38,8 @@ export const validateLogin = (data: unknown) => loginSchema.safeParse(data);
 
 export const validateVerifyEmail = (data: unknown) =>
   verifyEmailSchema.safeParse(data);
+
+export const validateResetPassword = (data: unknown) =>
+  resetPasswordSchema.safeParse(data);
 
 export const validateEmail = (data: unknown) => emailSchema.safeParse(data);
