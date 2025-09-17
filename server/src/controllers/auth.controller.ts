@@ -18,14 +18,16 @@ import {
   generateAccessToken,
   generateRefreshToken,
   generateToken,
+  hashToken,
   verifyRefreshJWT,
 } from "@/utils/token";
 
 import {
   validateLogin,
   validateRegister,
+  validateVerifyEmail,
 } from "@/validations/auth.validations";
-import { and, eq } from "drizzle-orm";
+import { and, eq, gt } from "drizzle-orm";
 
 export const register = asyncHandler(async (req, res) => {
   const { name, email, password } = handleZodError(validateRegister(req.body));
@@ -209,4 +211,42 @@ export const logout = asyncHandler(async (req, res) => {
   res
     .status(HttpStatus.OK)
     .json(new ApiResponse(HttpStatus.OK, "Logged out successfully", null));
+});
+
+export const verifyEmail = asyncHandler(async (req, res) => {
+  const { token } = handleZodError(validateVerifyEmail(req.body));
+
+  const tokenHash = hashToken(token);
+
+  const [tokenInDb] = await db
+    .select()
+    .from(tokenTable)
+    .where(
+      and(
+        eq(tokenTable.token, tokenHash),
+        eq(tokenTable.type, "verify_email"),
+        gt(tokenTable.expiresAt, new Date())
+      )
+    );
+
+  if (!tokenInDb) {
+    throw new ApiError(400, "Invalid or expired link");
+  }
+
+  await db.transaction(async (tx) => {
+    await db
+      .update(userTable)
+      .set({ emailVerified: true })
+      .where(eq(userTable.id, tokenInDb.userId));
+
+    await db.delete(tokenTable).where(eq(tokenTable.id, tokenInDb.id));
+  });
+
+  res
+    .status(HttpStatus.OK)
+    .json(new ApiResponse(HttpStatus.OK, "Email verified successfully", null));
+});
+
+export const example = asyncHandler(async (req, res) => {
+  res.status(HttpStatus.OK).json(new ApiResponse(HttpStatus.OK, "", null));
 });

@@ -1,6 +1,6 @@
 import * as z from "zod";
 
-const emailSchema = z.email({ error: "Invalid email address" });
+const emailSchema = z.email({ error: "Invalid email address" }).toLowerCase();
 
 const passwordSchema = z
   .string()
@@ -22,7 +22,14 @@ const loginSchema = z.object({
   password: passwordSchema,
 });
 
+const verifyEmailSchema = z.object({
+  token: z.string().trim().min(1, "Token is required"),
+});
+
 export const validateRegister = (data: unknown) =>
   registerSchema.safeParse(data);
 
 export const validateLogin = (data: unknown) => loginSchema.safeParse(data);
+
+export const validateVerifyEmail = (data: unknown) =>
+  verifyEmailSchema.safeParse(data);
