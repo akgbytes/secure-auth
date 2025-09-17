@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { sessionTable } from "@/db/schema/session.schema";
 import { tokenTable } from "@/db/schema/token.schema";
 import { userTable } from "@/db/schema/user.schema";
+import { setAuthCookies } from "@/utils/cookies";
 import {
   ApiError,
   ApiResponse,
@@ -13,7 +14,11 @@ import {
 import { sessionExpiresAfter } from "@/utils/helpers";
 import { sendVerificationMail } from "@/utils/mail";
 import { hashPassword, verifyPasswordHash } from "@/utils/password";
-import { generateToken } from "@/utils/token";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  generateToken,
+} from "@/utils/token";
 
 import {
   validateLogin,
@@ -133,17 +138,45 @@ export const login = asyncHandler(async (req, res) => {
     );
   }
 
-  const [existingSession] = await db
-    .select()
-    .from(sessionTable)
-    .where(
-      and(
-        eq(sessionTable.userId, user.id),
-        eq(sessionTable.userAgent, userAgent),
-        eq(sessionTable.ipAddress, ipAddress)
-      )
-    )
-    .limit(1);
+  // if session exists then update expiry time otherwise create new
+  const [session] = await db
+    .insert(sessionTable)
+    .values({
+      userId: user.id,
+      ipAddress,
+      userAgent,
+      expiresAt: sessionExpiresAfter(),
+    })
+    .onConflictDoUpdate({
+      target: [
+        sessionTable.userId,
+        sessionTable.userAgent,
+        sessionTable.ipAddress,
+      ],
+      set: {
+        expiresAt: sessionExpiresAfter(),
+      },
+    })
+    .returning();
+
+  if (!session) {
+    logger.error("Login failed: Could not create or update session", { email });
+    throw new ApiError(
+      HttpStatus.INTERNAL_SERVER_ERROR,
+      "Unable to login. Please try again later."
+    );
+  }
+  const accessToken = generateAccessToken({
+    userId: user.id,
+    sessionId: session.id,
+  });
+
+  const refreshToken = generateRefreshToken({
+    userId: user.id,
+    sessionId: session.id,
+  });
+
+  setAuthCookies(res, accessToken, refreshToken);
 
   res
     .status(HttpStatus.CREATED)
