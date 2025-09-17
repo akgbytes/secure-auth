@@ -1,5 +1,5 @@
 import { ZodError } from "zod";
-import { ApiError } from "@/utils/ApiError";
+import { ApiError } from "@/utils/core/ApiError";
 import { HttpStatus } from "./httpStatus";
 
 export const handleZodError = <T>(

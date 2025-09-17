@@ -1,6 +1,4 @@
-import { ApiResponse } from "@/utils/ApiResponse";
-import { asyncHandler } from "@/utils/asyncHandler";
-import { HttpStatus } from "@/utils/httpStatus";
+import { ApiResponse, asyncHandler, HttpStatus } from "@/utils/core";
 
 export const checkHealth = asyncHandler(async (req, res) => {
   res

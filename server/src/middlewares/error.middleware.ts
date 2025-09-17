@@ -1,6 +1,5 @@
 import { logger } from "@/config/logger";
-import { ApiError } from "@/utils/ApiError";
-import { HttpStatus } from "@/utils/httpStatus";
+import { ApiError, HttpStatus } from "@/utils/core";
 import { ErrorRequestHandler, Request, Response, NextFunction } from "express";
 
 export const errorHandler: ErrorRequestHandler = (

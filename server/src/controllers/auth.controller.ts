@@ -2,13 +2,17 @@ import { logger } from "@/config/logger";
 import { db } from "@/db";
 import { tokenTable } from "@/db/schema/token.schema";
 import { userTable } from "@/db/schema/user.schema";
-import { ApiError } from "@/utils/ApiError";
-import { ApiResponse } from "@/utils/ApiResponse";
-import { asyncHandler } from "@/utils/asyncHandler";
-import { handleZodError } from "@/utils/handleZodError";
-import { HttpStatus } from "@/utils/httpStatus";
+import {
+  ApiError,
+  ApiResponse,
+  asyncHandler,
+  handleZodError,
+  HttpStatus,
+} from "@/utils/core";
+import { sendVerificationMail } from "@/utils/mail";
 import { hashPassword } from "@/utils/password";
 import { generateToken } from "@/utils/token";
+
 import { validateRegister } from "@/validations/auth.validations";
 import { eq } from "drizzle-orm";
 
@@ -41,13 +45,12 @@ export const register = asyncHandler(async (req, res) => {
     });
 
   if (!user) {
-    logger.warn("Failed to create user");
+    logger.warn("Failed to create user", { email });
     throw new ApiError(
       HttpStatus.INTERNAL_SERVER_ERROR,
       "Unable to register, Please try again."
     );
   }
-
   // generate token for email verification
   const { rawToken, tokenHash, tokenExpiry } = generateToken();
 
@@ -69,13 +72,20 @@ export const register = asyncHandler(async (req, res) => {
     );
   }
 
+  await sendVerificationMail(user.email, rawToken);
+
+  logger.info("Registration successful, verification email sent.", {
+    email,
+    userId: user.id,
+  });
+
   res
     .status(HttpStatus.CREATED)
     .json(
       new ApiResponse(
         HttpStatus.CREATED,
-        "Register successful, Please verify your email.",
-        null
+        "Registered successfully, Please verify your email.",
+        user
       )
     );
 });

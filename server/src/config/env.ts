@@ -9,6 +9,8 @@ const envSchema = z.object({
   }),
   APP_ORIGIN: z.url(),
   TOKEN_EXPIRY_IN_MINUTES: z.coerce.number<number>(),
+  MAILTRAP_API_TOKEN: z.string().nonempty(),
+  MAILTRAP_SENDER_EMAIL: z.email(),
 });
 
 const createEnv = (env: NodeJS.ProcessEnv) => {
