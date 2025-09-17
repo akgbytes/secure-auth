@@ -12,7 +12,7 @@ import {
   HttpStatus,
 } from "@/utils/core";
 import { sessionExpiresAfter } from "@/utils/helpers";
-import { sendVerificationMail } from "@/utils/mail";
+import { sendResetPasswordMail, sendVerificationMail } from "@/utils/mail";
 import { hashPassword, verifyPasswordHash } from "@/utils/password";
 import {
   generateAccessToken,
@@ -318,6 +318,62 @@ export const resendVerificationEmail = asyncHandler(async (req, res) => {
       new ApiResponse(
         HttpStatus.OK,
         "If an account exists, a verification email has been sent.",
+        null
+      )
+    );
+});
+
+export const forgotPassword = asyncHandler(async (req, res) => {
+  const email = handleZodError(validateEmail(req.body.email));
+
+  const [user] = await db
+    .select()
+    .from(userTable)
+    .where(eq(userTable.email, email));
+
+  if (!user) {
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          "If an account exists, a reset link has been sent to the email.",
+          null
+        )
+      );
+  }
+
+  //  delete if there is already token for reset password in db
+  await db.delete(tokenTable).where(eq(tokenTable.userId, user.id));
+
+  const { rawToken, tokenHash, tokenExpiry } = generateToken();
+  const [token] = await db
+    .insert(tokenTable)
+    .values({
+      token: tokenHash,
+      type: "reset_password",
+      userId: user.id,
+      expiresAt: tokenExpiry,
+    })
+    .returning();
+
+  if (!token) {
+    logger.warn("Failed to create reset password token", { email });
+    throw new ApiError(
+      HttpStatus.INTERNAL_SERVER_ERROR,
+      "Something went wrong, Please try again later."
+    );
+  }
+
+  await sendResetPasswordMail(user.email, rawToken);
+
+  logger.info("Password reset email sent", { email });
+  res
+    .status(HttpStatus.OK)
+    .json(
+      new ApiResponse(
+        HttpStatus.OK,
+        "If an account exists, a reset link has been sent to the email",
         null
       )
     );
