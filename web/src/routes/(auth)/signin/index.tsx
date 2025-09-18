@@ -9,25 +9,20 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { createFileRoute, Link } from "@tanstack/react-router";
+
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Card } from "@/components/ui/card";
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
+import { createFileRoute, Link } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/(auth)/register/")({
+export const Route = createFileRoute("/(auth)/signin/")({
   component: RouteComponent,
 });
 
 const formSchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(2, { error: "Name must be at least 2 characters long" })
-    .max(50, { error: "Name must be less than 50 characters" }),
-
   email: z.email("Invalid email format").trim(),
   password: z
     .string()
@@ -42,7 +37,6 @@ function RouteComponent() {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema as any),
     defaultValues: {
-      name: "",
       email: "",
       password: "",
     },
@@ -59,10 +53,10 @@ function RouteComponent() {
       <Card className="w-full max-w-sm sm:max-w-md rounded-xl px-10 py-8 shadow-[0px_0px_0px_1px_rgba(0,0,0,0.06),0px_1px_1px_-0.5px_rgba(0,0,0,0.06),0px_3px_3px_-1.5px_rgba(0,0,0,0.06),_0px_6px_6px_-3px_rgba(0,0,0,0.06),0px_12px_12px_-6px_rgba(0,0,0,0.06),0px_24px_24px_-12px_rgba(0,0,0,0.06)]">
         <div className="text-center">
           <h2 className="text-lg font-bold text-foreground">
-            Create your account
+            Sign in to SecureAuth
           </h2>
           <p className="text-muted-foreground text-sm pt-1">
-            Welcome! Please fill in the details to get started.
+            Welcome back! Please sign in to continue
           </p>
         </div>
 
@@ -102,23 +96,6 @@ function RouteComponent() {
               <div className="grid gap-4">
                 <FormField
                   control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Name</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="text"
-                          placeholder="Enter your name"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
                   name="email"
                   render={({ field }) => (
                     <FormItem>
@@ -143,7 +120,7 @@ function RouteComponent() {
                       <FormControl>
                         <Input
                           type="password"
-                          placeholder="Enter a strong password"
+                          placeholder="Enter your password"
                           {...field}
                         />
                       </FormControl>
@@ -172,12 +149,12 @@ function RouteComponent() {
 
         <div className="text-center">
           <p className="text-sm text-muted-foreground">
-            Already have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Link
-              to="/login"
+              to="/signup"
               className="text-primary hover:underline font-medium"
             >
-              Sign in
+              Sign up
             </Link>
           </p>
         </div>
