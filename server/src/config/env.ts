@@ -17,6 +17,14 @@ const envSchema = z.object({
 
   REFRESH_TOKEN_SECRET: z.string().nonempty(),
   REFRESH_TOKEN_EXPIRY: z.string().nonempty(),
+
+  GOOGLE_CLIENT_ID: z.string().nonempty(),
+  GOOGLE_CLIENT_SECRET: z.string().nonempty(),
+
+  REDIRECT_URI: z.url(),
+
+  // GITHUB_CLIENT_ID: z.string().nonempty(),
+  // GITHUB_CLIENT_SECRET: z.string().nonempty(),
 });
 
 const createEnv = (env: NodeJS.ProcessEnv) => {

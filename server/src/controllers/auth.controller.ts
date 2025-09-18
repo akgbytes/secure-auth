@@ -1,3 +1,4 @@
+import { env } from "@/config/env";
 import { logger } from "@/config/logger";
 import { db } from "@/db";
 import { sessionTable } from "@/db/schema/session.schema";
@@ -13,6 +14,12 @@ import {
 } from "@/utils/core";
 import { sessionExpiresAfter } from "@/utils/helpers";
 import { sendResetPasswordMail, sendVerificationMail } from "@/utils/mail";
+import {
+  cookieOptionsForOauth,
+  generateCodeVerifier,
+  pkceChallenge,
+  randomString,
+} from "@/utils/oauth";
 import { hashPassword, verifyPasswordHash } from "@/utils/password";
 import {
   generateAccessToken,
@@ -30,6 +37,9 @@ import {
   validateVerifyEmail,
 } from "@/validations/auth.validations";
 import { and, eq, gt } from "drizzle-orm";
+import querystring from "querystring";
+import axios from "axios";
+import { UserGoogleProfile } from "@/types";
 
 export const register = asyncHandler(async (req, res) => {
   const { name, email, password } = handleZodError(validateRegister(req.body));
@@ -558,6 +568,151 @@ export const getMe = asyncHandler(async (req, res) => {
       updatedAt: user.updatedAt,
     })
   );
+});
+
+export const googleLogin = asyncHandler(async (req, res) => {
+  const state = randomString(16);
+  const codeVerifier = generateCodeVerifier(64);
+  const codeChallenge = pkceChallenge(codeVerifier);
+
+  // Set HttpOnly cookies bound to this browser
+  res.cookie("google_oauth_state", state, cookieOptionsForOauth);
+  res.cookie("google_code_verifier", codeVerifier, cookieOptionsForOauth);
+
+  const params = {
+    response_type: "code",
+    client_id: env.GOOGLE_CLIENT_ID,
+    redirect_uri: env.REDIRECT_URI,
+    scope: "openid email profile",
+    state,
+    code_challenge: codeChallenge,
+    code_challenge_method: "S256",
+    access_type: "offline",
+    prompt: "consent",
+  };
+
+  const url = `https://accounts.google.com/o/oauth2/v2/auth?${querystring.stringify(
+    params
+  )}`;
+
+  console.log("final redirect url to google: ", url);
+
+  return res.redirect(url);
+});
+
+export const googleCallback = asyncHandler(async (req, res) => {
+  const { code, state: returnedState } = req.query as {
+    code?: string;
+    state?: string;
+  };
+
+  console.log("request query from callback: ", req.query);
+
+  const cookieState = req.cookies["google_oauth_state"];
+  const cookieCodeVerifier = req.cookies["google_code_verifier"];
+
+  if (!code || !returnedState) {
+    return res.status(400).send("Missing code or state in callback.");
+  }
+
+  if (!cookieState || !cookieCodeVerifier) {
+    return res
+      .status(400)
+      .send("Missing oauth cookies. Start the login flow again.");
+  }
+
+  if (returnedState !== cookieState) {
+    res.clearCookie("google_oauth_state", { path: "/" });
+    res.clearCookie("google_code_verifier", { path: "/" });
+    return res.status(400).send("Invalid state (possible CSRF).");
+  }
+
+  res.clearCookie("google_oauth_state", { path: "/" });
+  res.clearCookie("google_code_verifier", { path: "/" });
+
+  try {
+    // Exchange the authorization code for tokens (include code_verifier for PKCE)
+    const tokenResponse = await axios.post(
+      "https://oauth2.googleapis.com/token",
+      querystring.stringify({
+        code,
+        client_id: env.GOOGLE_CLIENT_ID,
+        client_secret: env.GOOGLE_CLIENT_SECRET,
+        redirect_uri: env.REDIRECT_URI,
+        grant_type: "authorization_code",
+        code_verifier: cookieCodeVerifier,
+      }),
+      { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+    );
+
+    console.log("token resposne from google: ", tokenResponse);
+
+    const tokens = tokenResponse.data;
+    const accessToken = tokens.access_token;
+
+    // Get the user's profile
+    const profileRes = await axios.get<UserGoogleProfile>(
+      "https://www.googleapis.com/oauth2/v3/userinfo",
+      {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      }
+    );
+    const profile = profileRes.data;
+
+    console.log("profile: ", profile);
+
+    // check if user already exists
+
+    const [exisitingUser] = await db
+      .select()
+      .from(userTable)
+      .where(eq(userTable.email, profile.email))
+      .limit(1);
+
+    if (exisitingUser) {
+      if (!exisitingUser.emailVerified) {
+        await db
+          .update(userTable)
+          .set({
+            emailVerified: true,
+          })
+          .where(eq(userTable.id, exisitingUser.id));
+      }
+
+      // issue new tokens
+    } else {
+      const [user] = await db
+        .insert(userTable)
+        .values({
+          email: profile.email,
+          name: profile.name,
+          avatar: profile.picture,
+          provider: "google",
+          emailVerified: true,
+        })
+        .returning();
+
+      if (!user)
+        throw new ApiError(
+          HttpStatus.INTERNAL_SERVER_ERROR,
+          "Something went wrong"
+        );
+
+      // issue new token
+    }
+
+    const redirectTo = env.APP_ORIGIN || "http://localhost:5173";
+    return res.redirect(`${redirectTo}/auth/success`);
+  } catch (err: any) {
+    console.error(
+      "Google callback error:",
+      err.response?.data || err.message || err
+    );
+    // clear cookies on error
+    res.clearCookie("google_oauth_state", { path: "/" });
+    res.clearCookie("google_code_verifier", { path: "/" });
+    return res.status(500).send("Failed to complete OAuth exchange.");
+  }
 });
 
 export const example = asyncHandler(async (req, res) => {

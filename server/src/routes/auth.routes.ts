@@ -1,12 +1,39 @@
-import { register } from "@/controllers/auth.controller";
+import {
+  forgotPassword,
+  getMe,
+  googleCallback,
+  googleLogin,
+  login,
+  logout,
+  refreshTokens,
+  register,
+  resendVerificationEmail,
+  resetPassword,
+  verifyEmail,
+} from "@/controllers/auth.controller";
 import { Router } from "express";
 
 const router = Router();
 
 router.post("/register", register);
-// router.post("/login");
-// router.post("/logout");
+router.post("/login", login);
+router.post("/logout", logout);
 
-// router.get("/me");
+router.post("/email/verify", verifyEmail);
+router.post("/email/resend", resendVerificationEmail);
+
+router.get("/password/forgot", forgotPassword);
+router.get("/password/reset", resetPassword);
+
+router.post("/refresh", refreshTokens);
+router.get("/me", getMe);
+
+// google login
+router.get("/login/google", googleLogin);
+router.get("/google/callback", googleCallback);
+
+// github login
+// router.get("/login/github");
+// router.get("/github/callback");
 
 export default router;
