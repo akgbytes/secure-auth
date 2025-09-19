@@ -1,24 +1,22 @@
 import { ZodError } from "zod";
 import { ApiError } from "@/utils/core/ApiError";
 import { HttpStatus } from "./httpStatus";
-
 export const handleZodError = <T>(
   result: { success: true; data: T } | { success: false; error: ZodError }
 ): T => {
   if (result.success) return result.data;
 
-  const issues = result.error.issues.map((issue) => {
-    const path = issue.path.length > 0 ? issue.path : ["root"];
-    return {
-      path,
-      message: issue.message,
-    };
-  });
+  const issue = result.error?.issues[0];
+  const path = issue?.path.join(".");
+  const isMissing =
+    issue?.code === "invalid_type" && issue.input === "undefined";
 
   throw new ApiError(
-    HttpStatus.UNPROCESSABLE_ENTITY,
-    "Validation failed",
-    null,
-    issues
+    isMissing ? 400 : 422,
+    isMissing
+      ? path
+        ? `Missing '${path}' field`
+        : "Missing required fields"
+      : issue?.message || "Invalid input data"
   );
 };

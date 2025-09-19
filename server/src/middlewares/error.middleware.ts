@@ -17,13 +17,12 @@ export const errorHandler: ErrorRequestHandler = (
     apiError = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, message);
   }
 
-  logger.error(apiError.message, apiError.errors);
+  logger.error(apiError.message);
 
   res.status(apiError.statusCode).json({
     statusCode: apiError.statusCode,
     message: apiError.message,
     data: apiError.data,
     success: apiError.success,
-    errors: apiError.errors || [],
   });
 };

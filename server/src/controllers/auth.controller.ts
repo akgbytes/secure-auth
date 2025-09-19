@@ -135,7 +135,7 @@ export const login = asyncHandler(async (req, res) => {
   }
 
   // if user had logged in via oauth, password will be null, so provide fallback
-  await verifyPasswordHash(user.password || "", password);
+  await verifyPasswordHash(user.password || "", password, "login");
 
   if (!user.emailVerified) {
     logger.warn("Login blocked: Email not verified", { email });
@@ -383,6 +383,7 @@ export const forgotPassword = asyncHandler(async (req, res) => {
 });
 
 export const resetPassword = asyncHandler(async (req, res) => {
+  console.log("hello");
   const { token, password } = handleZodError(validateResetPassword(req.body));
 
   const tokenHash = hashToken(token);
@@ -421,17 +422,7 @@ export const resetPassword = asyncHandler(async (req, res) => {
     .where(eq(userTable.id, tokenInDb.user.id));
 
   // check if old and new password are same
-  const isSamePassword = await verifyPasswordHash(
-    password,
-    tokenInDb.user.password || ""
-  );
-
-  if (isSamePassword) {
-    throw new ApiError(
-      HttpStatus.BAD_REQUEST,
-      "New password cannot be the same as the old password"
-    );
-  }
+  await verifyPasswordHash(tokenInDb.user.password || "", password, "reset");
 
   const hashedPassword = await hashPassword(password);
 

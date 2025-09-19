@@ -158,7 +158,16 @@ function RouteComponent() {
                     name="password"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Password</FormLabel>
+                        <div className="flex justify-between">
+                          {" "}
+                          <FormLabel>Password</FormLabel>
+                          <Link
+                            className="text-sm text-muted-foreground hover:text-foreground"
+                            to="/forgot-password"
+                          >
+                            Forgot Password
+                          </Link>
+                        </div>
                         <FormControl>
                           <Input
                             type="password"

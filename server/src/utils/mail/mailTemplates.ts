@@ -76,7 +76,7 @@ Need help? Contact our support team.`,
 
 export const passwordResetTemplate = (
   link: string,
-  brandColor: string = "#2563EB"
+  brandColor: string = "#117149"
 ) => ({
   subject: "Reset your SecureAuth password",
   text: `We received a request to reset your password.

@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 
 import Spinner from "@/components/Spinner";
 import { Button } from "@/components/ui/button";
@@ -22,8 +22,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useMutation } from "@tanstack/react-query";
+import type { ApiAxiosError, ApiResponse } from "@/types";
+import { api } from "@/lib/axios";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/(auth)/reset-password/")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    token: search.token as string,
+  }),
   component: RouteComponent,
 });
 
@@ -38,6 +45,8 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 function RouteComponent() {
+  const navigate = useNavigate();
+  const { token } = Route.useSearch();
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema as any),
     defaultValues: {
@@ -45,7 +54,33 @@ function RouteComponent() {
     },
   });
 
-  let isPending = false;
+  const { mutate: resetPassword, isPending } = useMutation<
+    ApiResponse<null>,
+    ApiAxiosError,
+    { token: string; password: string }
+  >({
+    mutationFn: async (values) => {
+      const response = await api.post("/auth/password/reset", values);
+      return response.data;
+    },
+  });
+
+  const onSubmit = (values: FormValues) => {
+    resetPassword(
+      { password: values.password, token: token },
+      {
+        onSuccess: (res) => {
+          toast.success(res.message);
+          navigate({ to: "/signin" });
+        },
+        onError: (error) => {
+          toast.error(error.response?.data.message);
+          form.reset();
+        },
+      }
+    );
+  };
+
   return (
     <div className="flex items-center justify-center min-h-svh">
       <Card className="w-full max-w-sm sm:max-w-md rounded-xl px-6 py-8">
@@ -64,7 +99,7 @@ function RouteComponent() {
 
         <CardContent className="space-y-4">
           <Form {...form}>
-            <form onSubmit={() => {}}>
+            <form onSubmit={form.handleSubmit(onSubmit)}>
               <div className="flex flex-col gap-6">
                 <div className="grid gap-4">
                   <FormField
@@ -105,12 +140,12 @@ function RouteComponent() {
 
           <div className="text-center">
             <p className="text-sm text-muted-foreground">
-              Don&apos;t have an account?{" "}
+              Remember your password?{" "}
               <Link
-                to="/signup"
+                to="/signin"
                 className="text-primary hover:underline font-medium"
               >
-                Sign up
+                Sign in
               </Link>
             </p>
           </div>

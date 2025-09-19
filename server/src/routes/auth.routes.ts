@@ -23,8 +23,8 @@ router.post("/logout", logout);
 router.post("/email/verify", verifyEmail);
 router.post("/email/resend", resendVerificationEmail);
 
-router.get("/password/forgot", forgotPassword);
-router.get("/password/reset", resetPassword);
+router.post("/password/forgot", forgotPassword);
+router.post("/password/reset", resetPassword);
 
 router.post("/refresh", refreshTokens);
 router.get("/me", isLoggedIn, getMe);

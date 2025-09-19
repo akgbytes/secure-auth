@@ -23,11 +23,11 @@ const loginSchema = z.object({
 });
 
 const verifyEmailSchema = z.object({
-  token: z.string().trim().min(1, "Token is required"),
+  token: z.string("Invalid token").trim().min(1, "Invalid token"),
 });
 
 const resetPasswordSchema = z.object({
-  token: z.string().trim().min(1, "Token is required"),
+  token: z.string("Invalid token").trim().min(1, "Invalid token"),
   password: passwordSchema,
 });
 
