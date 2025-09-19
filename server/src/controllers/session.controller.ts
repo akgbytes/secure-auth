@@ -39,3 +39,27 @@ export const getAllSessions = asyncHandler(async (req, res) => {
       )
     );
 });
+
+export const logoutFromSpecificSession = asyncHandler(async (req, res) => {
+  const user = req.user;
+  if (!user) {
+    throw new ApiError(HttpStatus.UNAUTHORIZED, "Unauthorized");
+  }
+  const sessionId = req.params.id as string;
+
+  if (!user || !sessionId) {
+    throw new ApiError(HttpStatus.UNAUTHORIZED, "Unauthorized");
+  }
+
+  await db
+    .delete(sessionTable)
+    .where(
+      and(eq(sessionTable.userId, user.id), eq(sessionTable.id, sessionId))
+    );
+
+  logger.info("Signed out successfully", { id: user.id });
+
+  res
+    .status(HttpStatus.OK)
+    .json(new ApiResponse(HttpStatus.OK, "Signed out successfully", null));
+});
