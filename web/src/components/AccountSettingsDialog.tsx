@@ -23,6 +23,7 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { Hamburger, MenuIcon } from "lucide-react";
+import { UpdateProfileDialog } from "./UpdateProfileDialog";
 
 type state = "profile" | "security";
 
@@ -33,6 +34,7 @@ export function AccountSettingsDialog({
   open: boolean;
   onOpenChange: (val: boolean) => void;
 }) {
+  const [openUpdateProfileDialog, setOpenUpdateProfileDialog] = useState(false);
   const [activeTab, setActiveTab] = useState<state>("profile");
 
   const handleUpdatePassword = () => {
@@ -140,7 +142,19 @@ export function AccountSettingsDialog({
                     />
                     <AvatarFallback className="size-12">CN</AvatarFallback>
                   </Avatar>
-                  <div></div>
+                  <Button
+                    variant="ghost"
+                    onClick={() => setOpenUpdateProfileDialog(true)}
+                  >
+                    Update profile
+                  </Button>
+
+                  <UpdateProfileDialog
+                    open={openUpdateProfileDialog}
+                    onOpenChange={setOpenUpdateProfileDialog}
+                    currentImage="https://example.com/avatar.png"
+                    name="Aman"
+                  />
                 </div>
                 <Separator />
                 <div className="flex justify-between items-center">
