@@ -37,3 +37,22 @@ export const getAllUsers = asyncHandler(async (req, res) => {
       new ApiResponse(HttpStatus.OK, "All users fetched successfully", users)
     );
 });
+
+export const logoutUserSession = asyncHandler(async (req, res) => {
+  const sessionId = req.params.id as string;
+
+  const [session] = await db
+    .delete(sessionTable)
+    .where(eq(sessionTable.id, sessionId))
+    .returning();
+
+  if (!session) {
+    throw new ApiError(HttpStatus.NOT_FOUND, "Session not found");
+  }
+
+  res
+    .status(HttpStatus.OK)
+    .json(
+      new ApiResponse(HttpStatus.OK, "User session deleted successfully", null)
+    );
+});
