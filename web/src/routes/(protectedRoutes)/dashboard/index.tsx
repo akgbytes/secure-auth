@@ -5,5 +5,5 @@ export const Route = createFileRoute("/(protectedRoutes)/dashboard/")({
 });
 
 function RouteComponent() {
-  return <div>Hello "/(protectedRoutes)/dashboard/"!</div>;
+  return <div>You are logged in</div>;
 }
