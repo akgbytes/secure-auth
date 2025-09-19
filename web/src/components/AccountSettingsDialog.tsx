@@ -17,12 +17,10 @@ import { toast } from "sonner";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { Hamburger, MenuIcon } from "lucide-react";
+import { MenuIcon } from "lucide-react";
 import { UpdateProfileDialog } from "./UpdateProfileDialog";
 
 type state = "profile" | "security";
