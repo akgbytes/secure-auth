@@ -39,7 +39,8 @@ import {
 import { and, eq, gt } from "drizzle-orm";
 import querystring from "querystring";
 import axios from "axios";
-import { UserGoogleProfile } from "@/types";
+import { GoogleTokenResponse, UserGoogleProfile } from "@/types";
+import { verifyIdToken } from "@/utils/oauth/verifyIdToken";
 
 export const register = asyncHandler(async (req, res) => {
   const { name, email, password } = handleZodError(validateRegister(req.body));
@@ -583,7 +584,6 @@ export const googleLogin = asyncHandler(async (req, res) => {
   const codeVerifier = generateCodeVerifier(64);
   const codeChallenge = pkceChallenge(codeVerifier);
 
-  // Set HttpOnly cookies bound to this browser
   res.cookie("google_oauth_state", state, cookieOptionsForOauth);
   res.cookie("google_code_verifier", codeVerifier, cookieOptionsForOauth);
 
@@ -635,9 +635,6 @@ export const googleCallback = asyncHandler(async (req, res) => {
     return res.status(400).send("Invalid state (possible CSRF).");
   }
 
-  res.clearCookie("google_oauth_state", { path: "/" });
-  res.clearCookie("google_code_verifier", { path: "/" });
-
   try {
     // Exchange the authorization code for tokens (include code_verifier for PKCE)
     const tokenResponse = await axios.post(
@@ -653,32 +650,36 @@ export const googleCallback = asyncHandler(async (req, res) => {
       { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
     );
 
-    console.log("token resposne from google: ", tokenResponse);
+    console.log("token response from google: ", tokenResponse.data);
 
-    const tokens = tokenResponse.data;
-    const accessToken = tokens.access_token;
+    const tokens = tokenResponse.data as GoogleTokenResponse;
+    const profile = await verifyIdToken(tokens.id_token || "");
 
-    // Get the user's profile
-    const profileRes = await axios.get<UserGoogleProfile>(
-      "https://www.googleapis.com/oauth2/v3/userinfo",
-      {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      }
-    );
-    const profile = profileRes.data;
+    // this takes entra api call, i can save it using jose for validating id_token manually
+    // const tokens = tokenResponse.data;
+    // const accessToken = tokens.access_token;
 
-    console.log("profile: ", profile);
+    // const profileRes = await axios.get<UserGoogleProfile>(
+    //   "https://www.googleapis.com/oauth2/v3/userinfo",
+    //   {
+    //     headers: { Authorization: `Bearer ${accessToken}` },
+    //   }
+    // );
+    // const profile = profileRes.data;
+
+    const userAgent = req.headers["user-agent"] || "";
+    const ipAddress =
+      (req.headers["x-forwarded-for"] as string) || req.ip || "";
 
     // check if user already exists
-
     const [exisitingUser] = await db
       .select()
       .from(userTable)
       .where(eq(userTable.email, profile.email))
       .limit(1);
 
-    // if user entry exists but not verified then verify it
     if (exisitingUser) {
+      // if user entry exists but not verified then verify it and create new session
       if (!exisitingUser.emailVerified) {
         await db
           .update(userTable)
@@ -689,6 +690,52 @@ export const googleCallback = asyncHandler(async (req, res) => {
       }
 
       // issue new tokens
+      // if session exists then update expiry time otherwise create new
+      const [session] = await db
+        .insert(sessionTable)
+        .values({
+          userId: exisitingUser.id,
+          ipAddress,
+          userAgent,
+          expiresAt: sessionExpiresAfter(),
+        })
+        .onConflictDoUpdate({
+          target: [
+            sessionTable.userId,
+            sessionTable.userAgent,
+            sessionTable.ipAddress,
+          ],
+          set: {
+            expiresAt: sessionExpiresAfter(),
+          },
+        })
+        .returning();
+
+      if (!session) {
+        logger.error("Login failed: Could not create or update session", {
+          email: exisitingUser.email,
+        });
+        throw new ApiError(
+          HttpStatus.INTERNAL_SERVER_ERROR,
+          "Unable to login. Please try again later."
+        );
+      }
+
+      const accessToken = generateAccessToken({
+        id: exisitingUser.id,
+        sessionId: session.id,
+        email: exisitingUser.email,
+        role: exisitingUser.role,
+      });
+
+      const refreshToken = generateRefreshToken({
+        id: exisitingUser.id,
+        sessionId: session.id,
+        email: exisitingUser.email,
+        role: exisitingUser.role,
+      });
+
+      setAuthCookies(res, accessToken, refreshToken);
     } else {
       const [user] = await db
         .insert(userTable)
@@ -707,20 +754,57 @@ export const googleCallback = asyncHandler(async (req, res) => {
           "Something went wrong"
         );
 
-      // issue new token
+      const [session] = await db
+        .insert(sessionTable)
+        .values({
+          userId: user.id,
+          ipAddress,
+          userAgent,
+          expiresAt: sessionExpiresAfter(),
+        })
+        .returning();
+
+      if (!session) {
+        logger.error("Google login failed: Could not create session", {
+          email: user.email,
+        });
+
+        throw new ApiError(
+          HttpStatus.INTERNAL_SERVER_ERROR,
+          "Unable to login. Please try again later."
+        );
+      }
+
+      const accessToken = generateAccessToken({
+        id: user.id,
+        sessionId: session.id,
+        email: user.email,
+        role: user.role,
+      });
+
+      const refreshToken = generateRefreshToken({
+        id: user.id,
+        sessionId: session.id,
+        email: user.email,
+        role: user.role,
+      });
+
+      setAuthCookies(res, accessToken, refreshToken);
     }
 
-    const redirectTo = env.APP_ORIGIN || "http://localhost:5173";
-    return res.redirect(`${redirectTo}/auth/success`);
-  } catch (err: any) {
-    console.error(
-      "Google callback error:",
-      err.response?.data || err.message || err
-    );
-    // clear cookies on error
     res.clearCookie("google_oauth_state", { path: "/" });
     res.clearCookie("google_code_verifier", { path: "/" });
-    return res.status(500).send("Failed to complete OAuth exchange.");
+
+    return res.redirect(
+      `${env.APP_ORIGIN}/auth/callback?provider=google&success=true`
+    );
+  } catch (err: any) {
+    logger.error("Failed to complete OAuth exchange");
+    res.clearCookie("google_oauth_state", { path: "/" });
+    res.clearCookie("google_code_verifier", { path: "/" });
+    return res.redirect(
+      `${env.APP_ORIGIN}/auth/callback?provider=google&success=false`
+    );
   }
 });
 

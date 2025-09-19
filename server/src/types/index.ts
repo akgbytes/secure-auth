@@ -17,3 +17,12 @@ export type UserGoogleProfile = {
   email: string;
   email_verified: boolean;
 };
+
+export interface GoogleTokenResponse {
+  access_token: string;
+  expires_in: number;
+  refresh_token?: string;
+  scope: string;
+  token_type: "Bearer";
+  id_token?: string; // JWT token (only if "openid" scope is requested)
+}

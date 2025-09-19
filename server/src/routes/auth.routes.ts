@@ -30,7 +30,7 @@ router.post("/refresh", refreshTokens);
 router.get("/me", isLoggedIn, getMe);
 
 // google login
-router.get("/login/google", googleLogin);
+router.get("/google/login", googleLogin);
 router.get("/google/callback", googleCallback);
 
 // github login
