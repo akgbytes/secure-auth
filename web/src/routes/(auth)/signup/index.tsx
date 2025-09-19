@@ -9,7 +9,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,6 +22,10 @@ import {
 } from "@/components/ui/card";
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
+import { useMutation } from "@tanstack/react-query";
+import type { ApiAxiosError, ApiResponse, User } from "@/types";
+import { api } from "@/lib/axios";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/(auth)/signup/")({
   component: RouteComponent,
@@ -30,21 +34,20 @@ export const Route = createFileRoute("/(auth)/signup/")({
 const formSchema = z.object({
   name: z
     .string()
-    .trim()
-    .min(2, { error: "Name must be at least 2 characters long" })
-    .max(50, { error: "Name must be less than 50 characters" }),
+    .min(2, { error: "Name must contain 2 or more characters" })
+    .max(50, { error: "Password must contain less than 50 characters" }),
 
   email: z.email("Invalid email format").trim(),
   password: z
     .string()
-    .trim()
-    .min(6, { error: "Password must be at least 6 characters long" })
-    .max(64, { error: "Password must be at most 64 characters long" }),
+    .min(6, { error: "Password must contain 8 or more characters" })
+    .max(72, { error: "Password must contain less than 72 characters" }),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
 function RouteComponent() {
+  const navigate = useNavigate();
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema as any),
     defaultValues: {
@@ -54,12 +57,31 @@ function RouteComponent() {
     },
   });
 
-  let isPending = false;
-  const onSubmit = async (e: any) => {
-    e.preventDefault();
-    console.log("sdsd");
-    window.location.href = "http://localhost:8080/api/v1/auth/login/google";
+  const { mutate: register, isPending } = useMutation<
+    ApiResponse<User>,
+    ApiAxiosError,
+    FormValues
+  >({
+    mutationFn: async (values) => {
+      const response = await api.post("/auth/register", values);
+      return response.data;
+    },
+  });
+
+  const onSubmit = (values: FormValues) => {
+    register(values, {
+      onSuccess: (res) => {
+        toast.success(res.message);
+        navigate({
+          to: "/signin",
+        });
+      },
+      onError: (error) => {
+        toast.error(error.response?.data.message);
+      },
+    });
   };
+
   return (
     <div className="flex items-center justify-center min-h-svh">
       <Card className="w-full rounded-xl max-w-sm px-2 py-4 sm:max-w-md sm:px-6 sm:py-8">

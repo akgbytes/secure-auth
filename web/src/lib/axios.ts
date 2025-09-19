@@ -22,7 +22,7 @@ api.interceptors.response.use(
         await api.post("/auth/refresh");
         return api(originalRequest!);
       } catch (err: any) {
-        window.location.href = "/login";
+        window.location.href = "/signin";
       }
     }
 

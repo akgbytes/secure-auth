@@ -62,7 +62,7 @@ if (rootElement && !rootElement.innerHTML) {
       <TanStackQueryProvider.Provider {...TanStackQueryProviderContext}>
         <InnerApp />
       </TanStackQueryProvider.Provider>
-      <Toaster />
+      <Toaster richColors />
     </StrictMode>
   );
 }

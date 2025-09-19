@@ -1,5 +1,5 @@
 import Spinner from "@/components/Spinner";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -7,17 +7,54 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { api } from "@/lib/axios";
+import type { ApiAxiosError, ApiResponse } from "@/types";
+import { useMutation } from "@tanstack/react-query";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { CheckCircle, XCircle } from "lucide-react";
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/(auth)/verify-email/")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    token: search.token as string,
+  }),
   component: RouteComponent,
 });
 
 function RouteComponent() {
+  const navigate = useNavigate();
+  const { token } = Route.useSearch();
+
+  const {
+    mutate: verifyEmail,
+    isPending,
+    isSuccess,
+    isError,
+  } = useMutation<ApiResponse<null>, ApiAxiosError, { token: string }>({
+    mutationFn: async (values) => {
+      const response = await api.post("auth/email/verify", values);
+      return response.data;
+    },
+  });
+
+  useEffect(() => {
+    verifyEmail(
+      { token: token },
+      {
+        onSuccess: (res) => {
+          toast.success(res.message);
+          navigate({ to: "/signin" });
+        },
+        onError: (error) => {
+          toast.error(error.response?.data.message);
+        },
+      }
+    );
+  }, []);
+
   const renderContent = (): ReactNode => {
-    if (true) {
+    if (isPending) {
       return (
         <>
           <CardHeader className="text-center gap-0">
@@ -38,33 +75,37 @@ function RouteComponent() {
           </CardContent>
         </>
       );
-    } else {
-      //   return (
-      //     <>
-      //       <CardHeader className="text-center gap-0">
-      //         <CardTitle>
-      //           <h2 className="text-lg font-bold text-foreground flex gap-2 items-center justify-center">
-      //             Email Verified
-      //             <CheckCircle className="size-5 text-green-500" />
-      //           </h2>
-      //         </CardTitle>
-      //       </CardHeader>
+    } else if (isSuccess) {
+      return (
+        <>
+          <CardHeader className="text-center gap-0">
+            <CardTitle>
+              <h2 className="text-lg font-bold text-foreground flex gap-2 items-center justify-center">
+                Email Verified
+                <CheckCircle className="size-5 text-green-500" />
+              </h2>
+            </CardTitle>
+          </CardHeader>
 
-      //       <CardContent className="space-y-4">
-      //         <p className="text-muted-foreground text-sm pt-1 text-center">
-      //           Your email has been successfully verified. <br /> You can now
-      //           access all features of your account.
-      //         </p>
+          <CardContent className="space-y-4">
+            <p className="text-muted-foreground text-sm pt-1 text-center">
+              Your email has been successfully verified. <br /> You can now
+              access all features of your account.
+            </p>
 
-      //         <Link
-      //           to="/dashboard"
-      //           className={buttonVariants({ size: "sm", className: "w-full cursor-pointer" })}
-      //         >
-      //           Go to Dashboard
-      //         </Link>
-      //       </CardContent>
-      //     </>
-      //   );
+            <Link
+              to="/dashboard"
+              className={buttonVariants({
+                size: "sm",
+                className: "w-full cursor-pointer",
+              })}
+            >
+              Go to Dashboard
+            </Link>
+          </CardContent>
+        </>
+      );
+    } else if (isError) {
       return (
         <>
           <CardHeader className="text-center gap-0">
@@ -94,6 +135,8 @@ function RouteComponent() {
           </CardContent>
         </>
       );
+    } else {
+      return null;
     }
   };
   return (
