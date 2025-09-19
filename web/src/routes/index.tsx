@@ -12,13 +12,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import UserButton from "@/components/UserButton";
 
 export const Route = createFileRoute("/")({
   component: Index,
 });
 
 function Index() {
-  const isAuthenticated = false;
+  const isAuthenticated = true;
   return (
     <div className="container mx-auto px-8 sm:px-24 lg:px-32 space-y-32 mb-24">
       <header>
@@ -39,6 +40,14 @@ function Index() {
                 <FiGithub className="size-4" />
               </Button>
             </a>
+
+            {isAuthenticated && (
+              <UserButton
+                email="akgbytes@gmail.com"
+                name="Aman Gupta"
+                image=""
+              />
+            )}
           </div>
         </div>
       </header>
