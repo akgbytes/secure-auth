@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 
 import Spinner from "@/components/Spinner";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useMutation } from "@tanstack/react-query";
+import type { ApiAxiosError, ApiResponse } from "@/types";
+import { api } from "@/lib/axios";
+import { toast } from "sonner";
+import { ArrowLeft } from "lucide-react";
 
 export const Route = createFileRoute("/(auth)/resend-verification/")({
   component: RouteComponent,
@@ -34,6 +39,7 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 function RouteComponent() {
+  const navigate = useNavigate();
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema as any),
     defaultValues: {
@@ -41,7 +47,33 @@ function RouteComponent() {
     },
   });
 
-  let isPending = false;
+  const { mutate: forgotPassword, isPending } = useMutation<
+    ApiResponse<{
+      token: string;
+    }>,
+    ApiAxiosError,
+    { email: string }
+  >({
+    mutationFn: async (values) => {
+      const response = await api.post("/auth/email/resend", values);
+      return response.data;
+    },
+  });
+
+  const onSubmit = (values: FormValues) => {
+    forgotPassword(values, {
+      onSuccess: (res) => {
+        toast.success(res.message);
+        navigate({
+          to: "/signin",
+        });
+      },
+      onError: (error) => {
+        toast.error(error.response?.data.message);
+      },
+    });
+  };
+
   return (
     <div className="flex items-center justify-center min-h-svh">
       <Card className="w-full max-w-sm sm:max-w-md rounded-xl px-6 py-8">
@@ -61,7 +93,7 @@ function RouteComponent() {
 
         <CardContent className="space-y-4">
           <Form {...form}>
-            <form onSubmit={() => {}}>
+            <form onSubmit={form.handleSubmit(onSubmit)}>
               <div className="flex flex-col gap-6">
                 <div className="grid gap-4">
                   <FormField
@@ -100,7 +132,17 @@ function RouteComponent() {
             </form>
           </Form>
 
-          <div className="text-center">
+          <div className="text-center space-y-1">
+            <p className="text-sm text-muted-foreground">
+              Already verified?{" "}
+              <Link
+                to="/signin"
+                className="text-primary hover:underline font-medium"
+              >
+                Sign in
+              </Link>
+            </p>
+
             <p className="text-sm text-muted-foreground">
               Don&apos;t have an account?{" "}
               <Link

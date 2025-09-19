@@ -678,6 +678,7 @@ export const googleCallback = asyncHandler(async (req, res) => {
       .where(eq(userTable.email, profile.email))
       .limit(1);
 
+    // if user entry exists but not verified then verify it
     if (exisitingUser) {
       if (!exisitingUser.emailVerified) {
         await db
