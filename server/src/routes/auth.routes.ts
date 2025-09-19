@@ -1,6 +1,8 @@
 import {
   forgotPassword,
   getMe,
+  githubCallback,
+  githubLogin,
   googleCallback,
   googleLogin,
   login,
@@ -34,7 +36,7 @@ router.get("/google/login", googleLogin);
 router.get("/google/callback", googleCallback);
 
 // github login
-// router.get("/login/github");
-// router.get("/github/callback");
+router.get("/github/login", githubLogin);
+router.get("/github/callback", githubCallback);
 
 export default router;

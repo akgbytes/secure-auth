@@ -101,20 +101,26 @@ function RouteComponent() {
         <CardContent className="space-y-4">
           <div className="flex gap-2 flex-col">
             <Button
-              size={"sm"}
+              asChild
+              size="sm"
               className="w-full cursor-pointer"
-              variant={"outline"}
+              variant="outline"
             >
-              <FcGoogle className="size-4" />
-              <span className="text-muted-foreground">Google</span>
+              <a href={`${import.meta.env.VITE_API_URL}/auth/google/login`}>
+                <FcGoogle className="size-4" />
+                <span className="text-muted-foreground">Google</span>
+              </a>
             </Button>
             <Button
-              size={"sm"}
+              asChild
+              size="sm"
               className="w-full cursor-pointer"
-              variant={"outline"}
+              variant="outline"
             >
-              <FaGithub className="size-4" />
-              <span className="text-muted-foreground">Github</span>
+              <a href={`${import.meta.env.VITE_API_URL}/auth/github/login`}>
+                <FaGithub className="size-4" />
+                <span className="text-muted-foreground">Github</span>
+              </a>
             </Button>
           </div>
 

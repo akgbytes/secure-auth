@@ -23,8 +23,8 @@ const envSchema = z.object({
 
   REDIRECT_URI: z.url(),
 
-  // GITHUB_CLIENT_ID: z.string().nonempty(),
-  // GITHUB_CLIENT_SECRET: z.string().nonempty(),
+  GITHUB_CLIENT_ID: z.string().nonempty(),
+  GITHUB_CLIENT_SECRET: z.string().nonempty(),
 });
 
 const createEnv = (env: NodeJS.ProcessEnv) => {

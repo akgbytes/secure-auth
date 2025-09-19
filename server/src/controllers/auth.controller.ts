@@ -41,6 +41,7 @@ import querystring from "querystring";
 import axios from "axios";
 import { GoogleTokenResponse, UserGoogleProfile } from "@/types";
 import { verifyIdToken } from "@/utils/oauth/verifyIdToken";
+import { Provider } from "@/utils/constants";
 
 export const register = asyncHandler(async (req, res) => {
   const { name, email, password } = handleZodError(validateRegister(req.body));
@@ -581,20 +582,15 @@ export const getMe = asyncHandler(async (req, res) => {
 
 export const googleLogin = asyncHandler(async (req, res) => {
   const state = randomString(16);
-  const codeVerifier = generateCodeVerifier(64);
-  const codeChallenge = pkceChallenge(codeVerifier);
 
   res.cookie("google_oauth_state", state, cookieOptionsForOauth);
-  res.cookie("google_code_verifier", codeVerifier, cookieOptionsForOauth);
 
   const params = {
     response_type: "code",
     client_id: env.GOOGLE_CLIENT_ID,
-    redirect_uri: env.REDIRECT_URI,
+    redirect_uri: env.REDIRECT_URI + "/google/callback",
     scope: "openid email profile",
     state,
-    code_challenge: codeChallenge,
-    code_challenge_method: "S256",
     access_type: "offline",
     prompt: "consent",
   };
@@ -602,8 +598,6 @@ export const googleLogin = asyncHandler(async (req, res) => {
   const url = `https://accounts.google.com/o/oauth2/v2/auth?${querystring.stringify(
     params
   )}`;
-
-  console.log("final redirect url to google: ", url);
 
   return res.redirect(url);
 });
@@ -613,201 +607,227 @@ export const googleCallback = asyncHandler(async (req, res) => {
     code?: string;
     state?: string;
   };
-
-  console.log("request query from callback: ", req.query);
-
   const cookieState = req.cookies["google_oauth_state"];
-  const cookieCodeVerifier = req.cookies["google_code_verifier"];
 
-  if (!code || !returnedState) {
-    return res.status(400).send("Missing code or state in callback.");
-  }
-
-  if (!cookieState || !cookieCodeVerifier) {
-    return res
-      .status(400)
-      .send("Missing oauth cookies. Start the login flow again.");
-  }
-
-  if (returnedState !== cookieState) {
+  if (
+    !code ||
+    !returnedState ||
+    !cookieState ||
+    returnedState !== cookieState
+  ) {
     res.clearCookie("google_oauth_state", { path: "/" });
-    res.clearCookie("google_code_verifier", { path: "/" });
-    return res.status(400).send("Invalid state (possible CSRF).");
+    return res.redirect(
+      `${env.APP_ORIGIN}/auth/callback?provider=google&success=false`
+    );
   }
 
   try {
-    // Exchange the authorization code for tokens (include code_verifier for PKCE)
+    // Exchange code for tokens
     const tokenResponse = await axios.post(
       "https://oauth2.googleapis.com/token",
       querystring.stringify({
         code,
         client_id: env.GOOGLE_CLIENT_ID,
         client_secret: env.GOOGLE_CLIENT_SECRET,
-        redirect_uri: env.REDIRECT_URI,
+        redirect_uri: env.REDIRECT_URI + "/google/callback",
         grant_type: "authorization_code",
-        code_verifier: cookieCodeVerifier,
       }),
       { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
     );
 
-    console.log("token response from google: ", tokenResponse.data);
-
     const tokens = tokenResponse.data as GoogleTokenResponse;
+    if (!tokens.id_token) throw new Error("Missing id_token from Google");
+
     const profile = await verifyIdToken(tokens.id_token || "");
 
-    // this takes entra api call, i can save it using jose for validating id_token manually
-    // const tokens = tokenResponse.data;
-    // const accessToken = tokens.access_token;
-
-    // const profileRes = await axios.get<UserGoogleProfile>(
-    //   "https://www.googleapis.com/oauth2/v3/userinfo",
-    //   {
-    //     headers: { Authorization: `Bearer ${accessToken}` },
-    //   }
-    // );
-    // const profile = profileRes.data;
-
-    const userAgent = req.headers["user-agent"] || "";
-    const ipAddress =
-      (req.headers["x-forwarded-for"] as string) || req.ip || "";
-
-    // check if user already exists
-    const [exisitingUser] = await db
-      .select()
-      .from(userTable)
-      .where(eq(userTable.email, profile.email))
-      .limit(1);
-
-    if (exisitingUser) {
-      // if user entry exists but not verified then verify it and create new session
-      if (!exisitingUser.emailVerified) {
-        await db
-          .update(userTable)
-          .set({
-            emailVerified: true,
-          })
-          .where(eq(userTable.id, exisitingUser.id));
-      }
-
-      // issue new tokens
-      // if session exists then update expiry time otherwise create new
-      const [session] = await db
-        .insert(sessionTable)
-        .values({
-          userId: exisitingUser.id,
-          ipAddress,
-          userAgent,
-          expiresAt: sessionExpiresAfter(),
-        })
-        .onConflictDoUpdate({
-          target: [
-            sessionTable.userId,
-            sessionTable.userAgent,
-            sessionTable.ipAddress,
-          ],
-          set: {
-            expiresAt: sessionExpiresAfter(),
-          },
-        })
-        .returning();
-
-      if (!session) {
-        logger.error("Login failed: Could not create or update session", {
-          email: exisitingUser.email,
-        });
-        throw new ApiError(
-          HttpStatus.INTERNAL_SERVER_ERROR,
-          "Unable to login. Please try again later."
-        );
-      }
-
-      const accessToken = generateAccessToken({
-        id: exisitingUser.id,
-        sessionId: session.id,
-        email: exisitingUser.email,
-        role: exisitingUser.role,
-      });
-
-      const refreshToken = generateRefreshToken({
-        id: exisitingUser.id,
-        sessionId: session.id,
-        email: exisitingUser.email,
-        role: exisitingUser.role,
-      });
-
-      setAuthCookies(res, accessToken, refreshToken);
-    } else {
-      const [user] = await db
-        .insert(userTable)
-        .values({
-          email: profile.email,
-          name: profile.name,
-          avatar: profile.picture,
-          provider: "google",
-          emailVerified: true,
-        })
-        .returning();
-
-      if (!user)
-        throw new ApiError(
-          HttpStatus.INTERNAL_SERVER_ERROR,
-          "Something went wrong"
-        );
-
-      const [session] = await db
-        .insert(sessionTable)
-        .values({
-          userId: user.id,
-          ipAddress,
-          userAgent,
-          expiresAt: sessionExpiresAfter(),
-        })
-        .returning();
-
-      if (!session) {
-        logger.error("Google login failed: Could not create session", {
-          email: user.email,
-        });
-
-        throw new ApiError(
-          HttpStatus.INTERNAL_SERVER_ERROR,
-          "Unable to login. Please try again later."
-        );
-      }
-
-      const accessToken = generateAccessToken({
-        id: user.id,
-        sessionId: session.id,
-        email: user.email,
-        role: user.role,
-      });
-
-      const refreshToken = generateRefreshToken({
-        id: user.id,
-        sessionId: session.id,
-        email: user.email,
-        role: user.role,
-      });
-
-      setAuthCookies(res, accessToken, refreshToken);
-    }
-
-    res.clearCookie("google_oauth_state", { path: "/" });
-    res.clearCookie("google_code_verifier", { path: "/" });
-
-    return res.redirect(
-      `${env.APP_ORIGIN}/auth/callback?provider=google&success=true`
-    );
+    await handleOAuthUser(profile, req, res, "google");
   } catch (err: any) {
     logger.error("Failed to complete OAuth exchange");
     res.clearCookie("google_oauth_state", { path: "/" });
-    res.clearCookie("google_code_verifier", { path: "/" });
     return res.redirect(
       `${env.APP_ORIGIN}/auth/callback?provider=google&success=false`
     );
   }
 });
 
-export const example = asyncHandler(async (req, res) => {
-  res.status(HttpStatus.OK).json(new ApiResponse(HttpStatus.OK, "", null));
+export const githubLogin = asyncHandler(async (req, res) => {
+  const state = randomString(16);
+  res.cookie("github_oauth_state", state, cookieOptionsForOauth);
+
+  const params = {
+    client_id: env.GITHUB_CLIENT_ID,
+    redirect_uri: env.REDIRECT_URI + "/github/callback",
+    scope: "read:user user:email",
+    state,
+  };
+
+  const url = `https://github.com/login/oauth/authorize?${querystring.stringify(
+    params
+  )}`;
+
+  return res.redirect(url);
 });
+
+export const githubCallback = asyncHandler(async (req, res) => {
+  const { code, state: returnedState } = req.query as {
+    code?: string;
+    state?: string;
+  };
+  const cookieState = req.cookies["github_oauth_state"];
+
+  if (
+    !code ||
+    !returnedState ||
+    !cookieState ||
+    returnedState !== cookieState
+  ) {
+    res.clearCookie("github_oauth_state", { path: "/" });
+    return res.redirect(
+      `${env.APP_ORIGIN}/auth/callback?provider=github&success=false`
+    );
+  }
+
+  try {
+    // Exchange code for access token
+    const tokenRes = await axios.post(
+      "https://github.com/login/oauth/access_token",
+      {
+        client_id: env.GITHUB_CLIENT_ID,
+        client_secret: env.GITHUB_CLIENT_SECRET,
+        code,
+        redirect_uri: env.REDIRECT_URI + "/github/callback",
+      },
+      { headers: { Accept: "application/json" } }
+    );
+
+    const accessToken = tokenRes.data.access_token;
+    if (!accessToken) throw new Error("Missing access token from GitHub");
+
+    // Fetch user profile
+    const profileRes = await axios.get("https://api.github.com/user", {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    const emailsRes = await axios.get("https://api.github.com/user/emails", {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+
+    const primaryEmail = emailsRes.data.find(
+      (e: any) => e.primary && e.verified
+    )?.email;
+    if (!primaryEmail)
+      throw new ApiError(
+        HttpStatus.BAD_REQUEST,
+        "No verified email from GitHub"
+      );
+
+    const profile = {
+      email: primaryEmail,
+      name: profileRes.data.name || profileRes.data.login,
+      picture: profileRes.data.avatar_url,
+      emailVerified: true,
+    };
+
+    await handleOAuthUser(profile, req, res, "github");
+  } catch (err) {
+    res.clearCookie("github_oauth_state", { path: "/" });
+    return res.redirect(
+      `${env.APP_ORIGIN}/auth/callback?provider=github&success=false`
+    );
+  }
+});
+
+async function handleOAuthUser(
+  profile: {
+    email: string;
+    name: string;
+    picture: string;
+    emailVerified: boolean;
+  },
+  req: any,
+  res: any,
+  provider: Provider
+) {
+  const userAgent = req.headers["user-agent"] || "";
+  const ipAddress = (req.headers["x-forwarded-for"] as string) || req.ip || "";
+
+  const [existingUser] = await db
+    .select()
+    .from(userTable)
+    .where(eq(userTable.email, profile.email))
+    .limit(1);
+
+  let userId: string;
+
+  if (existingUser) {
+    userId = existingUser.id;
+    if (!existingUser.emailVerified) {
+      await db
+        .update(userTable)
+        .set({ emailVerified: true })
+        .where(eq(userTable.id, userId));
+    }
+  } else {
+    const [user] = await db
+      .insert(userTable)
+      .values({
+        email: profile.email,
+        name: profile.name,
+        avatar: profile.picture,
+        provider,
+        emailVerified: profile.emailVerified,
+      })
+      .returning();
+
+    if (!user)
+      throw new ApiError(
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        "Failed to create user"
+      );
+    userId = user.id;
+  }
+
+  // Create or update session
+  const expiry = sessionExpiresAfter();
+  const [session] = await db
+    .insert(sessionTable)
+    .values({
+      userId,
+      ipAddress,
+      userAgent,
+      expiresAt: expiry,
+    })
+    .onConflictDoUpdate({
+      target: [
+        sessionTable.userId,
+        sessionTable.userAgent,
+        sessionTable.ipAddress,
+      ],
+      set: { expiresAt: expiry },
+    })
+    .returning();
+
+  if (!session)
+    throw new ApiError(
+      HttpStatus.INTERNAL_SERVER_ERROR,
+      "Failed to create session"
+    );
+
+  // Issue JWT tokens
+  const accessToken = generateAccessToken({
+    id: userId,
+    sessionId: session.id,
+    email: profile.email,
+    role: existingUser?.role || "user",
+  });
+  const refreshToken = generateRefreshToken({
+    id: userId,
+    sessionId: session.id,
+    email: profile.email,
+    role: existingUser?.role || "user",
+  });
+  setAuthCookies(res, accessToken, refreshToken);
+
+  return res.redirect(
+    `${env.APP_ORIGIN}/auth/callback?provider=${provider}&success=true`
+  );
+}
