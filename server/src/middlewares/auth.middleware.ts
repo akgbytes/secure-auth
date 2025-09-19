@@ -8,9 +8,8 @@ export const isLoggedIn = asyncHandler(async (req, res, next) => {
 
   const payload = verifyAccessJWT(accessToken);
 
-  req.user = {
-    id: payload.userId,
-  };
+  req.user = payload;
+  req.userSessionId = payload.sessionId;
 
   next();
 });

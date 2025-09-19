@@ -174,13 +174,17 @@ export const login = asyncHandler(async (req, res) => {
     );
   }
   const accessToken = generateAccessToken({
-    userId: user.id,
+    id: user.id,
     sessionId: session.id,
+    email: user.email,
+    role: user.role,
   });
 
   const refreshToken = generateRefreshToken({
-    userId: user.id,
+    id: user.id,
     sessionId: session.id,
+    email: user.email,
+    role: user.role,
   });
 
   setAuthCookies(res, accessToken, refreshToken);
@@ -509,13 +513,17 @@ export const refreshTokens = asyncHandler(async (req, res) => {
     .where(eq(sessionTable.id, validSession.id));
 
   const accessToken = generateAccessToken({
-    userId: validSession.userId,
+    id: validSession.userId,
     sessionId: validSession.id,
+    email: payload.email,
+    role: payload.role,
   });
 
   const newRefreshToken = generateRefreshToken({
-    userId: validSession.userId,
+    id: validSession.userId,
     sessionId: validSession.id,
+    email: payload.email,
+    role: payload.role,
   });
 
   setAuthCookies(res, accessToken, newRefreshToken);

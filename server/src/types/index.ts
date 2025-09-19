@@ -1,8 +1,11 @@
+import { UserRole } from "@/utils/constants";
 import { JwtPayload } from "jsonwebtoken";
 
 export interface TokenPayload extends JwtPayload {
-  userId: string;
+  id: string;
   sessionId: string;
+  email: string;
+  role: UserRole;
 }
 
 export type UserGoogleProfile = {

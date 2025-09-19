@@ -1,3 +1,4 @@
+import { role } from "./../db/schema/user.schema";
 import { env } from "@/config/env";
 import { TokenPayload } from "@/types";
 import crypto from "crypto";
@@ -17,21 +18,35 @@ export const generateToken = () => {
   return { rawToken, tokenHash, tokenExpiry };
 };
 
-export const generateAccessToken = ({ userId, sessionId }: TokenPayload) =>
+export const generateAccessToken = ({
+  id,
+  sessionId,
+  email,
+  role,
+}: TokenPayload) =>
   jwt.sign(
     {
-      userId,
+      id,
       sessionId,
+      email,
+      role,
     },
     env.ACCESS_TOKEN_SECRET,
     { expiresIn: env.ACCESS_TOKEN_EXPIRY as SignOptions["expiresIn"] }
   );
 
-export const generateRefreshToken = ({ userId, sessionId }: TokenPayload) =>
+export const generateRefreshToken = ({
+  id,
+  sessionId,
+  email,
+  role,
+}: TokenPayload) =>
   jwt.sign(
     {
-      userId,
+      id,
       sessionId,
+      email,
+      role,
     },
     env.REFRESH_TOKEN_SECRET,
     { expiresIn: env.REFRESH_TOKEN_EXPIRY as SignOptions["expiresIn"] }
