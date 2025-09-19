@@ -5,7 +5,7 @@ import ms from "ms";
 const cookieOptions = {
   accessTokenExpiryMs: ms(env.ACCESS_TOKEN_EXPIRY as ms.StringValue),
   refreshTokenExpiryMs: ms(env.REFRESH_TOKEN_EXPIRY as ms.StringValue),
-  secure: env.NODE_ENV === "production",
+  secure: true,
   httpOnly: true,
   sameSite: "none",
 };

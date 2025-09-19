@@ -1,6 +1,6 @@
 export const emailVerifyTemplate = (
   link: string,
-  brandColor: string = "#2563EB"
+  brandColor: string = "#117149"
 ) => ({
   subject: "Verify your SecureAuth account",
   text: `Welcome to SecureAuth! 

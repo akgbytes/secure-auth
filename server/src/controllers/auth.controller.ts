@@ -135,15 +135,7 @@ export const login = asyncHandler(async (req, res) => {
   }
 
   // if user had logged in via oauth, password will be null, so provide fallback
-  const isPasswordCorrect = await verifyPasswordHash(
-    password,
-    user.password || ""
-  );
-
-  if (!isPasswordCorrect) {
-    logger.warn("Login failed: Incorrect password", { email });
-    throw new ApiError(HttpStatus.UNAUTHORIZED, "Invalid credentials");
-  }
+  await verifyPasswordHash(user.password || "", password);
 
   if (!user.emailVerified) {
     logger.warn("Login blocked: Email not verified", { email });
@@ -555,19 +547,36 @@ export const getMe = asyncHandler(async (req, res) => {
     throw new ApiError(HttpStatus.UNAUTHORIZED, "Unauthorized");
   }
 
-  res.status(HttpStatus.OK).json(
-    new ApiResponse(HttpStatus.OK, "User profile fetched successfully", {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      emailVerified: user.emailVerified,
-      avatar: user.avatar,
-      role: user.role,
-      provider: user.provider,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
+  const [userDetails] = await db
+    .select({
+      id: userTable.id,
+      name: userTable.name,
+      email: userTable.email,
+      emailVerified: userTable.emailVerified,
+      avatar: userTable.avatar,
+      role: userTable.role,
+      provider: userTable.provider,
+      createdAt: userTable.createdAt,
+      updatedAt: userTable.updatedAt,
     })
-  );
+    .from(userTable)
+    .where(eq(userTable.id, user.id));
+
+  if (!userDetails)
+    throw new ApiError(
+      HttpStatus.INTERNAL_SERVER_ERROR,
+      "Something went wrong"
+    );
+
+  res
+    .status(HttpStatus.OK)
+    .json(
+      new ApiResponse(
+        HttpStatus.OK,
+        "User profile fetched successfully",
+        userDetails
+      )
+    );
 });
 
 export const googleLogin = asyncHandler(async (req, res) => {

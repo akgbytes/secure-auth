@@ -11,6 +11,7 @@ import {
   resetPassword,
   verifyEmail,
 } from "@/controllers/auth.controller";
+import { isLoggedIn } from "@/middlewares/auth.middleware";
 import { Router } from "express";
 
 const router = Router();
@@ -26,7 +27,7 @@ router.get("/password/forgot", forgotPassword);
 router.get("/password/reset", resetPassword);
 
 router.post("/refresh", refreshTokens);
-router.get("/me", getMe);
+router.get("/me", isLoggedIn, getMe);
 
 // google login
 router.get("/login/google", googleLogin);

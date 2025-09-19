@@ -13,8 +13,10 @@ export const userTable = pgTable("user", {
   emailVerified: boolean("email_verified").default(false).notNull(),
   role: role().default("user").notNull(),
   provider: provider().default("local").notNull(),
-  avatar: text("avatar").default(
-    "https://res.cloudinary.com/dmnh10etf/image/upload/v1750270944/default_epnleu.png"
-  ),
+  avatar: text("avatar")
+    .notNull()
+    .default(
+      "https://res.cloudinary.com/dmnh10etf/image/upload/v1750270944/default_epnleu.png"
+    ),
   ...timestamps,
 });

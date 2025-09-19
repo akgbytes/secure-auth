@@ -1,7 +1,7 @@
 import { env } from "@/config/env";
 import { logger } from "@/config/logger";
 import { sql } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/neon-http";
+import { drizzle } from "drizzle-orm/neon-serverless";
 
 export const db = drizzle(env.DATABASE_URL);
 
