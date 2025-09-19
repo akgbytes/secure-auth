@@ -62,7 +62,7 @@ function RouteComponent() {
   };
   return (
     <div className="flex items-center justify-center min-h-svh">
-      <Card className="w-full rounded-xl max-w-sm px-2 py-4 sm:max-w-md sm:px-6 sm:py-8 shadow-[0px_0px_0px_1px_rgba(0,0,0,0.06),0px_1px_1px_-0.5px_rgba(0,0,0,0.06),0px_3px_3px_-1.5px_rgba(0,0,0,0.06),_0px_6px_6px_-3px_rgba(0,0,0,0.06),0px_12px_12px_-6px_rgba(0,0,0,0.06),0px_24px_24px_-12px_rgba(0,0,0,0.06)]">
+      <Card className="w-full rounded-xl max-w-sm px-2 py-4 sm:max-w-md sm:px-6 sm:py-8">
         <CardHeader className="text-center gap-0">
           <CardTitle>
             <h2 className="text-lg font-bold text-foreground">

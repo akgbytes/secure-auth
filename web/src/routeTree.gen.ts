@@ -16,6 +16,7 @@ import { Route as protectedRoutesDashboardIndexRouteImport } from './routes/(pro
 import { Route as authVerifyEmailIndexRouteImport } from './routes/(auth)/verify-email/index'
 import { Route as authSignupIndexRouteImport } from './routes/(auth)/signup/index'
 import { Route as authSigninIndexRouteImport } from './routes/(auth)/signin/index'
+import { Route as authForgotPasswordIndexRouteImport } from './routes/(auth)/forgot-password/index'
 
 const protectedRoutesRouteRoute = protectedRoutesRouteRouteImport.update({
   id: '/(protectedRoutes)',
@@ -51,9 +52,15 @@ const authSigninIndexRoute = authSigninIndexRouteImport.update({
   path: '/signin/',
   getParentRoute: () => authRouteRoute,
 } as any)
+const authForgotPasswordIndexRoute = authForgotPasswordIndexRouteImport.update({
+  id: '/forgot-password/',
+  path: '/forgot-password/',
+  getParentRoute: () => authRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof protectedRoutesRouteRouteWithChildren
+  '/forgot-password': typeof authForgotPasswordIndexRoute
   '/signin': typeof authSigninIndexRoute
   '/signup': typeof authSignupIndexRoute
   '/verify-email': typeof authVerifyEmailIndexRoute
@@ -61,6 +68,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof protectedRoutesRouteRouteWithChildren
+  '/forgot-password': typeof authForgotPasswordIndexRoute
   '/signin': typeof authSigninIndexRoute
   '/signup': typeof authSignupIndexRoute
   '/verify-email': typeof authVerifyEmailIndexRoute
@@ -71,6 +79,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/(auth)': typeof authRouteRouteWithChildren
   '/(protectedRoutes)': typeof protectedRoutesRouteRouteWithChildren
+  '/(auth)/forgot-password/': typeof authForgotPasswordIndexRoute
   '/(auth)/signin/': typeof authSigninIndexRoute
   '/(auth)/signup/': typeof authSignupIndexRoute
   '/(auth)/verify-email/': typeof authVerifyEmailIndexRoute
@@ -78,14 +87,27 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/signin' | '/signup' | '/verify-email' | '/dashboard'
+  fullPaths:
+    | '/'
+    | '/forgot-password'
+    | '/signin'
+    | '/signup'
+    | '/verify-email'
+    | '/dashboard'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/signin' | '/signup' | '/verify-email' | '/dashboard'
+  to:
+    | '/'
+    | '/forgot-password'
+    | '/signin'
+    | '/signup'
+    | '/verify-email'
+    | '/dashboard'
   id:
     | '__root__'
     | '/'
     | '/(auth)'
     | '/(protectedRoutes)'
+    | '/(auth)/forgot-password/'
     | '/(auth)/signin/'
     | '/(auth)/signup/'
     | '/(auth)/verify-email/'
@@ -149,16 +171,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authSigninIndexRouteImport
       parentRoute: typeof authRouteRoute
     }
+    '/(auth)/forgot-password/': {
+      id: '/(auth)/forgot-password/'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof authForgotPasswordIndexRouteImport
+      parentRoute: typeof authRouteRoute
+    }
   }
 }
 
 interface authRouteRouteChildren {
+  authForgotPasswordIndexRoute: typeof authForgotPasswordIndexRoute
   authSigninIndexRoute: typeof authSigninIndexRoute
   authSignupIndexRoute: typeof authSignupIndexRoute
   authVerifyEmailIndexRoute: typeof authVerifyEmailIndexRoute
 }
 
 const authRouteRouteChildren: authRouteRouteChildren = {
+  authForgotPasswordIndexRoute: authForgotPasswordIndexRoute,
   authSigninIndexRoute: authSigninIndexRoute,
   authSignupIndexRoute: authSignupIndexRoute,
   authVerifyEmailIndexRoute: authVerifyEmailIndexRoute,
