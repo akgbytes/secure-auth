@@ -56,3 +56,25 @@ export const logoutUserSession = asyncHandler(async (req, res) => {
       new ApiResponse(HttpStatus.OK, "User session deleted successfully", null)
     );
 });
+
+export const getUserSessionsById = asyncHandler(async (req, res) => {
+  const userId = req.params.id as string;
+
+  const allSessions = await db
+    .select()
+    .from(sessionTable)
+    .where(eq(sessionTable.userId, userId))
+    .orderBy(desc(sessionTable.createdAt));
+
+  const formattedSessions = await transformSessions(allSessions);
+
+  res
+    .status(200)
+    .json(
+      new ApiResponse(
+        HttpStatus.OK,
+        "Fetched all sessions successfully",
+        formattedSessions
+      )
+    );
+});
