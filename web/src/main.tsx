@@ -10,6 +10,7 @@ import { useAuthStore } from "./store/index.ts";
 
 import { routeTree } from "./routeTree.gen";
 import reportWebVitals from "./reportWebVitals.ts";
+import { ThemeProvider } from "./components/theme-provider.tsx";
 
 const TanStackQueryProviderContext = TanStackQueryProvider.getContext();
 
@@ -59,10 +60,12 @@ if (rootElement && !rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement);
   root.render(
     <StrictMode>
-      <TanStackQueryProvider.Provider {...TanStackQueryProviderContext}>
-        <InnerApp />
-      </TanStackQueryProvider.Provider>
-      <Toaster richColors />
+      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+        <TanStackQueryProvider.Provider {...TanStackQueryProviderContext}>
+          <InnerApp />
+        </TanStackQueryProvider.Provider>
+        <Toaster richColors />
+      </ThemeProvider>
     </StrictMode>
   );
 }
