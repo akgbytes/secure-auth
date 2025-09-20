@@ -1,3 +1,4 @@
+import NotFoundPage from "@/components/NotFoundPage";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/(protectedRoutes)/dashboard/")({
@@ -5,5 +6,9 @@ export const Route = createFileRoute("/(protectedRoutes)/dashboard/")({
 });
 
 function RouteComponent() {
-  return <div>You are logged in</div>;
+  return (
+    <div>
+      <NotFoundPage />
+    </div>
+  );
 }
