@@ -38,8 +38,8 @@ const formSchema = z.object({
   password: z
     .string()
     .trim()
-    .min(6, { error: "Password must be at least 6 characters long" })
-    .max(64, { error: "Password must be at most 64 characters long" }),
+    .min(8, { error: "Password must be at least 8 characters long" })
+    .max(72, { error: "Password must be at most 72 characters long" }),
 });
 
 type FormValues = z.infer<typeof formSchema>;

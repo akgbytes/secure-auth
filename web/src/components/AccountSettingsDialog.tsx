@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -26,6 +26,7 @@ import type { ApiAxiosError, ApiResponse, User } from "@/types";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { fetchSessions } from "@/services/session.service";
 import { api } from "@/lib/axios";
+import { Input } from "./ui/input";
 
 type state = "profile" | "security";
 
@@ -48,7 +49,8 @@ export function AccountSettingsDialog({
 
   const sessions = result.data || [];
 
-  const { mutate: logout, isPending } = useMutation<
+  // logout from session
+  const { mutate: logout, isPending: logoutPending } = useMutation<
     ApiResponse<null>,
     ApiAxiosError,
     { id: string }
@@ -66,8 +68,46 @@ export function AccountSettingsDialog({
     },
   });
 
+  const passwordRef = useRef<HTMLInputElement | null>(null);
+
+  // update password
+  const { mutate: updatePassword, isPending: passwordPending } = useMutation<
+    ApiResponse<null>,
+    ApiAxiosError,
+    { password: string }
+  >({
+    mutationFn: async (values) => {
+      const response = await api.patch("/user/password", values);
+      return response.data;
+    },
+    onSuccess: (res) => {
+      passwordRef.current!.value = "";
+      toast.success(res.message);
+      result.refetch();
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
   const handleUpdatePassword = () => {
-    toast.info("Coming soon...");
+    const newPassword = passwordRef.current?.value || "";
+
+    console.log("new: ", newPassword.length);
+
+    if (!newPassword) {
+      passwordRef.current?.focus();
+      return toast.error("Please enter new password first");
+    }
+
+    if (newPassword.length < 8) {
+      return toast.error("Password must contain atleast 8 characters");
+    }
+    if (newPassword.length > 72) {
+      return toast.error("Password must be at most of 72 characters");
+    }
+
+    updatePassword({ password: newPassword });
   };
 
   const handleDeleteAccount = () => {
@@ -218,11 +258,17 @@ export function AccountSettingsDialog({
 
                 {/* Password */}
                 <div className="flex items-center justify-between border-b pb-4">
-                  <p className="text-sm font-medium">Password</p>
+                  <Input
+                    type="password"
+                    placeholder="Password"
+                    ref={passwordRef}
+                  />
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={handleUpdatePassword}
+                    className="cursor-pointer"
+                    disabled={passwordPending}
                   >
                     Update password
                   </Button>
@@ -257,7 +303,7 @@ export function AccountSettingsDialog({
                               onClick={() => {
                                 logout({ id: session.id });
                               }}
-                              disabled={isPending}
+                              disabled={logoutPending}
                             >
                               Logout
                             </Button>

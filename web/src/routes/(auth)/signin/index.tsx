@@ -38,7 +38,7 @@ const formSchema = z.object({
   email: z.email("Invalid email format").trim(),
   password: z
     .string()
-    .min(6, { error: "Password must contain 8 or more characters" })
+    .min(8, { error: "Password must contain 8 or more characters" })
     .max(72, { error: "Password must contain less than 72 characters" }),
 });
 
