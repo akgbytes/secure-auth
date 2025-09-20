@@ -21,9 +21,19 @@ export type User = {
   name: string;
   email: string;
   emailVerified: boolean;
-  avatar: string | null;
+  avatar: string;
   role: "user" | "admin";
   provider: "local" | "google" | "github";
   createdAt: Date;
   updatedAt: Date;
+};
+
+export type Session = {
+  id: string;
+  device: string; // Desktop - Chrome
+  location: string; // Localhost
+  ip: string;
+  lastLogin: string; // 20/9/2025, 5:56:55 AM
+  status: "expired" | "active";
+  current: boolean;
 };

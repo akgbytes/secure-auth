@@ -14,32 +14,20 @@ interface SessionWithUserAgent {
 }
 
 export interface IpInfo {
-  ip: string;
-  version: string;
-  city: string;
-  region: string;
-  region_code: string;
-  country_code: string;
-  country_code_iso3: string;
-  country_name: string;
-  country_capital: string;
-  country_tld: string;
-  continent_code: string;
-  in_eu: boolean;
-  postal: string;
-  latitude: number;
-  longitude: number;
-  timezone: string;
-  utc_offset: string;
-  country_calling_code: string;
-  currency: string;
-  currency_name: string;
-  languages: string;
-  country_area: number;
-  country_population: number;
-  asn: string;
-  org: string;
-  hostname: string;
+  status: string; // success
+  country: string; // Canada
+  countryCode: string; //CA
+  region: string; // QC
+  regionName: string; // Quebec
+  city: string; // Montreal
+  zip: string; // H1K
+  lat: number; // 45.6085
+  lon: number; // -73.5493
+  timezone: string; // America/Toronto
+  isp: string; // Le Groupe Videotron Ltee
+  org: string; // Videotron Ltee
+  as: string; // AS5769 Videotron Ltee
+  query: string; // ip address that we queried
 }
 
 interface TransformedSession {
@@ -47,7 +35,7 @@ interface TransformedSession {
   device: string;
   location: string;
   ip: string;
-  lastActive: string;
+  lastLogin: string;
   status: "expired" | "active";
   current?: boolean;
 }
@@ -61,7 +49,7 @@ export const transformSessions = async (sessions: SessionWithUserAgent[]) => {
     const deviceType = parser.device.type || "Desktop";
     const device = `${deviceType} - ${browser}`;
     const location = await getLocationFromIP(session.ipAddress!);
-    const lastActive = format(
+    const lastLogin = format(
       new Date(session.updatedAt),
       "d/M/yyyy, h:mm:ss a"
     );
@@ -72,7 +60,7 @@ export const transformSessions = async (sessions: SessionWithUserAgent[]) => {
       current: session.current,
       device,
       ip: session.ipAddress,
-      lastActive,
+      lastLogin,
       location,
       status,
     });
@@ -85,13 +73,13 @@ async function getLocationFromIP(ip: string): Promise<string> {
   if (ip === "::1" || ip === "127.0.0.1") return "Localhost";
 
   try {
-    const res = await fetch(`https://ipapi.co/${ip}/json/`);
+    const res = await fetch(`http://ip-api.com/json/${ip}`);
     const data = (await res.json()) as IpInfo;
 
     const location =
-      data.city && data.country_name
-        ? `${data.city}, ${data.country_name}`
-        : data.country_name || "Unknown Location";
+      data.city && data.country
+        ? `${data.city}, ${data.country}`
+        : data.country || "Unknown Location";
 
     return location;
   } catch (error: any) {

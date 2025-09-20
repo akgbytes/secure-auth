@@ -1,14 +1,13 @@
-"use client";
-
 import { useState } from "react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { capitalize, cn } from "@/lib/utils";
 
 import { IconShieldCheckFilled, IconUserCircle } from "@tabler/icons-react";
 import { Separator } from "./ui/separator";
@@ -23,17 +22,49 @@ import {
 import { MenuIcon } from "lucide-react";
 import { UpdateProfileDialog } from "./UpdateProfileDialog";
 
+import type { ApiAxiosError, ApiResponse, User } from "@/types";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { fetchSessions } from "@/services/session.service";
+import { api } from "@/lib/axios";
+
 type state = "profile" | "security";
 
 export function AccountSettingsDialog({
   open,
   onOpenChange,
+  user,
 }: {
   open: boolean;
   onOpenChange: (val: boolean) => void;
+  user: User;
 }) {
   const [openUpdateProfileDialog, setOpenUpdateProfileDialog] = useState(false);
   const [activeTab, setActiveTab] = useState<state>("profile");
+
+  const result = useQuery({
+    queryKey: ["sessions"],
+    queryFn: () => fetchSessions(),
+  });
+
+  const sessions = result.data || [];
+
+  const { mutate: logout, isPending } = useMutation<
+    ApiResponse<null>,
+    ApiAxiosError,
+    { id: string }
+  >({
+    mutationFn: async ({ id }) => {
+      const res = await api.delete(`/sessions/${id}`);
+      return res.data;
+    },
+    onSuccess: (res) => {
+      toast.success(res.message);
+      result.refetch();
+    },
+    onError: () => {
+      toast.error("Error while logging out, Please try again.");
+    },
+  });
 
   const handleUpdatePassword = () => {
     toast.info("Coming soon...");
@@ -59,8 +90,9 @@ export function AccountSettingsDialog({
                 <Button
                   variant="ghost"
                   className={cn(
-                    "w-full justify-start rounded-lg cursor-pointer text-foreground/60",
-                    activeTab == "profile" && "bg-foreground/10 text-foreground"
+                    "w-full justify-start rounded-lg text-foreground/60",
+                    activeTab === "profile" &&
+                      "bg-foreground/10 text-foreground"
                   )}
                   onClick={() => setActiveTab("profile")}
                 >
@@ -70,8 +102,8 @@ export function AccountSettingsDialog({
                 <Button
                   variant="ghost"
                   className={cn(
-                    "w-full justify-start rounded-lg cursor-pointer text-foreground/60",
-                    activeTab == "security" &&
+                    "w-full justify-start rounded-lg text-foreground/60",
+                    activeTab === "security" &&
                       "bg-foreground/10 text-foreground"
                   )}
                   onClick={() => setActiveTab("security")}
@@ -84,61 +116,63 @@ export function AccountSettingsDialog({
           </aside>
 
           {/* Main Content */}
-          {/* Mobile Menu */}
-          <div className="md:hidden absolute top-4 left-4">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild className="cursor-pointer">
-                <Button variant="ghost" size="icon">
-                  <MenuIcon className="h-5 w-5" />
-                </Button>
-              </DropdownMenuTrigger>
+          <div className="flex-1 px-8 py-6 overflow-y-auto">
+            {/* Mobile Menu */}
+            <div className="md:hidden absolute top-4 left-4">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild className="cursor-pointer">
+                  <Button variant="ghost" size="icon">
+                    <MenuIcon className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
 
-              <DropdownMenuContent
-                align="start"
-                className="rounded-xl min-w-[180px]"
-              >
-                <DropdownMenuItem
-                  className={cn(
-                    "cursor-pointer",
-                    activeTab === "profile" && "bg-muted"
-                  )}
-                  onClick={() => setActiveTab("profile")}
+                <DropdownMenuContent
+                  align="start"
+                  className="rounded-xl min-w-[180px]"
                 >
-                  <IconUserCircle className="mr-2 h-4 w-4" />
-                  Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className={cn(
-                    "cursor-pointer",
-                    activeTab === "security" && "bg-muted"
-                  )}
-                  onClick={() => setActiveTab("security")}
-                >
-                  <IconShieldCheckFilled className="mr-2 h-4 w-4" />
-                  Security
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+                  <DropdownMenuItem
+                    className={cn(
+                      "cursor-pointer",
+                      activeTab === "profile" && "bg-muted"
+                    )}
+                    onClick={() => setActiveTab("profile")}
+                  >
+                    <IconUserCircle className="mr-2 h-4 w-4" />
+                    Profile
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className={cn(
+                      "cursor-pointer",
+                      activeTab === "security" && "bg-muted"
+                    )}
+                    onClick={() => setActiveTab("security")}
+                  >
+                    <IconShieldCheckFilled className="mr-2 h-4 w-4" />
+                    Security
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
 
-          <main className="flex-1 px-8 py-6">
+            {/* Profile Tab */}
             {activeTab === "profile" && (
               <div className="space-y-5 text-sm">
                 <DialogHeader>
                   <DialogTitle className="sm:px-8 md:px-0">
                     Profile details
                   </DialogTitle>
+                  <DialogDescription>
+                    View your personal information, email, and role settings.
+                  </DialogDescription>
                 </DialogHeader>
                 <Separator />
-                <div className="flex justify-between items-center">
+                <div className="grid grid-cols-3 justify-between items-center">
                   <p>Profile</p>
                   <Avatar className="size-12">
-                    <AvatarImage
-                      className="size-12"
-                      src=""
-                      alt="Profile image"
-                    />
-                    <AvatarFallback className="size-12">CN</AvatarFallback>
+                    <AvatarImage src={user.avatar} alt="Profile image" />
+                    <AvatarFallback className="size-12">
+                      {user.name[0].toUpperCase()}
+                    </AvatarFallback>
                   </Avatar>
                   <Button
                     variant="ghost"
@@ -155,35 +189,39 @@ export function AccountSettingsDialog({
                   />
                 </div>
                 <Separator />
-                <div className="flex justify-between items-center">
+                <div className="grid grid-cols-3 justify-between items-center">
                   <p>Email address</p>
-                  <div>akgbytes@gmail.com</div>
+                  <div>{user.email}</div>
                   <div></div>
                 </div>
                 <Separator />
-                <div className="flex justify-between items-center">
+                <div className="grid grid-cols-3 justify-between items-center">
                   <p>Role</p>
-                  <div>Admin</div>
+                  <div>{capitalize(user.role)}</div>
                   <div></div>
                 </div>
               </div>
             )}
 
+            {/* Security Tab */}
             {activeTab === "security" && (
-              <div>
+              <div className="flex flex-col space-y-6">
                 <DialogHeader>
                   <DialogTitle className="sm:px-8 md:px-0">
                     Security
                   </DialogTitle>
+                  <DialogDescription>
+                    Manage your password and active devices for account
+                    security.
+                  </DialogDescription>
                 </DialogHeader>
 
                 {/* Password */}
-                <div className="mt-6 flex items-center justify-between border-b pb-4">
+                <div className="flex items-center justify-between border-b pb-4">
                   <p className="text-sm font-medium">Password</p>
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="cursor-pointer"
                     onClick={handleUpdatePassword}
                   >
                     Update password
@@ -191,24 +229,48 @@ export function AccountSettingsDialog({
                 </div>
 
                 {/* Active Devices */}
-                <div className="mt-6 border-b pb-4">
+                <div className="border-b pb-4 w-full overflow-y-auto max-h-[300px]">
                   <p className="text-sm font-medium mb-2">Active devices</p>
-                  <div className="flex flex-col gap-1 text-sm text-muted-foreground">
-                    <div className="flex items-center justify-between">
-                      <span>Windows · Chrome 140</span>
-                      <span className="text-xs rounded bg-muted px-2 py-0.5">
-                        This device
-                      </span>
-                    </div>
-                    <span>117.201.46.239 (Kapsan, IN)</span>
-                    <span>Today at 10:39 AM</span>
+                  <div className="space-y-4 w-full">
+                    {sessions.map((session) => (
+                      <div
+                        key={session.id}
+                        className="flex justify-between items-center w-full text-xs sm:text-sm"
+                      >
+                        <div>
+                          <div>{session.device}</div>
+                          <div>
+                            {session.ip}, ({session.location})
+                          </div>
+                          <div>{session.lastLogin}</div>
+                        </div>
+                        <div className="mr-4">
+                          {session.current ? (
+                            <span className="text-xs rounded bg-muted px-2 py-0.5">
+                              This device
+                            </span>
+                          ) : (
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              className="text-xs rounded h-6"
+                              onClick={() => {
+                                logout({ id: session.id });
+                              }}
+                              disabled={isPending}
+                            >
+                              Logout
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
                 {/* Delete account */}
-                <div className="mt-6">
+                <div>
                   <Button
-                    className="cursor-pointer"
                     variant="destructive"
                     size="sm"
                     onClick={handleDeleteAccount}
@@ -218,7 +280,7 @@ export function AccountSettingsDialog({
                 </div>
               </div>
             )}
-          </main>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

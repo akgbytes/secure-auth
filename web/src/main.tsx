@@ -1,5 +1,5 @@
 import "./index.css";
-import { StrictMode } from "react";
+import { StrictMode, useEffect } from "react";
 import ReactDOM from "react-dom/client";
 
 import { RouterProvider, createRouter } from "@tanstack/react-router";
@@ -11,6 +11,7 @@ import { useAuthStore } from "./store/index.ts";
 import { routeTree } from "./routeTree.gen";
 import reportWebVitals from "./reportWebVitals.ts";
 import { ThemeProvider } from "./components/theme-provider.tsx";
+import Spinner from "./components/Spinner.tsx";
 
 const TanStackQueryProviderContext = TanStackQueryProvider.getContext();
 
@@ -37,20 +38,17 @@ declare module "@tanstack/react-router" {
 function InnerApp() {
   const auth = useAuthStore();
 
-  // useEffect(() => {
-  //   auth.checkAuth(); // Restore auth state on app load
-  // }, []);
+  useEffect(() => {
+    auth.checkAuth(); // Restore auth state on app load
+  }, []);
 
-  // if (auth.loading) {
-  //   return (
-  //     <div className="flex items-center justify-center h-screen">
-  //       <div className="flex flex-col items-center gap-2">
-  //         <LoaderCircle className="animate-spin text-sky-600 size-6" />
-  //         <span>Authenticating</span>
-  //       </div>
-  //     </div>
-  //   );
-  // }
+  if (auth.loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Spinner className="size-8 text-green-800" />
+      </div>
+    );
+  }
 
   return <RouterProvider router={router} context={{ auth }} />;
 }

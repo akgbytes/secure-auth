@@ -1,3 +1,4 @@
+import { fetchUser } from "@/services/user.service";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
@@ -11,9 +12,15 @@ export const Route = createFileRoute("/(auth)/auth/callback/")({
 });
 
 function RouteComponent() {
+  const { auth } = Route.useRouteContext();
   const navigate = useNavigate();
   const { success, provider } = Route.useSearch();
   const toastFired = useRef(false);
+
+  const handleUser = async () => {
+    const user = await fetchUser();
+    auth.setUser(user);
+  };
 
   useEffect(() => {
     if (toastFired.current) return; // prevent double firing
@@ -24,6 +31,7 @@ function RouteComponent() {
       } else if (provider === "github") {
         toast.success("Logged in with Github");
       }
+      handleUser();
       navigate({ to: "/dashboard" });
     } else {
       toast.error("Something went wrong");

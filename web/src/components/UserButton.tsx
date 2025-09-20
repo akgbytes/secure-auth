@@ -12,16 +12,13 @@ import {
 import { IconSettings, IconLogout } from "@tabler/icons-react";
 import { Home } from "lucide-react";
 import { AccountSettingsDialog } from "./AccountSettingsDialog";
+import { useAuthStore } from "@/store";
 
-interface UserButtonProps {
-  name: string;
-  email: string;
-  image: string;
-}
-
-const UserButton = ({ name, email, image }: UserButtonProps) => {
+const UserButton = () => {
+  const { user } = useAuthStore();
   const [open, setOpen] = useState(false);
 
+  if (!user) return null;
   const handleSignOut = () => {};
 
   return (
@@ -29,8 +26,8 @@ const UserButton = ({ name, email, image }: UserButtonProps) => {
       <DropdownMenu>
         <DropdownMenuTrigger asChild className="cursor-pointer">
           <Avatar>
-            <AvatarImage src={image} alt="Profile image" />
-            <AvatarFallback>{name[0].toUpperCase()}</AvatarFallback>
+            <AvatarImage src={user.avatar} alt="Profile image" />
+            <AvatarFallback>{user.name[0].toUpperCase()}</AvatarFallback>
           </Avatar>
         </DropdownMenuTrigger>
 
@@ -41,13 +38,15 @@ const UserButton = ({ name, email, image }: UserButtonProps) => {
           <DropdownMenuLabel className="p-0 font-normal">
             <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={image} alt={name} />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                <AvatarImage src={user.avatar} alt={user.name} />
+                <AvatarFallback className="rounded-lg">
+                  {user.name[0].toUpperCase()}
+                </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{name}</span>
+                <span className="truncate font-medium">{user.name}</span>
                 <span className="text-muted-foreground truncate text-xs">
-                  {email}
+                  {user.email}
                 </span>
               </div>
             </div>
@@ -75,7 +74,7 @@ const UserButton = ({ name, email, image }: UserButtonProps) => {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <AccountSettingsDialog open={open} onOpenChange={setOpen} />
+      <AccountSettingsDialog user={user} open={open} onOpenChange={setOpen} />
     </>
   );
 };

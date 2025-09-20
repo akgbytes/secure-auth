@@ -41,13 +41,7 @@ function Index() {
               </Button>
             </a>
 
-            {isAuthenticated && (
-              <UserButton
-                email="akgbytes@gmail.com"
-                name="Aman Gupta"
-                image=""
-              />
-            )}
+            {isAuthenticated && <UserButton />}
           </div>
         </div>
       </header>

@@ -25,7 +25,7 @@ import adminRoutes from "@/routes/admin.routes";
 
 app.use("/api/v1/health", healthRoutes);
 app.use("/api/v1/auth", authRoutes);
-app.use("/api/v1/session", sessionRoutes);
+app.use("/api/v1/sessions", sessionRoutes);
 app.use("/api/v1/admin", adminRoutes);
 
 app.use(errorHandler);
