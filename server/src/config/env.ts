@@ -25,6 +25,10 @@ const envSchema = z.object({
 
   GITHUB_CLIENT_ID: z.string().nonempty(),
   GITHUB_CLIENT_SECRET: z.string().nonempty(),
+
+  CLOUDINARY_CLOUD_NAME: z.string().nonempty(),
+  CLOUDINARY_API_KEY: z.string().nonempty(),
+  CLOUDINARY_API_SECRET: z.string().nonempty(),
 });
 
 const createEnv = (env: NodeJS.ProcessEnv) => {

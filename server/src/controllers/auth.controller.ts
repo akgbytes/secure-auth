@@ -830,3 +830,22 @@ async function handleOAuthUser(
     `${env.APP_ORIGIN}/auth/callback?provider=${provider}&success=true`
   );
 }
+
+export const deleteAccount = asyncHandler(async (req, res) => {
+  const user = req.user;
+  if (!user) {
+    throw new ApiError(HttpStatus.UNAUTHORIZED, "Unauthorized");
+  }
+
+  logger.info("Request for account deletion", { email: user.email });
+
+  await db.delete(userTable).where(eq(userTable.id, user.id));
+
+  logger.info("Account deleted successfully", { email: user.email });
+
+  clearAuthCookies(res);
+
+  res
+    .status(HttpStatus.OK)
+    .json(new ApiResponse(HttpStatus.OK, "Account deleted successfully", null));
+});

@@ -1,3 +1,4 @@
+import { uploadOnCloudinary } from "@/config/cloudinary";
 import { logger } from "@/config/logger";
 import { db } from "@/db";
 import { sessionTable } from "@/db/schema/session.schema";
@@ -54,4 +55,28 @@ export const changePassword = asyncHandler(async (req, res) => {
     );
 });
 
-export const updateAvatar = asyncHandler(async (req, res) => {});
+export const updateAvatar = asyncHandler(async (req, res) => {
+  const user = req.user;
+  if (!user) {
+    throw new ApiError(HttpStatus.UNAUTHORIZED, "Unauthorized");
+  }
+
+  let imageUrl = await uploadOnCloudinary(req.file?.path || "");
+  logger.info("Avatar uploaded to Cloudinary", { email: user.email });
+
+  // update in db
+  await db
+    .update(userTable)
+    .set({
+      avatar: imageUrl.secure_url,
+    })
+    .where(eq(userTable.id, user.id));
+
+  logger.info("Avatar changed successfully");
+
+  res
+    .status(HttpStatus.OK)
+    .json(
+      new ApiResponse(HttpStatus.OK, "User avatar updated successfully", null)
+    );
+});

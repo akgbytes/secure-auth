@@ -1,4 +1,5 @@
 import {
+  deleteAccount,
   forgotPassword,
   getMe,
   githubCallback,
@@ -30,6 +31,8 @@ router.post("/password/reset", resetPassword);
 
 router.post("/refresh", refreshTokens);
 router.get("/me", isLoggedIn, getMe);
+
+router.delete("/account/delete", isLoggedIn, deleteAccount);
 
 // google login
 router.get("/google/login", googleLogin);
