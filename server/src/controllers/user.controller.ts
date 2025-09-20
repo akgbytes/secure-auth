@@ -12,7 +12,7 @@ import {
 } from "@/utils/core";
 import { hashPassword, verifyPasswordHash } from "@/utils/password";
 import { validatePassword } from "@/validations/auth.validations";
-import { eq } from "drizzle-orm";
+import { and, eq, ne } from "drizzle-orm";
 
 export const changePassword = asyncHandler(async (req, res) => {
   const user = req.user;
@@ -20,7 +20,7 @@ export const changePassword = asyncHandler(async (req, res) => {
     throw new ApiError(HttpStatus.UNAUTHORIZED, "Unauthorized");
   }
 
-  const password = handleZodError(validatePassword(req.body.email));
+  const password = handleZodError(validatePassword(req.body.password));
   const hashedPassword = await hashPassword(password);
 
   await db
@@ -34,7 +34,12 @@ export const changePassword = asyncHandler(async (req, res) => {
         .where(eq(userTable.id, user.id));
 
       // delete all existing sessions
-      await tx.delete(sessionTable).where(eq(sessionTable.userId, user.id));
+      await tx.delete(sessionTable).where(
+        and(
+          eq(sessionTable.userId, user.id),
+          ne(sessionTable.id, user.sessionId) // keep the current session
+        )
+      );
     })
     .catch((error) => {
       logger.error("Error during password change transaction", {

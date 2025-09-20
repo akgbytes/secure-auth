@@ -19,7 +19,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  const isAuthenticated = true;
+  const { auth } = Route.useRouteContext();
   return (
     <div className="container mx-auto px-8 sm:px-24 lg:px-32 space-y-32 mb-24">
       <header>
@@ -41,7 +41,7 @@ function Index() {
               </Button>
             </a>
 
-            {isAuthenticated && <UserButton />}
+            {auth.isAuthenticated && <UserButton />}
           </div>
         </div>
       </header>
@@ -60,7 +60,7 @@ function Index() {
           authentication systems.
         </p>
 
-        {isAuthenticated ? (
+        {auth.isAuthenticated ? (
           <div className="mt-4">
             <Link
               to="/dashboard"

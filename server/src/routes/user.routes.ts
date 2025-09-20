@@ -5,12 +5,7 @@ import { Router } from "express";
 
 const router = Router();
 
-router.post("/change-password", isLoggedIn, changePassword);
-router.post(
-  "/update-avatar",
-  isLoggedIn,
-  upload.single("avatar"),
-  updateAvatar
-);
+router.patch("/password", isLoggedIn, changePassword);
+router.patch("/avatar", isLoggedIn, upload.single("avatar"), updateAvatar);
 
 export default router;

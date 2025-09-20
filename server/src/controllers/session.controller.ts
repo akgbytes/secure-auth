@@ -8,11 +8,11 @@ import { and, desc, eq } from "drizzle-orm";
 export const getAllSessions = asyncHandler(async (req, res) => {
   console.log("im here");
   const user = req.user;
-  const currentSessionId = req.userSessionId;
 
-  if (!user || !currentSessionId) {
+  if (!user) {
     throw new ApiError(HttpStatus.UNAUTHORIZED, "Unauthorized");
   }
+  const currentSessionId = user.sessionId;
 
   const allSessions = await db
     .select()

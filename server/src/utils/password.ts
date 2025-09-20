@@ -9,13 +9,12 @@ export const verifyPasswordHash = async (
   hash: string,
   password: string,
   type: "login" | "reset"
-): Promise<boolean> => {
-  try {
-    return await verify(hash, password);
-  } catch (error) {
-    if (type === "login")
+): Promise<void> => {
+  const isValid = await verify(hash, password);
+  if (!isValid) {
+    if (type === "login") {
       throw new ApiError(HttpStatus.UNAUTHORIZED, "Invalid credentials");
-
+    }
     throw new ApiError(
       HttpStatus.BAD_REQUEST,
       "New password cannot be the same as the old password"

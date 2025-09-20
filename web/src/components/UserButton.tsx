@@ -13,13 +13,30 @@ import { IconSettings, IconLogout } from "@tabler/icons-react";
 import { Home } from "lucide-react";
 import { AccountSettingsDialog } from "./AccountSettingsDialog";
 import { useAuthStore } from "@/store";
+import { useMutation } from "@tanstack/react-query";
+import type { ApiAxiosError, ApiResponse } from "@/types";
+import { api } from "@/lib/axios";
+import { toast } from "sonner";
+import { useNavigate } from "@tanstack/react-router";
 
 const UserButton = () => {
-  const { user } = useAuthStore();
+  const navigate = useNavigate();
+  const { user, clearUser } = useAuthStore();
   const [open, setOpen] = useState(false);
 
   if (!user) return null;
-  const handleSignOut = () => {};
+
+  const { mutate: logout } = useMutation<ApiResponse<null>, ApiAxiosError>({
+    mutationFn: async () => {
+      const res = await api.post("/auth/logout");
+      return res.data;
+    },
+    onSuccess: (res) => {
+      clearUser();
+      toast.success(res.message);
+      navigate({ to: "/signin" });
+    },
+  });
 
   return (
     <>
@@ -67,7 +84,12 @@ const UserButton = () => {
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer">
+          <DropdownMenuItem
+            onClick={() => {
+              logout();
+            }}
+            className="cursor-pointer"
+          >
             <IconLogout className="size-4" aria-hidden="true" />
             <span>Sign out</span>
           </DropdownMenuItem>

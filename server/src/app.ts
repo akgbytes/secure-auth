@@ -14,7 +14,7 @@ app.use(
   cors({
     origin: env.APP_ORIGIN,
     credentials: true,
-    methods: ["GET", "POST", "DELETE", "PUT"],
+    methods: ["GET", "POST", "DELETE", "PUT", "PATCH"],
   })
 );
 
@@ -22,10 +22,12 @@ import healthRoutes from "@/routes/health.routes";
 import authRoutes from "@/routes/auth.routes";
 import sessionRoutes from "@/routes/session.routes";
 import adminRoutes from "@/routes/admin.routes";
+import userRoutes from "@/routes/user.routes";
 
 app.use("/api/v1/health", healthRoutes);
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/sessions", sessionRoutes);
 app.use("/api/v1/admin", adminRoutes);
+app.use("/api/v1/user", userRoutes);
 
 app.use(errorHandler);

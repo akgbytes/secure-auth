@@ -19,7 +19,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { MenuIcon } from "lucide-react";
+import { Eye, EyeOff, MenuIcon } from "lucide-react";
 import { UpdateProfileDialog } from "./UpdateProfileDialog";
 
 import type { ApiAxiosError, ApiResponse, User } from "@/types";
@@ -68,6 +68,7 @@ export function AccountSettingsDialog({
     },
   });
 
+  const [showPassword, setShowPassword] = useState<boolean>(false);
   const passwordRef = useRef<HTMLInputElement | null>(null);
 
   // update password
@@ -130,9 +131,9 @@ export function AccountSettingsDialog({
                 <Button
                   variant="ghost"
                   className={cn(
-                    "w-full justify-start rounded-lg text-foreground/60",
+                    "w-full justify-start rounded-lg text-foreground/60 cursor-pointer",
                     activeTab === "profile" &&
-                      "bg-foreground/10 text-foreground"
+                      "bg-primary hover:bg-primary dark:hover:bg-primary text-neutral-100 hover:text-neutral-100"
                   )}
                   onClick={() => setActiveTab("profile")}
                 >
@@ -142,9 +143,9 @@ export function AccountSettingsDialog({
                 <Button
                   variant="ghost"
                   className={cn(
-                    "w-full justify-start rounded-lg text-foreground/60",
+                    "w-full justify-start rounded-lg text-foreground/60 cursor-pointer",
                     activeTab === "security" &&
-                      "bg-foreground/10 text-foreground"
+                      "bg-primary hover:bg-primary dark:hover:bg-primary text-neutral-100 hover:text-neutral-100"
                   )}
                   onClick={() => setActiveTab("security")}
                 >
@@ -216,6 +217,7 @@ export function AccountSettingsDialog({
                   </Avatar>
                   <Button
                     variant="ghost"
+                    className="cursor-pointer"
                     onClick={() => setOpenUpdateProfileDialog(true)}
                   >
                     Update profile
@@ -257,12 +259,25 @@ export function AccountSettingsDialog({
                 </DialogHeader>
 
                 {/* Password */}
-                <div className="flex items-center justify-between border-b pb-4">
-                  <Input
-                    type="password"
-                    placeholder="Password"
-                    ref={passwordRef}
-                  />
+                <div className="flex items-center gap-4 justify-between border-b pb-4">
+                  <div className="relative w-full">
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Password"
+                      ref={passwordRef}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="cursor-pointer absolute right-3 top-1/2 -translate-y-1/2"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="size-4" />
+                      ) : (
+                        <Eye className="size-4" />
+                      )}
+                    </button>
+                  </div>
                   <Button
                     variant="ghost"
                     size="sm"

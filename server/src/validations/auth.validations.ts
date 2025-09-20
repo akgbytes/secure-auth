@@ -4,7 +4,7 @@ const emailSchema = z.email({ error: "Invalid email address" }).toLowerCase();
 
 const passwordSchema = z
   .string()
-  .min(6, { error: "Password must contain 8 or more characters" })
+  .min(8, { error: "Password must contain 8 or more characters" })
   .max(72, { error: "Password must contain less than 72 characters" });
 
 const registerSchema = z.object({

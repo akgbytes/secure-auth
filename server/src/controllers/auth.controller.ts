@@ -136,9 +136,6 @@ export const login = asyncHandler(async (req, res) => {
     throw new ApiError(HttpStatus.UNAUTHORIZED, "Invalid credentials");
   }
 
-  // if user had logged in via oauth, password will be null, so provide fallback
-  await verifyPasswordHash(user.password || "", password, "login");
-
   if (!user.emailVerified) {
     logger.warn("Login blocked: Email not verified", { email });
     throw new ApiError(
@@ -146,6 +143,9 @@ export const login = asyncHandler(async (req, res) => {
       "Your email is not verified. Please verify before login."
     );
   }
+
+  // if user had logged in via oauth, password will be null, so provide fallback
+  await verifyPasswordHash(user.password || "", password, "login");
 
   // if session exists then update expiry time otherwise create new
   const [session] = await db
@@ -192,8 +192,8 @@ export const login = asyncHandler(async (req, res) => {
   setAuthCookies(res, accessToken, refreshToken);
 
   res
-    .status(HttpStatus.CREATED)
-    .json(new ApiResponse(HttpStatus.CREATED, "Logged in successfully", null));
+    .status(HttpStatus.OK)
+    .json(new ApiResponse(HttpStatus.OK, "Logged in successfully", null));
 });
 
 export const logout = asyncHandler(async (req, res) => {

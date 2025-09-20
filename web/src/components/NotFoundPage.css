@@ -7,11 +7,11 @@
   height: 100vh;
   background-image: linear-gradient(
     to top,
-    #0a0a0a,
-    /* neutral-950 */ #171717,
-    /* neutral-900 */ #262626,
-    /* neutral-800 */ #404040,
-    /* neutral-700 */ #525252 /* neutral-600 */
+    #000e08,
+    #001c10,
+    #003821,
+    #004629,
+    #006239
   );
   display: flex;
   justify-content: center;
