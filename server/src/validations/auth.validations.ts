@@ -43,3 +43,6 @@ export const validateResetPassword = (data: unknown) =>
   resetPasswordSchema.safeParse(data);
 
 export const validateEmail = (data: unknown) => emailSchema.safeParse(data);
+
+export const validatePassword = (data: unknown) =>
+  passwordSchema.safeParse(data);

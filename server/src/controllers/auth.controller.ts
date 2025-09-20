@@ -389,7 +389,6 @@ export const forgotPassword = asyncHandler(async (req, res) => {
 });
 
 export const resetPassword = asyncHandler(async (req, res) => {
-  console.log("hello");
   const { token, password } = handleZodError(validateResetPassword(req.body));
 
   const tokenHash = hashToken(token);
