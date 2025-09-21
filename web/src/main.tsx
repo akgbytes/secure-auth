@@ -12,6 +12,7 @@ import { routeTree } from "./routeTree.gen";
 import reportWebVitals from "./reportWebVitals.ts";
 import { ThemeProvider } from "./components/theme-provider.tsx";
 import Spinner from "./components/Spinner.tsx";
+import NotFoundPage from "./components/NotFoundPage.tsx";
 
 const TanStackQueryProviderContext = TanStackQueryProvider.getContext();
 
@@ -27,6 +28,8 @@ const router = createRouter({
   defaultStructuralSharing: true,
   defaultPreloadStaleTime: 0,
   defaultStaleTime: 90 * 1000, // 1.5 minutes
+
+  defaultNotFoundComponent: () => <NotFoundPage />,
 });
 
 declare module "@tanstack/react-router" {

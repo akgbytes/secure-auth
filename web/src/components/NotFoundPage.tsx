@@ -43,7 +43,7 @@ const NotFoundPage = () => {
           className="cursor-pointer border border-border"
           onClick={() => navigate({ to: "/" })}
         >
-          Go to Dashboard
+          Home
         </Button>
       </div>
 

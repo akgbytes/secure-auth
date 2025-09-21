@@ -1,4 +1,3 @@
-import NotFoundPage from "@/components/NotFoundPage";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/(protectedRoutes)/dashboard/")({
@@ -8,7 +7,7 @@ export const Route = createFileRoute("/(protectedRoutes)/dashboard/")({
 function RouteComponent() {
   return (
     <div>
-      <NotFoundPage />
+      <h1>Admin dashboard</h1>
     </div>
   );
 }

@@ -59,6 +59,7 @@ const DeleteAccountDialog = ({
             className="cursor-pointer"
             variant="ghost"
             onClick={() => onOpenChange(false)}
+            disabled={isPending}
           >
             Cancel
           </Button>
@@ -69,7 +70,7 @@ const DeleteAccountDialog = ({
             }}
             disabled={isPending}
           >
-            {isPending ? <Spinner /> : <span>Yes, delete</span>}
+            {isPending ? <Spinner text="Deleting" /> : <span>Yes, delete</span>}
           </Button>
         </DialogFooter>
       </DialogContent>

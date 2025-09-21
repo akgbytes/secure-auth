@@ -112,11 +112,15 @@ export function UpdateProfileDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>
+          <Button
+            variant="ghost"
+            disabled={isPending}
+            onClick={() => onOpenChange(false)}
+          >
             Cancel
           </Button>
           <Button onClick={handleSave} disabled={!file || isPending}>
-            {isPending ? <Spinner /> : <span>Save</span>}
+            {isPending ? <Spinner text="Saving" /> : <span>Save</span>}
           </Button>
         </DialogFooter>
       </DialogContent>
