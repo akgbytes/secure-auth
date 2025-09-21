@@ -21,14 +21,13 @@ import { useAuthStore } from "@/store";
 interface UpdateProfileDialogProps {
   open: boolean;
   onOpenChange: (val: boolean) => void;
-  currentImage?: string;
   name?: string;
 }
 
 export function UpdateProfileDialog({
   open,
   onOpenChange,
-  currentImage,
+
   name = "User",
 }: UpdateProfileDialogProps) {
   const { setUser } = useAuthStore();
@@ -100,7 +99,7 @@ export function UpdateProfileDialog({
 
         <div className="flex flex-col items-center space-y-4 py-6">
           <Avatar className="h-20 w-20">
-            <AvatarImage src={preview || currentImage} alt={name} />
+            <AvatarImage src={preview || undefined} alt={name} />
             <AvatarFallback>{name[0]}</AvatarFallback>
           </Avatar>
 
@@ -117,7 +116,7 @@ export function UpdateProfileDialog({
             Cancel
           </Button>
           <Button onClick={handleSave} disabled={!file || isPending}>
-            {isPending ? <Spinner /> : <span> Save</span>}
+            {isPending ? <Spinner /> : <span>Save</span>}
           </Button>
         </DialogFooter>
       </DialogContent>

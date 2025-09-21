@@ -27,6 +27,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { fetchSessions } from "@/services/session.service";
 import { api } from "@/lib/axios";
 import { Input } from "./ui/input";
+import DeleteAccountDialog from "./DeleteAccountDialog";
 
 type state = "profile" | "security";
 
@@ -40,6 +41,7 @@ export function AccountSettingsDialog({
   user: User;
 }) {
   const [openUpdateProfileDialog, setOpenUpdateProfileDialog] = useState(false);
+  const [openDeleteAccountDialog, setOpenDeleteAccountDialog] = useState(false);
   const [activeTab, setActiveTab] = useState<state>("profile");
 
   const result = useQuery({
@@ -63,8 +65,8 @@ export function AccountSettingsDialog({
       toast.success(res.message);
       result.refetch();
     },
-    onError: () => {
-      toast.error("Error while logging out, Please try again.");
+    onError: (err) => {
+      toast.error(err.message);
     },
   });
 
@@ -109,10 +111,6 @@ export function AccountSettingsDialog({
     }
 
     updatePassword({ password: newPassword });
-  };
-
-  const handleDeleteAccount = () => {
-    toast.info("Coming soon...");
   };
 
   return (
@@ -226,8 +224,6 @@ export function AccountSettingsDialog({
                   <UpdateProfileDialog
                     open={openUpdateProfileDialog}
                     onOpenChange={setOpenUpdateProfileDialog}
-                    currentImage="https://example.com/avatar.png"
-                    name="Aman"
                   />
                 </div>
                 <Separator />
@@ -334,10 +330,18 @@ export function AccountSettingsDialog({
                   <Button
                     variant="destructive"
                     size="sm"
-                    onClick={handleDeleteAccount}
+                    className="cursor-pointer"
+                    onClick={() => {
+                      setOpenDeleteAccountDialog(true);
+                    }}
                   >
                     Delete account
                   </Button>
+
+                  <DeleteAccountDialog
+                    open={openDeleteAccountDialog}
+                    onOpenChange={setOpenDeleteAccountDialog}
+                  />
                 </div>
               </div>
             )}

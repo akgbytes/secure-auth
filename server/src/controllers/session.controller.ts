@@ -6,7 +6,6 @@ import { transformSessions } from "@/utils/sessions";
 import { and, desc, eq } from "drizzle-orm";
 
 export const getAllSessions = asyncHandler(async (req, res) => {
-  console.log("im here");
   const user = req.user;
 
   if (!user) {
@@ -46,19 +45,24 @@ export const logoutFromSpecificSession = asyncHandler(async (req, res) => {
   if (!user) {
     throw new ApiError(HttpStatus.UNAUTHORIZED, "Unauthorized");
   }
-  const sessionId = req.params.id as string;
 
-  if (!user || !sessionId) {
-    throw new ApiError(HttpStatus.UNAUTHORIZED, "Unauthorized");
+  const sessionId = req.params.id as string;
+  if (!sessionId) {
+    throw new ApiError(HttpStatus.BAD_REQUEST, "Session ID is required");
   }
 
-  await db
+  const result = await db
     .delete(sessionTable)
     .where(
       and(eq(sessionTable.userId, user.id), eq(sessionTable.id, sessionId))
-    );
+    )
+    .returning();
 
-  logger.info("Signed out successfully", { id: user.id });
+  if (result.length === 0) {
+    throw new ApiError(HttpStatus.NOT_FOUND, "Session not found");
+  }
+
+  logger.info("Signed out successfully", { userId: user.id, sessionId });
 
   res
     .status(HttpStatus.OK)
