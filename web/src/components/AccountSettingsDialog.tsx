@@ -28,6 +28,7 @@ import { fetchSessions } from "@/services/session.service";
 import { api } from "@/lib/axios";
 import { Input } from "./ui/input";
 import DeleteAccountDialog from "./DeleteAccountDialog";
+import Spinner from "./Spinner";
 
 type state = "profile" | "security";
 
@@ -210,7 +211,7 @@ export function AccountSettingsDialog({
                   <Avatar className="size-12">
                     <AvatarImage src={user.avatar} alt="Profile image" />
                     <AvatarFallback className="size-12">
-                      {user.name[0].toUpperCase()}
+                      {user.name[0].toUpperCase() || "SA"}
                     </AvatarFallback>
                   </Avatar>
                   <Button
@@ -281,13 +282,17 @@ export function AccountSettingsDialog({
                     className="cursor-pointer"
                     disabled={passwordPending}
                   >
-                    Update password
+                    {passwordPending ? (
+                      <Spinner text="Updating" />
+                    ) : (
+                      "Update password"
+                    )}
                   </Button>
                 </div>
 
                 {/* Active Devices */}
                 <div className="border-b pb-4 w-full overflow-y-auto max-h-[300px]">
-                  <p className="text-sm font-medium mb-2">Active devices</p>
+                  <p className="text-base font-medium mb-2">Active devices</p>
                   <div className="space-y-4 w-full">
                     {sessions.map((session) => (
                       <div
@@ -296,10 +301,10 @@ export function AccountSettingsDialog({
                       >
                         <div>
                           <div>{session.device}</div>
-                          <div>
-                            {session.ip}, ({session.location})
+                          <div className="text-muted-foreground">
+                            {session.ip} ({session.location})
                           </div>
-                          <div>{session.lastLogin}</div>
+                          <div className="text-[13px]">{session.lastLogin}</div>
                         </div>
                         <div className="mr-4">
                           {session.current ? (

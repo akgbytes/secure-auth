@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import UserButton from "@/components/UserButton";
+import { toast } from "sonner";
+import Navbar from "@/components/Navbar";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -22,29 +24,7 @@ function Index() {
   const { auth } = Route.useRouteContext();
   return (
     <div className="container mx-auto px-8 sm:px-24 lg:px-32 space-y-32 mb-24">
-      <header>
-        <div className="flex h-16 items-center justify-between">
-          <div className="flex items-center gap-2">
-            <IconInnerShadowTop className="size-5" />
-            <h1 className="text-xl font-bold">SecureAuth</h1>
-          </div>
-
-          <div className="flex gap-2">
-            <ModeToggle />
-            <a
-              href="https://github.com/akgbytes/secure-auth"
-              aria-label="GitHub Repo"
-              target="_blank"
-            >
-              <Button variant={"ghost"} className="cursor-pointer">
-                <FiGithub className="size-4" />
-              </Button>
-            </a>
-
-            {auth.isAuthenticated && <UserButton />}
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       {/* hero-section */}
       <div className="max-w-3xl mx-auto text-center">
@@ -61,18 +41,17 @@ function Index() {
         </p>
 
         {auth.isAuthenticated ? (
-          <div className="mt-4">
-            <Link
-              to="/dashboard"
-              className={cn(
-                buttonVariants({
-                  size: "lg",
-                })
-              )}
+          <div className="mt-6">
+            <Button
+              className=""
+              size="lg"
+              onClick={() => {
+                toast.info("Click on user button to explore features");
+              }}
             >
-              Go to Dashboard
+              Explore features
               <ArrowRight />
-            </Link>
+            </Button>
           </div>
         ) : (
           <div className="mt-4">
