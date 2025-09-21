@@ -1,9 +1,15 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/(protectedRoutes)")({
-  component: RouteComponent,
+  beforeLoad({ context, location }) {
+    const auth = context.auth;
+    console.log("bhai logged krle ", auth.isAuthenticated);
+    if (!auth.isAuthenticated) {
+      throw redirect({
+        to: "/signin",
+        search: { redirect: location.href },
+      });
+    }
+  },
+  component: () => <Outlet />,
 });
-
-function RouteComponent() {
-  return <Outlet />;
-}
