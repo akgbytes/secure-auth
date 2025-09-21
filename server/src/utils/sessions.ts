@@ -45,14 +45,14 @@ export const transformSessions = async (sessions: SessionWithUserAgent[]) => {
 
   for (const session of sessions) {
     const parser = UAParser(session.userAgent!);
-    const browser = parser.browser.name || "Unknown";
-    const deviceType = parser.device.type || "Desktop";
-    const device = `${deviceType} - ${browser}`;
+    const browser = parser.browser.name || "Unknown Browser";
+    // const deviceType = parser.device.type || "Desktop";
+    const os = parser.os.name || "Unknown OS";
+    const device = `${browser} on ${os}`;
+    // const device = `${deviceType} - ${browser}`;
     const location = await getLocationFromIP(session.ipAddress!);
-    const lastLogin = format(
-      new Date(session.updatedAt),
-      "d/M/yyyy, h:mm:ss a"
-    );
+    const lastLogin = format(new Date(session.updatedAt), "MMM d, yyyy h:mm a");
+
     const status = getSessionStatus(session.expiresAt);
 
     transformed.push({

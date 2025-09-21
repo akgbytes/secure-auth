@@ -1,14 +1,5 @@
 import { useState } from "react";
-import {
-  MoreHorizontal,
-  Search,
-  Filter,
-  UserCog,
-  Clock,
-  Shield,
-  ChevronDown,
-  Calendar,
-} from "lucide-react";
+import { MoreHorizontal, Search, Clock, Calendar } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -31,53 +22,44 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Navbar from "@/components/Navbar";
 import { createFileRoute } from "@tanstack/react-router";
 import { ManageSessionsDialog } from "@/components/ManageSessionsDialog";
+import { fetchUsers } from "@/services/admin.service";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import type { User } from "@/types";
 
-export const Route = createFileRoute("/(protectedRoutes)/dashboard/")({
+export const Route = createFileRoute("/(protectedRoutes)/admin/dashboard/")({
+  loader: ({ context: { queryClient } }) =>
+    queryClient.ensureQueryData({
+      queryKey: ["users"],
+      queryFn: () => fetchUsers(),
+    }),
   component: RouteComponent,
 });
 
-const mockUsers = [
-  {
-    id: "2",
-    name: "Michael Chen",
-    avatar:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop&crop=face",
-    joinedAt: "2024-02-20",
-    role: "User",
-    provider: "Google",
-  },
-  {
-    id: "3",
-    name: "Emily Rodriguez",
-    avatar:
-      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=50&h=50&fit=crop&crop=face",
-    joinedAt: "2024-03-10",
-    role: "Moderator",
-    provider: "Email",
-  },
-  {
-    id: "4",
-    name: "David Park",
-    avatar:
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=50&h=50&fit=crop&crop=face",
-    joinedAt: "2024-03-25",
-    role: "User",
-    provider: "GitHub",
-  },
-];
-
-const role: "admin" | "user" = "user";
-
 function RouteComponent() {
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [open, setOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
-  const filteredUsers = mockUsers.filter(
+  const usersData = useSuspenseQuery({
+    queryKey: ["users"],
+    queryFn: () => fetchUsers(),
+  });
+
+  const users = usersData.data;
+
+  const filteredUsers = users.filter(
     (user) =>
-      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.provider.toLowerCase().includes(searchTerm.toLowerCase())
+      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const formatDate = (date: Date) => {
+    return new Intl.DateTimeFormat("en-US", {
+      month: "short",
+      day: "2-digit",
+      year: "numeric",
+    }).format(new Date(date));
+  };
 
   return (
     <div className="container mx-auto px-8 sm:px-24 lg:px-32 space-y-12 mb-12">
@@ -96,8 +78,8 @@ function RouteComponent() {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
           <Input
             placeholder="Search users by their name, role or provider..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9 h-10"
           />
         </div>
@@ -144,7 +126,9 @@ function RouteComponent() {
                   <TableCell>
                     <Badge
                       variant="secondary"
-                      className={role === "admin" ? "bg-blue-600" : undefined}
+                      className={
+                        user.role === "admin" ? "bg-blue-600" : undefined
+                      }
                     >
                       {user.role}
                     </Badge>
@@ -155,11 +139,7 @@ function RouteComponent() {
                   <TableCell>
                     <div className="flex items-center gap-2 text-sm">
                       <Calendar className="w-4 h-4 text-muted-foreground" />
-                      {new Date(user.joinedAt).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                      })}
+                      {formatDate(user.createdAt)}
                     </div>
                   </TableCell>
                   <TableCell className="text-right">
@@ -177,7 +157,10 @@ function RouteComponent() {
                       <DropdownMenuContent align="end" className="w-48">
                         <DropdownMenuItem
                           className="gap-2 cursor-pointer"
-                          onClick={() => setOpen(true)}
+                          onClick={() => {
+                            setSelectedUser(user);
+                            setOpen(true);
+                          }}
                         >
                           <Clock className="w-4 h-4" />
                           Manage Sessions
@@ -189,16 +172,12 @@ function RouteComponent() {
               ))}
             </TableBody>
           </Table>
+
           <ManageSessionsDialog
             open={open}
             onOpenChange={setOpen}
-            user={{
-              id: "u1",
-              name: "Michael Chen",
-              email: "michael@example.com",
-            }}
+            user={selectedUser}
           />
-          ;
         </div>
       </div>
     </div>

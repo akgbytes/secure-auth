@@ -12,13 +12,14 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as protectedRoutesRouteRouteImport } from './routes/(protectedRoutes)/route'
 import { Route as authRouteRouteImport } from './routes/(auth)/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as protectedRoutesDashboardIndexRouteImport } from './routes/(protectedRoutes)/dashboard/index'
+import { Route as protectedRoutesAdminRouteRouteImport } from './routes/(protectedRoutes)/admin/route'
 import { Route as authVerifyEmailIndexRouteImport } from './routes/(auth)/verify-email/index'
 import { Route as authSignupIndexRouteImport } from './routes/(auth)/signup/index'
 import { Route as authSigninIndexRouteImport } from './routes/(auth)/signin/index'
 import { Route as authResetPasswordIndexRouteImport } from './routes/(auth)/reset-password/index'
 import { Route as authResendVerificationIndexRouteImport } from './routes/(auth)/resend-verification/index'
 import { Route as authForgotPasswordIndexRouteImport } from './routes/(auth)/forgot-password/index'
+import { Route as protectedRoutesAdminDashboardIndexRouteImport } from './routes/(protectedRoutes)/admin/dashboard/index'
 import { Route as authAuthCallbackIndexRouteImport } from './routes/(auth)/auth/callback/index'
 
 const protectedRoutesRouteRoute = protectedRoutesRouteRouteImport.update({
@@ -34,10 +35,10 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const protectedRoutesDashboardIndexRoute =
-  protectedRoutesDashboardIndexRouteImport.update({
-    id: '/dashboard/',
-    path: '/dashboard/',
+const protectedRoutesAdminRouteRoute =
+  protectedRoutesAdminRouteRouteImport.update({
+    id: '/admin',
+    path: '/admin',
     getParentRoute: () => protectedRoutesRouteRoute,
   } as any)
 const authVerifyEmailIndexRoute = authVerifyEmailIndexRouteImport.update({
@@ -71,6 +72,12 @@ const authForgotPasswordIndexRoute = authForgotPasswordIndexRouteImport.update({
   path: '/forgot-password/',
   getParentRoute: () => authRouteRoute,
 } as any)
+const protectedRoutesAdminDashboardIndexRoute =
+  protectedRoutesAdminDashboardIndexRouteImport.update({
+    id: '/dashboard/',
+    path: '/dashboard/',
+    getParentRoute: () => protectedRoutesAdminRouteRoute,
+  } as any)
 const authAuthCallbackIndexRoute = authAuthCallbackIndexRouteImport.update({
   id: '/auth/callback/',
   path: '/auth/callback/',
@@ -79,76 +86,82 @@ const authAuthCallbackIndexRoute = authAuthCallbackIndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof protectedRoutesRouteRouteWithChildren
+  '/admin': typeof protectedRoutesAdminRouteRouteWithChildren
   '/forgot-password': typeof authForgotPasswordIndexRoute
   '/resend-verification': typeof authResendVerificationIndexRoute
   '/reset-password': typeof authResetPasswordIndexRoute
   '/signin': typeof authSigninIndexRoute
   '/signup': typeof authSignupIndexRoute
   '/verify-email': typeof authVerifyEmailIndexRoute
-  '/dashboard': typeof protectedRoutesDashboardIndexRoute
   '/auth/callback': typeof authAuthCallbackIndexRoute
+  '/admin/dashboard': typeof protectedRoutesAdminDashboardIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof protectedRoutesRouteRouteWithChildren
+  '/admin': typeof protectedRoutesAdminRouteRouteWithChildren
   '/forgot-password': typeof authForgotPasswordIndexRoute
   '/resend-verification': typeof authResendVerificationIndexRoute
   '/reset-password': typeof authResetPasswordIndexRoute
   '/signin': typeof authSigninIndexRoute
   '/signup': typeof authSignupIndexRoute
   '/verify-email': typeof authVerifyEmailIndexRoute
-  '/dashboard': typeof protectedRoutesDashboardIndexRoute
   '/auth/callback': typeof authAuthCallbackIndexRoute
+  '/admin/dashboard': typeof protectedRoutesAdminDashboardIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/(auth)': typeof authRouteRouteWithChildren
   '/(protectedRoutes)': typeof protectedRoutesRouteRouteWithChildren
+  '/(protectedRoutes)/admin': typeof protectedRoutesAdminRouteRouteWithChildren
   '/(auth)/forgot-password/': typeof authForgotPasswordIndexRoute
   '/(auth)/resend-verification/': typeof authResendVerificationIndexRoute
   '/(auth)/reset-password/': typeof authResetPasswordIndexRoute
   '/(auth)/signin/': typeof authSigninIndexRoute
   '/(auth)/signup/': typeof authSignupIndexRoute
   '/(auth)/verify-email/': typeof authVerifyEmailIndexRoute
-  '/(protectedRoutes)/dashboard/': typeof protectedRoutesDashboardIndexRoute
   '/(auth)/auth/callback/': typeof authAuthCallbackIndexRoute
+  '/(protectedRoutes)/admin/dashboard/': typeof protectedRoutesAdminDashboardIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/forgot-password'
     | '/resend-verification'
     | '/reset-password'
     | '/signin'
     | '/signup'
     | '/verify-email'
-    | '/dashboard'
     | '/auth/callback'
+    | '/admin/dashboard'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin'
     | '/forgot-password'
     | '/resend-verification'
     | '/reset-password'
     | '/signin'
     | '/signup'
     | '/verify-email'
-    | '/dashboard'
     | '/auth/callback'
+    | '/admin/dashboard'
   id:
     | '__root__'
     | '/'
     | '/(auth)'
     | '/(protectedRoutes)'
+    | '/(protectedRoutes)/admin'
     | '/(auth)/forgot-password/'
     | '/(auth)/resend-verification/'
     | '/(auth)/reset-password/'
     | '/(auth)/signin/'
     | '/(auth)/signup/'
     | '/(auth)/verify-email/'
-    | '/(protectedRoutes)/dashboard/'
     | '/(auth)/auth/callback/'
+    | '/(protectedRoutes)/admin/dashboard/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -180,11 +193,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/(protectedRoutes)/dashboard/': {
-      id: '/(protectedRoutes)/dashboard/'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof protectedRoutesDashboardIndexRouteImport
+    '/(protectedRoutes)/admin': {
+      id: '/(protectedRoutes)/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof protectedRoutesAdminRouteRouteImport
       parentRoute: typeof protectedRoutesRouteRoute
     }
     '/(auth)/verify-email/': {
@@ -229,6 +242,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authForgotPasswordIndexRouteImport
       parentRoute: typeof authRouteRoute
     }
+    '/(protectedRoutes)/admin/dashboard/': {
+      id: '/(protectedRoutes)/admin/dashboard/'
+      path: '/dashboard'
+      fullPath: '/admin/dashboard'
+      preLoaderRoute: typeof protectedRoutesAdminDashboardIndexRouteImport
+      parentRoute: typeof protectedRoutesAdminRouteRoute
+    }
     '/(auth)/auth/callback/': {
       id: '/(auth)/auth/callback/'
       path: '/auth/callback'
@@ -263,12 +283,27 @@ const authRouteRouteWithChildren = authRouteRoute._addFileChildren(
   authRouteRouteChildren,
 )
 
+interface protectedRoutesAdminRouteRouteChildren {
+  protectedRoutesAdminDashboardIndexRoute: typeof protectedRoutesAdminDashboardIndexRoute
+}
+
+const protectedRoutesAdminRouteRouteChildren: protectedRoutesAdminRouteRouteChildren =
+  {
+    protectedRoutesAdminDashboardIndexRoute:
+      protectedRoutesAdminDashboardIndexRoute,
+  }
+
+const protectedRoutesAdminRouteRouteWithChildren =
+  protectedRoutesAdminRouteRoute._addFileChildren(
+    protectedRoutesAdminRouteRouteChildren,
+  )
+
 interface protectedRoutesRouteRouteChildren {
-  protectedRoutesDashboardIndexRoute: typeof protectedRoutesDashboardIndexRoute
+  protectedRoutesAdminRouteRoute: typeof protectedRoutesAdminRouteRouteWithChildren
 }
 
 const protectedRoutesRouteRouteChildren: protectedRoutesRouteRouteChildren = {
-  protectedRoutesDashboardIndexRoute: protectedRoutesDashboardIndexRoute,
+  protectedRoutesAdminRouteRoute: protectedRoutesAdminRouteRouteWithChildren,
 }
 
 const protectedRoutesRouteRouteWithChildren =

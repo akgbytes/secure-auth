@@ -540,45 +540,6 @@ export const refreshTokens = asyncHandler(async (req, res) => {
     );
 });
 
-export const getMe = asyncHandler(async (req, res) => {
-  const user = req.user;
-
-  if (!user) {
-    throw new ApiError(HttpStatus.UNAUTHORIZED, "Unauthorized");
-  }
-
-  const [userDetails] = await db
-    .select({
-      id: userTable.id,
-      name: userTable.name,
-      email: userTable.email,
-      emailVerified: userTable.emailVerified,
-      avatar: userTable.avatar,
-      role: userTable.role,
-      provider: userTable.provider,
-      createdAt: userTable.createdAt,
-      updatedAt: userTable.updatedAt,
-    })
-    .from(userTable)
-    .where(eq(userTable.id, user.id));
-
-  if (!userDetails)
-    throw new ApiError(
-      HttpStatus.INTERNAL_SERVER_ERROR,
-      "Something went wrong"
-    );
-
-  res
-    .status(HttpStatus.OK)
-    .json(
-      new ApiResponse(
-        HttpStatus.OK,
-        "User profile fetched successfully",
-        userDetails
-      )
-    );
-});
-
 export const googleLogin = asyncHandler(async (req, res) => {
   const state = randomString(16);
 

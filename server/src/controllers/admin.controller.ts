@@ -39,7 +39,7 @@ export const getAllUsers = asyncHandler(async (req, res) => {
 });
 
 export const logoutUserSession = asyncHandler(async (req, res) => {
-  const sessionId = req.params.id as string;
+  const sessionId = req.params.sessionId as string;
 
   const [session] = await db
     .delete(sessionTable)
@@ -58,7 +58,7 @@ export const logoutUserSession = asyncHandler(async (req, res) => {
 });
 
 export const getUserSessionsById = asyncHandler(async (req, res) => {
-  const userId = req.params.id as string;
+  const userId = req.params.userId as string;
 
   const allSessions = await db
     .select()

@@ -74,7 +74,7 @@ function RouteComponent() {
         try {
           const user = await fetchUser();
           setUser(user);
-          navigate({ to: "/dashboard" });
+          navigate({ to: "/" });
         } catch (err) {
           toast.error("Failed to fetch user details");
         }

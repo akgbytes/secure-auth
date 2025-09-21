@@ -32,7 +32,7 @@ function RouteComponent() {
         toast.success("Logged in with Github");
       }
       handleUser();
-      navigate({ to: "/dashboard" });
+      navigate({ to: "/" });
     } else {
       toast.error("Something went wrong");
       navigate({ to: "/signin" });

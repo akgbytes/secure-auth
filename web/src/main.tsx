@@ -30,6 +30,13 @@ const router = createRouter({
   defaultStaleTime: 90 * 1000, // 1.5 minutes
 
   defaultNotFoundComponent: () => <NotFoundPage />,
+
+  defaultErrorComponent: ({ error }) => (
+    <div className="p-4">
+      <h1 className="text-xl font-bold text-red-600">Something went wrong</h1>
+      <pre className="text-sm text-muted-foreground">{error.message}</pre>
+    </div>
+  ),
 });
 
 declare module "@tanstack/react-router" {

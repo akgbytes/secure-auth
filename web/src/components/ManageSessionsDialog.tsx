@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -7,21 +6,11 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-
-type Session = {
-  id: string;
-  device: string;
-  ip: string;
-  location: string;
-  lastLogin: string;
-  current?: boolean;
-};
-
-type User = {
-  id: string;
-  name: string;
-  email: string;
-};
+import type { ApiAxiosError, ApiResponse, User } from "@/types";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { fetchUserSessionsById } from "@/services/admin.service";
+import { api } from "@/lib/axios";
+import { toast } from "sonner";
 
 export function ManageSessionsDialog({
   open,
@@ -32,35 +21,36 @@ export function ManageSessionsDialog({
   onOpenChange: (val: boolean) => void;
   user: User | null;
 }) {
-  // mock data
-  const [sessions, setSessions] = useState<Session[]>([
-    {
-      id: "1",
-      device: "Chrome on Windows",
-      ip: "192.168.1.20",
-      location: "New Delhi, IN",
-      lastLogin: "Sep 20, 2025 10:45 PM",
-      current: true,
-    },
-    {
-      id: "2",
-      device: "Safari on iPhone",
-      ip: "10.20.30.40",
-      location: "Mumbai, IN",
-      lastLogin: "Sep 18, 2025 09:10 AM",
-    },
-    {
-      id: "3",
-      device: "Firefox on Linux",
-      ip: "203.0.113.55",
-      location: "Bangalore, IN",
-      lastLogin: "Sep 15, 2025 07:25 PM",
-    },
-  ]);
+  if (!user) return null;
 
-  const handleLogout = (id: string) => {
-    setSessions((prev) => prev.filter((s) => s.id !== id));
-  };
+  const {
+    data: sessions,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ["user-sessions", user.id],
+    queryFn: () => fetchUserSessionsById(user.id),
+    enabled: !!user, // run only if user exists
+  });
+
+  const { mutate: logout, isPending } = useMutation<
+    ApiResponse<null>,
+    ApiAxiosError,
+    { id: string }
+  >({
+    mutationFn: async ({ id }) => {
+      const res = await api.delete(`/admin/users/sessions/${id}`);
+      return res.data;
+    },
+    onSuccess: (res) => {
+      toast.success(res.message);
+      refetch();
+    },
+    onError: () => {
+      toast.error("Error while logging out, Please try again.");
+    },
+  });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -72,11 +62,23 @@ export function ManageSessionsDialog({
           </DialogDescription>
         </DialogHeader>
 
+        {isLoading && (
+          <p className="text-sm text-muted-foreground">Loading sessions...</p>
+        )}
+
+        {error && (
+          <p className="text-sm text-red-500">Error while fetching sessions</p>
+        )}
+
+        {!isLoading && sessions?.length === 0 && (
+          <p className="text-sm text-muted-foreground">No active sessions</p>
+        )}
+
         <div className="space-y-3 max-h-[400px] overflow-y-auto">
-          {sessions.map((session) => (
+          {sessions?.map((session) => (
             <div
               key={session.id}
-              className="flex justify-between items-center text-sm border-b pb-2"
+              className="flex justify-between items-center text-sm pb-2"
             >
               <div>
                 <div>{session.device}</div>
@@ -95,7 +97,8 @@ export function ManageSessionsDialog({
                     size="sm"
                     variant="destructive"
                     className="h-6 text-xs"
-                    onClick={() => handleLogout(session.id)}
+                    onClick={() => logout({ id: session.id })}
+                    disabled={isPending}
                   >
                     Logout
                   </Button>
@@ -103,10 +106,6 @@ export function ManageSessionsDialog({
               </div>
             </div>
           ))}
-
-          {sessions.length === 0 && (
-            <p className="text-muted-foreground text-sm">No active sessions</p>
-          )}
         </div>
       </DialogContent>
     </Dialog>
