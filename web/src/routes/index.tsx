@@ -1,10 +1,7 @@
 import { Button, buttonVariants } from "@/components/ui/button";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { FiGithub } from "react-icons/fi";
-import { IconInnerShadowTop } from "@tabler/icons-react";
-import { ModeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Heart } from "lucide-react";
 import {
   Card,
   CardDescription,
@@ -12,12 +9,53 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import UserButton from "@/components/UserButton";
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
+import {
+  IconClock,
+  IconKey,
+  IconLock,
+  IconMailCheck,
+  IconRefresh,
+  IconShieldCheck,
+} from "@tabler/icons-react";
 
 export const Route = createFileRoute("/")({
   component: Index,
+  head: () => ({
+    title: "SecureAuth",
+    meta: [
+      {
+        name: "description",
+        content:
+          "A complete authentication system built with JWT, Drizzle ORM, TanStack Router, and modern best practices. Includes secure login, email verification, password reset, RBAC, and session management.",
+      },
+      { property: "og:title", content: "Secure Authentication Simplified" },
+      {
+        property: "og:description",
+        content:
+          "Explore a production-ready auth stack featuring JWT, Drizzle ORM, TanStack Query, email verification, and RBAC.",
+      },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://auth.akgbytes.com/" },
+      {
+        property: "og:image",
+        content: "https://auth.akgbytes.com/preview.png",
+      },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Secure Authentication Simplified" },
+      {
+        name: "twitter:description",
+        content:
+          "A modern full-stack authentication system with JWT, Drizzle ORM, and TanStack Router.",
+      },
+      {
+        name: "twitter:image",
+        content: "https://auth.akgbytes.com/preview.png",
+      },
+    ],
+    links: [{ rel: "canonical", href: "https://auth.akgbytes.com/" }],
+  }),
 });
 
 function Index() {
@@ -81,8 +119,9 @@ function Index() {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
           <Card className="border shadow-sm">
             <CardHeader>
-              <CardTitle className="text-xl">
-                Secure Login & Registration
+              <CardTitle className="text-xl flex gap-2 items-center">
+                <span>Secure Login & Registration</span>
+                <IconLock className="size-5" />
               </CardTitle>
               <CardDescription>
                 Complete user authentication flows with JWT access and refresh
@@ -93,16 +132,23 @@ function Index() {
 
           <Card className="border shadow-sm">
             <CardHeader>
-              <CardTitle className="text-xl">Email Verification</CardTitle>
+              <CardTitle className="text-xl flex gap-2 items-center">
+                <span>Email Verification</span>
+                <IconMailCheck className="size-5" />
+              </CardTitle>
               <CardDescription>
-                OTP-based email verification system to ensure user authenticity
+                Simple and secure email verification using time-bound magic
+                links ensures only real users get in.
               </CardDescription>
             </CardHeader>
           </Card>
 
           <Card className="border shadow-sm">
             <CardHeader>
-              <CardTitle className="text-xl">Password Recovery</CardTitle>
+              <CardTitle className="text-xl flex gap-2 items-center">
+                <span>Password Recovery</span>
+                <IconKey className="size-5" />
+              </CardTitle>
               <CardDescription>
                 Secure password reset flow with expiring tokens and email
                 notifications
@@ -112,32 +158,39 @@ function Index() {
 
           <Card className="border shadow-sm">
             <CardHeader>
-              <CardTitle className="text-xl">
-                Role-Based Access Control
+              <CardTitle className="text-xl flex gap-2 items-center">
+                <span>Role-Based Access Control</span>
+                <IconShieldCheck className="size-5" />
               </CardTitle>
               <CardDescription>
-                Flexible RBAC system to manage user sessions and access levels
+                Fine-grained permissions to separate users, admins, and more.
               </CardDescription>
             </CardHeader>
           </Card>
 
           <Card className="border shadow-sm">
             <CardHeader>
-              <CardTitle className="text-xl">Auto Token Refresh</CardTitle>
+              <CardTitle className="text-xl flex gap-2 items-center">
+                <span>Session Management</span>
+                <IconClock className="size-5" />
+              </CardTitle>
+
               <CardDescription>
-                Seamless JWT token refresh mechanism for uninterrupted user
-                sessions
+                Track and revoke active sessions across devices in real time.
               </CardDescription>
             </CardHeader>
           </Card>
 
           <Card className="border shadow-sm">
             <CardHeader>
-              <CardTitle className="text-xl">
-                Role-Based Access Control
+              <CardTitle className="text-xl flex gap-2 items-center">
+                <span>Automatic Token Refresh</span>
+                <IconRefresh className="size-5" />
               </CardTitle>
+
               <CardDescription>
-                Flexible RBAC system to manage user sessions and access levels
+                Seamless background refresh keeps users logged in without
+                interruptions.
               </CardDescription>
             </CardHeader>
           </Card>
@@ -155,14 +208,32 @@ function Index() {
           </p>
 
           <div className="flex flex-wrap justify-center gap-3">
-            <Badge>Tanstack Query</Badge>
+            <Badge>React + shadCN</Badge>
             <Badge>Tanstack Router</Badge>
+            <Badge>Tanstack Query</Badge>
             <Badge>Drizzle ORM</Badge>
-            <Badge>JWT Tokens</Badge>
+            <Badge>JWT & JOSE</Badge>
             <Badge>Mailtrap</Badge>
+            <Badge>Cloudinary</Badge>
+            <Badge>Winston</Badge>
           </div>
         </div>
       </section>
+
+      <footer className="text-center">
+        <span>
+          Made with <Heart className="inline border-none size-5" /> by{" "}
+        </span>
+        <a
+          href="https://x.com/akgbytes"
+          aria-label="twitter"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="cursor-pointer hover:text-lime-600 hover:underline"
+        >
+          akgbytes
+        </a>
+      </footer>
     </div>
   );
 }

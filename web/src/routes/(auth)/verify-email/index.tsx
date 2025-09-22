@@ -94,7 +94,7 @@ function RouteComponent() {
             </p>
 
             <Link
-              to="/dashboard"
+              to="/"
               className={buttonVariants({
                 size: "sm",
                 className: "w-full cursor-pointer",
@@ -124,7 +124,7 @@ function RouteComponent() {
             </p>
 
             <Link
-              to="/dashboard"
+              to="/"
               className={buttonVariants({
                 size: "sm",
                 className: "w-full cursor-pointer",

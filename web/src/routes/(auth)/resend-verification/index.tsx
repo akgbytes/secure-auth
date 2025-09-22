@@ -26,7 +26,6 @@ import { useMutation } from "@tanstack/react-query";
 import type { ApiAxiosError, ApiResponse } from "@/types";
 import { api } from "@/lib/axios";
 import { toast } from "sonner";
-import { ArrowLeft } from "lucide-react";
 
 export const Route = createFileRoute("/(auth)/resend-verification/")({
   component: RouteComponent,
