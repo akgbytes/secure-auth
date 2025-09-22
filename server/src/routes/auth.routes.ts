@@ -7,7 +7,6 @@ import {
   googleLogin,
   login,
   logout,
-  refreshTokens,
   register,
   resendVerificationEmail,
   resetPassword,
@@ -27,8 +26,6 @@ router.post("/email/resend", resendVerificationEmail);
 
 router.post("/password/forgot", forgotPassword);
 router.post("/password/reset", resetPassword);
-
-router.post("/refresh", refreshTokens);
 
 router.delete("/account/delete", isLoggedIn, deleteAccount);
 

@@ -81,7 +81,7 @@ export function AccountSettingsDialog({
     { password: string }
   >({
     mutationFn: async (values) => {
-      const response = await api.patch("/user/password", values);
+      const response = await api.patch("/users/me/password", values);
       return response.data;
     },
     onSuccess: (res) => {
@@ -96,8 +96,6 @@ export function AccountSettingsDialog({
 
   const handleUpdatePassword = () => {
     const newPassword = passwordRef.current?.value || "";
-
-    console.log("new: ", newPassword.length);
 
     if (!newPassword) {
       passwordRef.current?.focus();
@@ -266,7 +264,7 @@ export function AccountSettingsDialog({
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="cursor-pointer absolute right-3 top-1/2 -translate-y-1/2"
+                      className="cursor-pointer absolute right-[17px] top-1/2 -translate-y-1/2"
                     >
                       {showPassword ? (
                         <EyeOff className="size-4" />

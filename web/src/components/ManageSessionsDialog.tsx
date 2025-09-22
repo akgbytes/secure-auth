@@ -54,7 +54,7 @@ export function ManageSessionsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-[380px] sm:max-w-md md:max-w-lg">
         <DialogHeader>
           <DialogTitle>Manage Sessions</DialogTitle>
           <DialogDescription>

@@ -1,4 +1,3 @@
-import { role } from "./../db/schema/user.schema";
 import { env } from "@/config/env";
 import { TokenPayload } from "@/types";
 import crypto from "crypto";
@@ -57,13 +56,7 @@ export const verifyAccessJWT = (accessToken: string): TokenPayload => {
     const payload = jwt.verify(accessToken, env.ACCESS_TOKEN_SECRET);
     return payload as TokenPayload;
   } catch (error: any) {
-    if (error instanceof TokenExpiredError) {
-      throw new ApiError(HttpStatus.UNAUTHORIZED, "TokenExpiredError");
-    }
-    throw new ApiError(
-      HttpStatus.UNAUTHORIZED,
-      "Invalid or expired access token"
-    );
+    throw new ApiError(HttpStatus.UNAUTHORIZED, "Invalid access token");
   }
 };
 
@@ -72,6 +65,6 @@ export const verifyRefreshJWT = (refreshToken: string): TokenPayload => {
     const payload = jwt.verify(refreshToken, env.REFRESH_TOKEN_SECRET);
     return payload as TokenPayload;
   } catch (error: any) {
-    throw new ApiError(401, "Invalid or expired refresh token");
+    throw new ApiError(401, "Invalid refresh token");
   }
 };

@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { IconSettings, IconLogout } from "@tabler/icons-react";
-import { Home } from "lucide-react";
+import { Home, LayoutDashboard } from "lucide-react";
 import { AccountSettingsDialog } from "./AccountSettingsDialog";
 import { useAuthStore } from "@/store";
 import { useMutation } from "@tanstack/react-query";
@@ -70,7 +70,10 @@ const UserButton = () => {
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
-            <DropdownMenuItem className="cursor-pointer">
+            <DropdownMenuItem
+              className="cursor-pointer"
+              onClick={() => navigate({ to: "/" })}
+            >
               <Home className="size-4" aria-hidden="true" />
               <span>Home</span>
             </DropdownMenuItem>
@@ -82,6 +85,16 @@ const UserButton = () => {
               <IconSettings className="size-4" aria-hidden="true" />
               <span>Manage account</span>
             </DropdownMenuItem>
+
+            {user.role === "admin" && (
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onClick={() => navigate({ to: "/admin/dashboard" })}
+              >
+                <LayoutDashboard className="size-4" aria-hidden="true" />
+                <span>Admin dashboard</span>
+              </DropdownMenuItem>
+            )}
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuItem

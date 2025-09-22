@@ -23,7 +23,6 @@ import Navbar from "@/components/Navbar";
 import { createFileRoute } from "@tanstack/react-router";
 import { ManageSessionsDialog } from "@/components/ManageSessionsDialog";
 import { fetchUsers } from "@/services/admin.service";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import type { User } from "@/types";
 
 export const Route = createFileRoute("/(protectedRoutes)/admin/dashboard/")({
@@ -40,12 +39,7 @@ function RouteComponent() {
   const [open, setOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
-  const usersData = useSuspenseQuery({
-    queryKey: ["users"],
-    queryFn: () => fetchUsers(),
-  });
-
-  const users = usersData.data;
+  const users = Route.useLoaderData();
 
   const filteredUsers = users.filter(
     (user) =>

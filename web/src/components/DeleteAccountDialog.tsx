@@ -11,7 +11,7 @@ import Spinner from "./Spinner";
 import { useMutation } from "@tanstack/react-query";
 import type { ApiAxiosError, ApiResponse } from "@/types";
 import { api } from "@/lib/axios";
-import { fetchUser } from "@/services/user.service";
+
 import { toast } from "sonner";
 import { useAuthStore } from "@/store";
 import { useNavigate } from "@tanstack/react-router";
@@ -45,7 +45,7 @@ const DeleteAccountDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm rounded-xl">
+      <DialogContent className="max-w-xs sm:max-w-md rounded-xl">
         <DialogHeader>
           <DialogTitle>Are you absolutely sure?</DialogTitle>
           <DialogDescription>

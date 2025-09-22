@@ -42,7 +42,7 @@ export function UpdateProfileDialog({
     mutationFn: async (file) => {
       const formData = new FormData();
       formData.append("avatar", file);
-      const response = await api.patch("/user/avatar", formData, {
+      const response = await api.patch("/users/me/avatar", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -89,7 +89,7 @@ export function UpdateProfileDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md rounded-xl">
+      <DialogContent className="max-w-xs sm:max-w-md rounded-xl">
         <DialogHeader>
           <DialogTitle>Update profile</DialogTitle>
           <DialogDescription>
