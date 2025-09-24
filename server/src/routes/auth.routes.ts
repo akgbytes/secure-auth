@@ -13,18 +13,22 @@ import {
   verifyEmail,
 } from "@/controllers/auth.controller";
 import { isLoggedIn } from "@/middlewares/auth.middleware";
+import {
+  authRateLimiter,
+  forgotPasswordRateLimiter,
+} from "@/middlewares/rateLimit.middleware";
 import { Router } from "express";
 
 const router = Router();
 
-router.post("/register", register);
-router.post("/login", login);
+router.post("/register", authRateLimiter, register);
+router.post("/login", authRateLimiter, login);
 router.post("/logout", logout);
 
 router.post("/email/verify", verifyEmail);
-router.post("/email/resend", resendVerificationEmail);
+router.post("/email/resend", resendVerificationEmail, resendVerificationEmail);
 
-router.post("/password/forgot", forgotPassword);
+router.post("/password/forgot", forgotPasswordRateLimiter, forgotPassword);
 router.post("/password/reset", resetPassword);
 
 router.delete("/account/delete", isLoggedIn, deleteAccount);
