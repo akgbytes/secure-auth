@@ -11,7 +11,8 @@
 </div>
 
 <div align="center">
-  <img width="800" alt="SecureAuth Preview" src="./frontend/public/landing.png" />
+  <img width="800" alt="SecureAuth Preview" src="./web/public/image1.png" />
+  <img width="800" alt="SecureAuth Preview" src="./web/public/image2.png" />
 </div>
 
 ## 🚀 Introduction
