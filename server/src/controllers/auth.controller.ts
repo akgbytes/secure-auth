@@ -124,7 +124,7 @@ export const login = asyncHandler(async (req, res) => {
   logger.info("Login attempt", { email });
 
   const userAgent = req.headers["user-agent"] || "";
-  const ipAddress = (req.headers["x-forwarded-for"] as string) || req.ip || "";
+  const ipAddress = req.ip || "";
 
   const [user] = await db
     .select()
@@ -490,7 +490,7 @@ export const resetPassword = asyncHandler(async (req, res) => {
 //   }
 
 //   const incomingUserAgent = req.headers["user-agent"] || "";
-//   const incomingIp = (req.headers["x-forwarded-for"] as string) || req.ip || "";
+//   const incomingIp = req.ip || "";
 
 //   if (
 //     validSession.userAgent !== incomingUserAgent ||
@@ -709,7 +709,7 @@ async function handleOAuthUser(
   provider: Provider
 ) {
   const userAgent = req.headers["user-agent"] || "";
-  const ipAddress = (req.headers["x-forwarded-for"] as string) || req.ip || "";
+  const ipAddress = req.ip || "";
 
   const [existingUser] = await db
     .select()
