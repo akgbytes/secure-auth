@@ -112,7 +112,7 @@ function RouteComponent() {
                       <div>
                         <p className="font-medium">{user.name}</p>
                         <p className="text-sm text-muted-foreground">
-                          #{user.id}
+                          {user.email}
                         </p>
                       </div>
                     </div>
