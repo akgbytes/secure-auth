@@ -22,40 +22,6 @@ import {
 
 export const Route = createFileRoute("/")({
   component: Index,
-  head: () => ({
-    title: "SecureAuth",
-    meta: [
-      {
-        name: "description",
-        content:
-          "A complete authentication system built with JWT, Drizzle ORM, TanStack Router, and modern best practices. Includes secure login, email verification, password reset, RBAC, and session management.",
-      },
-      { property: "og:title", content: "Secure Authentication Simplified" },
-      {
-        property: "og:description",
-        content:
-          "Explore a production-ready auth stack featuring JWT, Drizzle ORM, TanStack Query, email verification, and RBAC.",
-      },
-      { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://auth.akgbytes.com/" },
-      {
-        property: "og:image",
-        content: "https://auth.akgbytes.com/preview.png",
-      },
-      { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Secure Authentication Simplified" },
-      {
-        name: "twitter:description",
-        content:
-          "A modern full-stack authentication system with JWT, Drizzle ORM, and TanStack Router.",
-      },
-      {
-        name: "twitter:image",
-        content: "https://auth.akgbytes.com/preview.png",
-      },
-    ],
-    links: [{ rel: "canonical", href: "https://auth.akgbytes.com/" }],
-  }),
 });
 
 function Index() {
