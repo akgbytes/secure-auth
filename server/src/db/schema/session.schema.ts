@@ -1,11 +1,4 @@
-import {
-  pgTable,
-  text,
-  boolean,
-  uuid,
-  timestamp,
-  unique,
-} from "drizzle-orm/pg-core";
+import { pgTable, text, uuid, timestamp, unique } from "drizzle-orm/pg-core";
 import { timestamps } from "@/db/column-helpers";
 import { userTable } from "./user.schema";
 
@@ -21,11 +14,11 @@ export const sessionTable = pgTable(
     expiresAt: timestamp("expires_at").notNull(),
     ...timestamps,
   },
-  (table) => ({
-    userAgentIpUnique: unique().on(
+  (table) => [
+    unique("userAgentIpUnique").on(
       table.userId,
       table.userAgent,
       table.ipAddress
     ),
-  })
+  ]
 );

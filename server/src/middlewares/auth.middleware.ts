@@ -1,4 +1,4 @@
-import { logger } from "@/config/logger";
+import { logger } from "@/utils/core/logger";
 import { db } from "@/db";
 import { sessionTable } from "@/db/schema/session.schema";
 import { clearAuthCookies, setAuthCookies } from "@/utils/cookies";

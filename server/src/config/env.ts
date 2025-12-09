@@ -4,10 +4,13 @@ import * as z from "zod";
 const envSchema = z.object({
   PORT: z.coerce.number<number>(),
   DATABASE_URL: z.url(),
+
   NODE_ENV: z.enum(["development", "production"], {
     error: (issue) => `NODE ENV must be ${issue.values.join(" | ")}`,
   }),
+
   APP_ORIGIN: z.url(),
+
   TOKEN_EXPIRY_IN_MINUTES: z.coerce.number<number>(),
   MAILTRAP_API_TOKEN: z.string().nonempty(),
   MAILTRAP_SENDER_EMAIL: z.email(),
@@ -35,7 +38,8 @@ const createEnv = (env: NodeJS.ProcessEnv) => {
   const result = envSchema.safeParse(env);
 
   if (!result.success) {
-    console.log("Failed to validate env:\n", result.error);
+    console.error("\nInvalid environment variables:");
+    console.error(z.treeifyError(result.error).properties);
     process.exit(1);
   }
 

@@ -1,6 +1,6 @@
 import { UAParser } from "ua-parser-js";
 import { format } from "date-fns";
-import { logger } from "@/config/logger";
+import { logger } from "@/utils/core/logger";
 
 interface SessionWithUserAgent {
   current?: boolean;

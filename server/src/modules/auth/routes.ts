@@ -1,5 +1,4 @@
 import {
-  deleteAccount,
   forgotPassword,
   githubCallback,
   githubLogin,
@@ -11,8 +10,7 @@ import {
   resendVerificationEmail,
   resetPassword,
   verifyEmail,
-} from "@/controllers/auth.controller";
-import { isLoggedIn } from "@/middlewares/auth.middleware";
+} from "@/modules/auth/controller";
 import {
   authRateLimiter,
   forgotPasswordRateLimiter,
@@ -26,12 +24,10 @@ router.post("/login", authRateLimiter, login);
 router.post("/logout", logout);
 
 router.post("/email/verify", verifyEmail);
-router.post("/email/resend", resendVerificationEmail, resendVerificationEmail);
+router.post("/email/resend", resendVerificationEmail);
 
 router.post("/password/forgot", forgotPasswordRateLimiter, forgotPassword);
 router.post("/password/reset", resetPassword);
-
-router.delete("/account/delete", isLoggedIn, deleteAccount);
 
 // google login
 router.get("/google/login", googleLogin);

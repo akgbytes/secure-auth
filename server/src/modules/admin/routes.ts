@@ -5,7 +5,7 @@ import {
   getAllUsers,
   logoutUserSession,
   getUserSessionsById,
-} from "../controllers/admin.controller";
+} from "../admin/controller";
 import { isAdmin } from "@/middlewares/role.middleware";
 
 const router = Router();

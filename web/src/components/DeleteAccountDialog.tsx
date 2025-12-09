@@ -29,7 +29,7 @@ const DeleteAccountDialog = ({
   const navigate = useNavigate();
   const { mutate, isPending } = useMutation<ApiResponse<null>, ApiAxiosError>({
     mutationFn: async () => {
-      const response = await api.delete("auth/account/delete");
+      const response = await api.delete("users/account/delete");
       return response.data;
     },
     onSuccess: async (res) => {

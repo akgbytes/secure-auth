@@ -20,11 +20,11 @@ app.use(
   })
 );
 
-import healthRoutes from "@/routes/health.routes";
-import authRoutes from "@/routes/auth.routes";
-import sessionRoutes from "@/routes/session.routes";
-import adminRoutes from "@/routes/admin.routes";
-import userRoutes from "@/routes/user.routes";
+import healthRoutes from "@/modules/health/routes";
+import authRoutes from "@/modules/auth/routes";
+import sessionRoutes from "@/modules/sessions/routes";
+import adminRoutes from "@/modules/admin/routes";
+import userRoutes from "@/modules/users/routes";
 
 app.use("/api/v1/health", healthRoutes);
 app.use("/api/v1/auth", authRoutes);

@@ -1,4 +1,4 @@
-import { UserRole } from "@/utils/constants";
+import { UserRole } from "@/constants";
 import { JwtPayload } from "jsonwebtoken";
 
 export interface TokenPayload extends JwtPayload {

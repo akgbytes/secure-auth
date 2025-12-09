@@ -1,5 +1,5 @@
 import { env } from "@/config/env";
-import { logger } from "@/config/logger";
+import { logger } from "@/utils/core/logger";
 import { sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/neon-serverless";
 

@@ -1,4 +1,4 @@
-import { addColors, createLogger, format, Logger, transports } from "winston";
+import { addColors, createLogger, format, transports } from "winston";
 import DailyRotateFile from "winston-daily-rotate-file";
 
 const colors = {

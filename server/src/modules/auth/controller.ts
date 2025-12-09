@@ -1,26 +1,17 @@
-import { env } from "@/config/env";
-import { logger } from "@/config/logger";
-import { db } from "@/db";
-import { sessionTable } from "@/db/schema/session.schema";
-import { tokenTable } from "@/db/schema/token.schema";
-import { userTable } from "@/db/schema/user.schema";
-import { clearAuthCookies, setAuthCookies } from "@/utils/cookies";
+import axios from "axios";
 import {
   ApiError,
   ApiResponse,
   asyncHandler,
-  handleZodError,
   HttpStatus,
+  logger,
 } from "@/utils/core";
-import { sessionExpiresAfter } from "@/utils/helpers";
-import { sendResetPasswordMail, sendVerificationMail } from "@/utils/mail";
 import {
-  cookieOptionsForOauth,
-  generateCodeVerifier,
-  pkceChallenge,
-  randomString,
-} from "@/utils/oauth";
-import { hashPassword, verifyPasswordHash } from "@/utils/password";
+  getClientInfo,
+  hashPassword,
+  sessionExpiresAfter,
+  verifyPasswordHash,
+} from "@/utils/helpers";
 import {
   generateAccessToken,
   generateRefreshToken,
@@ -28,23 +19,32 @@ import {
   hashToken,
   verifyRefreshJWT,
 } from "@/utils/token";
-
+import { sendResetPasswordMail, sendVerificationMail } from "@/utils/mail";
 import {
   validateEmail,
   validateLogin,
   validateRegister,
   validateResetPassword,
   validateVerifyEmail,
-} from "@/validations/auth.validations";
+} from "./validator";
+import { db } from "@/db";
+import { userTable } from "@/db/schema/user.schema";
+import { tokenTable } from "@/db/schema/token.schema";
 import { and, eq, gt } from "drizzle-orm";
+import { sessionTable } from "@/db/schema/session.schema";
+import { clearAuthCookies, setAuthCookies } from "@/utils/cookies";
+import {
+  cookieOptionsForOauth,
+  handleOAuthUser,
+  randomString,
+} from "@/utils/oauth";
+import { env } from "@/config/env";
 import querystring from "querystring";
-import axios from "axios";
-import { GoogleTokenResponse, UserGoogleProfile } from "@/types";
+import { GoogleTokenResponse } from "@/types";
 import { verifyIdToken } from "@/utils/oauth/verifyIdToken";
-import { Provider } from "@/utils/constants";
 
 export const register = asyncHandler(async (req, res) => {
-  const { name, email, password } = handleZodError(validateRegister(req.body));
+  const { name, email, password } = validateRegister(req.body);
 
   logger.info("Registration attempt", { email });
 
@@ -67,8 +67,8 @@ export const register = asyncHandler(async (req, res) => {
       name: userTable.name,
       email: userTable.email,
       emailVerified: userTable.emailVerified,
-      avatar: userTable.avatar,
       role: userTable.role,
+      avatar: userTable.avatar,
       provider: userTable.provider,
     });
 
@@ -79,7 +79,8 @@ export const register = asyncHandler(async (req, res) => {
       "Unable to register. Please try again."
     );
   }
-  // generate token for email verification
+
+  // Generate token for email verification
   const { rawToken, tokenHash, tokenExpiry } = generateToken();
 
   const [token] = await db
@@ -107,24 +108,21 @@ export const register = asyncHandler(async (req, res) => {
     userId: user.id,
   });
 
-  res
-    .status(HttpStatus.CREATED)
-    .json(
-      new ApiResponse(
-        HttpStatus.CREATED,
-        "Registered successfully, Please verify your email.",
-        user
-      )
-    );
+  const response = new ApiResponse(
+    HttpStatus.CREATED,
+    "Registered successfully, Please verify your email.",
+    user
+  );
+
+  res.status(response.statusCode).json(response);
 });
 
 export const login = asyncHandler(async (req, res) => {
-  const { email, password } = handleZodError(validateLogin(req.body));
+  const { email, password } = validateLogin(req.body);
 
   logger.info("Login attempt", { email });
 
-  const userAgent = req.headers["user-agent"] || "";
-  const ipAddress = req.ip || "";
+  const { userAgent, ipAddress } = getClientInfo(req);
 
   const [user] = await db
     .select()
@@ -144,7 +142,7 @@ export const login = asyncHandler(async (req, res) => {
     );
   }
 
-  // if user had logged in via oauth, password will be null, so provide fallback
+  // If user had logged in via oauth, password will be null, so provide fallback
   await verifyPasswordHash(user.password || "", password, "login");
 
   // if session exists then update expiry time otherwise create new
@@ -191,9 +189,13 @@ export const login = asyncHandler(async (req, res) => {
 
   setAuthCookies(res, accessToken, refreshToken);
 
-  res
-    .status(HttpStatus.OK)
-    .json(new ApiResponse(HttpStatus.OK, "Logged in successfully", null));
+  const response = new ApiResponse(
+    HttpStatus.OK,
+    "Logged in successfully",
+    null
+  );
+
+  res.status(response.statusCode).json(response);
 });
 
 export const logout = asyncHandler(async (req, res) => {
@@ -207,8 +209,6 @@ export const logout = asyncHandler(async (req, res) => {
       await db
         .delete(sessionTable)
         .where(eq(sessionTable.id, payload.sessionId));
-
-      logger.info("Logged out successfully", { userId: payload.userId });
     } catch (err: any) {
       const errorMsg =
         err instanceof ApiError ? err.message : "Invalid session";
@@ -217,14 +217,19 @@ export const logout = asyncHandler(async (req, res) => {
   }
 
   clearAuthCookies(res);
+  logger.info("Logged out successfully");
 
-  res
-    .status(HttpStatus.OK)
-    .json(new ApiResponse(HttpStatus.OK, "Logged out successfully", null));
+  const response = new ApiResponse(
+    HttpStatus.OK,
+    "Logged out successfully",
+    null
+  );
+
+  res.status(response.statusCode).json(response);
 });
 
 export const verifyEmail = asyncHandler(async (req, res) => {
-  const { token } = handleZodError(validateVerifyEmail(req.body));
+  const { token } = validateVerifyEmail(req.body);
 
   const tokenHash = hashToken(token);
 
@@ -252,13 +257,17 @@ export const verifyEmail = asyncHandler(async (req, res) => {
     await db.delete(tokenTable).where(eq(tokenTable.id, tokenInDb.id));
   });
 
-  res
-    .status(HttpStatus.OK)
-    .json(new ApiResponse(HttpStatus.OK, "Email verified successfully", null));
+  const response = new ApiResponse(
+    HttpStatus.OK,
+    "Email verified successfully",
+    null
+  );
+
+  res.status(response.statusCode).json(response);
 });
 
 export const resendVerificationEmail = asyncHandler(async (req, res) => {
-  const email = handleZodError(validateEmail(req.body.email));
+  const email = validateEmail(req.body.email);
 
   logger.info("Request for resend verification email", { email });
 
@@ -272,15 +281,13 @@ export const resendVerificationEmail = asyncHandler(async (req, res) => {
       email,
     });
 
-    return res
-      .status(200)
-      .json(
-        new ApiResponse(
-          200,
-          "If an account exists, a verification email has been sent.",
-          null
-        )
-      );
+    const response = new ApiResponse(
+      200,
+      "If an account exists, a verification email has been sent.",
+      null
+    );
+
+    return res.status(response.statusCode).json(response);
   }
 
   if (user.emailVerified) {
@@ -291,7 +298,7 @@ export const resendVerificationEmail = asyncHandler(async (req, res) => {
     throw new ApiError(HttpStatus.BAD_REQUEST, "Email is already verified");
   }
 
-  // delete if there is already token for email verification in db
+  // Delete if there is already token for email verification in db
   await db.delete(tokenTable).where(eq(tokenTable.userId, user.id));
 
   const { rawToken, tokenHash, tokenExpiry } = generateToken();
@@ -321,19 +328,17 @@ export const resendVerificationEmail = asyncHandler(async (req, res) => {
 
   logger.info("Verification email resent", { email });
 
-  res
-    .status(HttpStatus.OK)
-    .json(
-      new ApiResponse(
-        HttpStatus.OK,
-        "If an account exists, a verification email has been sent.",
-        null
-      )
-    );
+  const response = new ApiResponse(
+    HttpStatus.OK,
+    "If an account exists, a verification email has been sent.",
+    null
+  );
+
+  res.status(response.statusCode).json(response);
 });
 
 export const forgotPassword = asyncHandler(async (req, res) => {
-  const email = handleZodError(validateEmail(req.body.email));
+  const email = validateEmail(req.body.email);
 
   const [user] = await db
     .select()
@@ -341,18 +346,16 @@ export const forgotPassword = asyncHandler(async (req, res) => {
     .where(eq(userTable.email, email));
 
   if (!user) {
-    return res
-      .status(200)
-      .json(
-        new ApiResponse(
-          200,
-          "If an account exists, a reset link has been sent to the email.",
-          null
-        )
-      );
+    const response = new ApiResponse(
+      200,
+      "If an account exists, a reset link has been sent to the email.",
+      null
+    );
+
+    return res.status(response.statusCode).json(response);
   }
 
-  //  delete if there is already token for reset password in db
+  // Delete if there is already token for reset password in db
   await db.delete(tokenTable).where(eq(tokenTable.userId, user.id));
 
   const { rawToken, tokenHash, tokenExpiry } = generateToken();
@@ -377,19 +380,18 @@ export const forgotPassword = asyncHandler(async (req, res) => {
   await sendResetPasswordMail(user.email, rawToken);
 
   logger.info("Password reset email sent", { email });
-  res
-    .status(HttpStatus.OK)
-    .json(
-      new ApiResponse(
-        HttpStatus.OK,
-        "If an account exists, a reset link has been sent to the email",
-        null
-      )
-    );
+
+  const response = new ApiResponse(
+    HttpStatus.OK,
+    "If an account exists, a reset link has been sent to the email",
+    null
+  );
+
+  return res.status(response.statusCode).json(response);
 });
 
 export const resetPassword = asyncHandler(async (req, res) => {
-  const { token, password } = handleZodError(validateResetPassword(req.body));
+  const { token, password } = validateResetPassword(req.body);
 
   const tokenHash = hashToken(token);
 
@@ -420,20 +422,20 @@ export const resetPassword = asyncHandler(async (req, res) => {
     );
   }
 
-  // if user have valid token for password reset means we can also verify his email
+  // If user have valid token for password reset means we can also verify his email
   await db
     .update(userTable)
     .set({ emailVerified: true })
     .where(eq(userTable.id, tokenInDb.user.id));
 
-  // check if old and new password are same
+  // Check if old and new password are same
   await verifyPasswordHash(tokenInDb.user.password || "", password, "reset");
 
   const hashedPassword = await hashPassword(password);
 
   await db
     .transaction(async (tx) => {
-      // update password
+      // Update password
       await tx
         .update(userTable)
         .set({
@@ -441,10 +443,10 @@ export const resetPassword = asyncHandler(async (req, res) => {
         })
         .where(eq(userTable.id, tokenInDb.user.id));
 
-      // delete token
+      // Delete token
       await tx.delete(tokenTable).where(eq(tokenTable.id, tokenInDb.token.id));
 
-      // delete all existing sessions
+      // Delete all existing sessions
       await tx
         .delete(sessionTable)
         .where(eq(sessionTable.userId, tokenInDb.user.id));
@@ -461,85 +463,15 @@ export const resetPassword = asyncHandler(async (req, res) => {
     });
 
   logger.info("Password reset successful", { email: tokenInDb.user.email });
-  res
-    .status(HttpStatus.OK)
-    .json(new ApiResponse(HttpStatus.OK, "Password reset successful", null));
+
+  const response = new ApiResponse(
+    HttpStatus.OK,
+    "Password reset successful",
+    null
+  );
+
+  return res.status(response.statusCode).json(response);
 });
-
-// refreshing tokens in middleware now
-// export const refreshTokens = asyncHandler(async (req, res) => {
-//   const incomingRefreshToken = req.cookies.refreshToken as string;
-
-//   if (!incomingRefreshToken) {
-//     throw new ApiError(HttpStatus.UNAUTHORIZED, "Refresh token is missing");
-//   }
-
-//   const payload = verifyRefreshJWT(incomingRefreshToken);
-
-//   const [validSession] = await db
-//     .select()
-//     .from(sessionTable)
-//     .where(eq(sessionTable.id, payload.sessionId));
-
-//   if (!validSession) {
-//     throw new ApiError(401, "Refresh token has been used or is invalid");
-//   }
-
-//   if (new Date(validSession.expiresAt) < new Date()) {
-//     throw new ApiError(401, "Session expired. Please login again.");
-//   }
-
-//   const incomingUserAgent = req.headers["user-agent"] || "";
-//   const incomingIp = req.ip || "";
-
-//   if (
-//     validSession.userAgent !== incomingUserAgent ||
-//     validSession.ipAddress !== incomingIp
-//   ) {
-//     await db.delete(sessionTable).where(eq(sessionTable.id, validSession.id));
-//     logger.warn("Session mismatch detected. Possible stolen token.", {
-//       sessionId: validSession.id,
-//       userId: validSession.userId,
-//     });
-//     throw new ApiError(
-//       HttpStatus.UNAUTHORIZED,
-//       "Session mismatch. Please log in again."
-//     );
-//   }
-
-//   await db
-//     .update(sessionTable)
-//     .set({
-//       expiresAt: sessionExpiresAfter(),
-//     })
-//     .where(eq(sessionTable.id, validSession.id));
-
-//   const accessToken = generateAccessToken({
-//     id: validSession.userId,
-//     sessionId: validSession.id,
-//     email: payload.email,
-//     role: payload.role,
-//   });
-
-//   const newRefreshToken = generateRefreshToken({
-//     id: validSession.userId,
-//     sessionId: validSession.id,
-//     email: payload.email,
-//     role: payload.role,
-//   });
-
-//   setAuthCookies(res, accessToken, newRefreshToken);
-
-//   res
-//     .status(HttpStatus.OK)
-//     .json(
-//       new ApiResponse(
-//         HttpStatus.OK,
-//         "Access token refreshed successfully",
-//         null
-//       )
-//     );
-// });
 
 export const googleLogin = asyncHandler(async (req, res) => {
   const state = randomString(16);
@@ -568,6 +500,7 @@ export const googleCallback = asyncHandler(async (req, res) => {
     code?: string;
     state?: string;
   };
+
   const cookieState = req.cookies["google_oauth_state"];
 
   if (
@@ -697,117 +630,77 @@ export const githubCallback = asyncHandler(async (req, res) => {
   }
 });
 
-async function handleOAuthUser(
-  profile: {
-    email: string;
-    name: string;
-    picture: string;
-    emailVerified: boolean;
-  },
-  req: any,
-  res: any,
-  provider: Provider
-) {
-  const userAgent = req.headers["user-agent"] || "";
-  const ipAddress = req.ip || "";
+// Refreshing tokens in middleware now
+// export const refreshTokens = asyncHandler(async (req, res) => {
+//   const incomingRefreshToken = req.cookies.refreshToken as string;
 
-  const [existingUser] = await db
-    .select()
-    .from(userTable)
-    .where(eq(userTable.email, profile.email))
-    .limit(1);
+//   if (!incomingRefreshToken) {
+//     throw new ApiError(HttpStatus.UNAUTHORIZED, "Refresh token is missing");
+//   }
 
-  let userId: string;
+//   const payload = verifyRefreshJWT(incomingRefreshToken);
 
-  if (existingUser) {
-    userId = existingUser.id;
-    if (!existingUser.emailVerified) {
-      await db
-        .update(userTable)
-        .set({ emailVerified: true })
-        .where(eq(userTable.id, userId));
-    }
-  } else {
-    const [user] = await db
-      .insert(userTable)
-      .values({
-        email: profile.email,
-        name: profile.name,
-        avatar: profile.picture,
-        provider,
-        emailVerified: profile.emailVerified,
-      })
-      .returning();
+//   const [validSession] = await db
+//     .select()
+//     .from(sessionTable)
+//     .where(eq(sessionTable.id, payload.sessionId));
 
-    if (!user)
-      throw new ApiError(
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Failed to create user"
-      );
-    userId = user.id;
-  }
+//   if (!validSession) {
+//     throw new ApiError(401, "Refresh token has been used or is invalid");
+//   }
 
-  // Create or update session
-  const expiry = sessionExpiresAfter();
-  const [session] = await db
-    .insert(sessionTable)
-    .values({
-      userId,
-      ipAddress,
-      userAgent,
-      expiresAt: expiry,
-    })
-    .onConflictDoUpdate({
-      target: [
-        sessionTable.userId,
-        sessionTable.userAgent,
-        sessionTable.ipAddress,
-      ],
-      set: { expiresAt: expiry },
-    })
-    .returning();
+//   if (new Date(validSession.expiresAt) < new Date()) {
+//     throw new ApiError(401, "Session expired. Please login again.");
+//   }
 
-  if (!session)
-    throw new ApiError(
-      HttpStatus.INTERNAL_SERVER_ERROR,
-      "Failed to create session"
-    );
+//   const incomingUserAgent = req.headers["user-agent"] || "";
+//   const incomingIp = req.ip || "";
 
-  // Issue JWT tokens
-  const accessToken = generateAccessToken({
-    id: userId,
-    sessionId: session.id,
-    email: profile.email,
-    role: existingUser?.role || "user",
-  });
-  const refreshToken = generateRefreshToken({
-    id: userId,
-    sessionId: session.id,
-    email: profile.email,
-    role: existingUser?.role || "user",
-  });
-  setAuthCookies(res, accessToken, refreshToken);
+//   if (
+//     validSession.userAgent !== incomingUserAgent ||
+//     validSession.ipAddress !== incomingIp
+//   ) {
+//     await db.delete(sessionTable).where(eq(sessionTable.id, validSession.id));
+//     logger.warn("Session mismatch detected. Possible stolen token.", {
+//       sessionId: validSession.id,
+//       userId: validSession.userId,
+//     });
+//     throw new ApiError(
+//       HttpStatus.UNAUTHORIZED,
+//       "Session mismatch. Please log in again."
+//     );
+//   }
 
-  return res.redirect(
-    `${env.APP_ORIGIN}/auth/callback?provider=${provider}&success=true`
-  );
-}
+//   await db
+//     .update(sessionTable)
+//     .set({
+//       expiresAt: sessionExpiresAfter(),
+//     })
+//     .where(eq(sessionTable.id, validSession.id));
 
-export const deleteAccount = asyncHandler(async (req, res) => {
-  const user = req.user;
-  if (!user) {
-    throw new ApiError(HttpStatus.UNAUTHORIZED, "Unauthorized");
-  }
+//   const accessToken = generateAccessToken({
+//     id: validSession.userId,
+//     sessionId: validSession.id,
+//     email: payload.email,
+//     role: payload.role,
+//   });
 
-  logger.info("Request for account deletion", { email: user.email });
+//   const newRefreshToken = generateRefreshToken({
+//     id: validSession.userId,
+//     sessionId: validSession.id,
+//     email: payload.email,
+//     role: payload.role,
+//   });
 
-  await db.delete(userTable).where(eq(userTable.id, user.id));
+//   setAuthCookies(res, accessToken, newRefreshToken);
 
-  logger.info("Account deleted successfully", { email: user.email });
-
-  clearAuthCookies(res);
-
-  res
-    .status(HttpStatus.OK)
-    .json(new ApiResponse(HttpStatus.OK, "Account deleted successfully", null));
-});
+//   res
+//     .status(HttpStatus.OK)
+//     .json(
+//       new ApiResponse(
+//         HttpStatus.OK,
+//         "Access token refreshed successfully",
+//         null
+//       )
+//     );
+// });

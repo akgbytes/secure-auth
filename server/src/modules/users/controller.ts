@@ -1,5 +1,5 @@
 import { uploadOnCloudinary } from "@/config/cloudinary";
-import { logger } from "@/config/logger";
+import { logger } from "@/utils/core/logger";
 import { db } from "@/db";
 import { sessionTable } from "@/db/schema/session.schema";
 import { userTable } from "@/db/schema/user.schema";
@@ -10,9 +10,11 @@ import {
   handleZodError,
   HttpStatus,
 } from "@/utils/core";
-import { hashPassword, verifyPasswordHash } from "@/utils/password";
-import { validatePassword } from "@/validations/auth.validations";
+
 import { and, eq, ne } from "drizzle-orm";
+import { validatePassword } from "../auth/validator";
+import { hashPassword } from "@/utils/helpers";
+import { clearAuthCookies } from "@/utils/cookies";
 
 export const getMe = asyncHandler(async (req, res) => {
   const user = req.user;
@@ -42,15 +44,13 @@ export const getMe = asyncHandler(async (req, res) => {
       "Something went wrong"
     );
 
-  res
-    .status(HttpStatus.OK)
-    .json(
-      new ApiResponse(
-        HttpStatus.OK,
-        "User profile fetched successfully",
-        userDetails
-      )
-    );
+  const response = new ApiResponse(
+    HttpStatus.OK,
+    "User profile fetched successfully",
+    userDetails
+  );
+
+  res.status(response.statusCode).json(response);
 });
 
 export const changePassword = asyncHandler(async (req, res) => {
@@ -59,12 +59,12 @@ export const changePassword = asyncHandler(async (req, res) => {
     throw new ApiError(HttpStatus.UNAUTHORIZED, "Unauthorized");
   }
 
-  const password = handleZodError(validatePassword(req.body.password));
+  const password = validatePassword(req.body.password);
   const hashedPassword = await hashPassword(password);
 
   await db
     .transaction(async (tx) => {
-      // change password
+      // Change password
       await tx
         .update(userTable)
         .set({
@@ -72,11 +72,11 @@ export const changePassword = asyncHandler(async (req, res) => {
         })
         .where(eq(userTable.id, user.id));
 
-      // delete all existing sessions
+      // Delete all existing sessions
       await tx.delete(sessionTable).where(
         and(
           eq(sessionTable.userId, user.id),
-          ne(sessionTable.id, user.sessionId) // keep the current session
+          ne(sessionTable.id, user.sessionId) // Keep the current session
         )
       );
     })
@@ -92,6 +92,7 @@ export const changePassword = asyncHandler(async (req, res) => {
     });
 
   logger.info("Password changed successfully", { email: user.email });
+
   res
     .status(HttpStatus.OK)
     .json(
@@ -108,7 +109,7 @@ export const updateAvatar = asyncHandler(async (req, res) => {
   let imageUrl = await uploadOnCloudinary(req.file?.path || "");
   logger.info("Avatar uploaded to Cloudinary", { email: user.email });
 
-  // update in db
+  // Update in db
   await db
     .update(userTable)
     .set({
@@ -118,9 +119,34 @@ export const updateAvatar = asyncHandler(async (req, res) => {
 
   logger.info("Avatar changed successfully");
 
-  res
-    .status(HttpStatus.OK)
-    .json(
-      new ApiResponse(HttpStatus.OK, "User avatar updated successfully", null)
-    );
+  const response = new ApiResponse(
+    HttpStatus.OK,
+    "User avatar updated successfully",
+    null
+  );
+
+  res.status(response.statusCode).json(response);
+});
+
+export const deleteAccount = asyncHandler(async (req, res) => {
+  const user = req.user;
+  if (!user) {
+    throw new ApiError(HttpStatus.UNAUTHORIZED, "Unauthorized");
+  }
+
+  logger.info("Request for account deletion", { email: user.email });
+
+  await db.delete(userTable).where(eq(userTable.id, user.id));
+
+  logger.info("Account deleted successfully", { email: user.email });
+
+  clearAuthCookies(res);
+
+  const response = new ApiResponse(
+    HttpStatus.OK,
+    "Account deleted successfully",
+    null
+  );
+
+  res.status(response.statusCode).json(response);
 });

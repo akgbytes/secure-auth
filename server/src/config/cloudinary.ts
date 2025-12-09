@@ -2,8 +2,7 @@ import { v2 as cloudinary } from "cloudinary";
 import fs from "fs/promises";
 import path from "path";
 import { env } from "./env";
-import { ApiError } from "@/utils/core";
-import { logger } from "./logger";
+import { ApiError, logger } from "@/utils/core";
 
 cloudinary.config({
   cloud_name: env.CLOUDINARY_CLOUD_NAME,

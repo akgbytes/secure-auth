@@ -1,7 +1,7 @@
 import { env } from "@/config/env";
 import { TokenPayload } from "@/types";
 import crypto from "crypto";
-import jwt, { SignOptions, TokenExpiredError } from "jsonwebtoken";
+import jwt, { SignOptions } from "jsonwebtoken";
 import { ApiError, HttpStatus } from "./core";
 
 export const hashToken = (rawToken: string) =>

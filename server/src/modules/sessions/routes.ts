@@ -1,7 +1,7 @@
 import {
   getAllSessions,
   logoutFromSpecificSession,
-} from "@/controllers/session.controller";
+} from "@/modules/sessions/controller";
 import { isLoggedIn } from "@/middlewares/auth.middleware";
 import { Router } from "express";
 

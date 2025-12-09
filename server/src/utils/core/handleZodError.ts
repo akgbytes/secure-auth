@@ -1,22 +1,22 @@
-import { ZodError } from "zod";
-import { ApiError } from "@/utils/core/ApiError";
+import { ZodSafeParseResult } from "zod";
+import { ApiError } from "./ApiError";
 import { HttpStatus } from "./httpStatus";
-export const handleZodError = <T>(
-  result: { success: true; data: T } | { success: false; error: ZodError }
-): T => {
-  if (result.success) return result.data;
 
-  const issue = result.error?.issues[0];
-  const path = issue?.path.join(".");
-  const isMissing =
-    issue?.code === "invalid_type" && issue.input === "undefined";
+type Issue = {
+  expected: string;
+  code: string;
+  path: string[];
+  message: string;
+};
 
-  throw new ApiError(
-    isMissing ? 400 : 422,
-    isMissing
-      ? path
-        ? `Missing '${path}' field`
-        : "Missing required fields"
-      : issue?.message || "Invalid input data"
-  );
+export const handleZodError = <T>(result: ZodSafeParseResult<T>) => {
+  if (result.success && result.data) return result.data;
+
+  const issue = result.error?.issues[0] as Issue;
+  const path = issue.path[0] || "";
+  const message = issue.message;
+
+  throw new ApiError(HttpStatus.BAD_REQUEST, "Validation failed", [
+    { field: path, message },
+  ]);
 };

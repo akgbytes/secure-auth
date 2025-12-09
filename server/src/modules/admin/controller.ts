@@ -1,4 +1,4 @@
-import { logger } from "@/config/logger";
+import { logger } from "@/utils/core/logger";
 import { db } from "@/db";
 import { sessionTable } from "@/db/schema/session.schema";
 import { userTable } from "@/db/schema/user.schema";
@@ -15,15 +15,15 @@ export const getAllUsers = asyncHandler(async (req, res) => {
 
   const users = await db
     .select({
-      createdAt: userTable.createdAt,
-      updatedAt: userTable.updatedAt,
       id: userTable.id,
       name: userTable.name,
       email: userTable.email,
       emailVerified: userTable.emailVerified,
       role: userTable.role,
-      provider: userTable.provider,
       avatar: userTable.avatar,
+      provider: userTable.provider,
+      createdAt: userTable.createdAt,
+      updatedAt: userTable.updatedAt,
     })
     .from(userTable)
     .where(ne(userTable.id, adminId))

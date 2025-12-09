@@ -1,4 +1,4 @@
-import { logger } from "@/config/logger";
+import { logger } from "@/utils/core/logger";
 import { ApiError, HttpStatus } from "@/utils/core";
 import { ErrorRequestHandler, Request, Response, NextFunction } from "express";
 
@@ -22,7 +22,7 @@ export const errorHandler: ErrorRequestHandler = (
   res.status(apiError.statusCode).json({
     statusCode: apiError.statusCode,
     message: apiError.message,
-    data: apiError.data,
+    errors: apiError.errors,
     success: apiError.success,
   });
 };

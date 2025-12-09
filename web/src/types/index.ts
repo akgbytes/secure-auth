@@ -7,14 +7,14 @@ export type ApiResponse<T> = {
   data: T;
 };
 
-export type ApiError<T = unknown> = {
+export type ApiError = {
   success: boolean;
   statusCode: number;
   message: string;
-  data: T | null;
+  errors: [];
 };
 
-export type ApiAxiosError<T = unknown> = AxiosError<ApiError<T>>;
+export type ApiAxiosError = AxiosError<ApiError>;
 
 export type User = {
   id: string;

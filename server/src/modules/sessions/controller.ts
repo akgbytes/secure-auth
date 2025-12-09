@@ -1,4 +1,4 @@
-import { logger } from "@/config/logger";
+import { logger } from "@/utils/core/logger";
 import { db } from "@/db";
 import { sessionTable } from "@/db/schema/session.schema";
 import { ApiError, ApiResponse, asyncHandler, HttpStatus } from "@/utils/core";
@@ -29,15 +29,13 @@ export const getAllSessions = asyncHandler(async (req, res) => {
     allSesssionsWithCurrentFlag
   );
 
-  res
-    .status(200)
-    .json(
-      new ApiResponse(
-        HttpStatus.OK,
-        "Fetched all sessions successfully",
-        formattedSessions
-      )
-    );
+  const response = new ApiResponse(
+    HttpStatus.OK,
+    "Fetched all sessions successfully",
+    formattedSessions
+  );
+
+  res.status(response.statusCode).json(response);
 });
 
 export const logoutFromSpecificSession = asyncHandler(async (req, res) => {
@@ -64,7 +62,11 @@ export const logoutFromSpecificSession = asyncHandler(async (req, res) => {
 
   logger.info("Signed out successfully", { userId: user.id, sessionId });
 
-  res
-    .status(HttpStatus.OK)
-    .json(new ApiResponse(HttpStatus.OK, "Signed out successfully", null));
+  const response = new ApiResponse(
+    HttpStatus.OK,
+    "Signed out successfully",
+    null
+  );
+
+  res.status(response.statusCode).json(response);
 });

@@ -1,6 +1,6 @@
 import { pgTable, text, boolean, uuid, pgEnum } from "drizzle-orm/pg-core";
 import { timestamps } from "@/db/column-helpers";
-import { Provider, UserRole } from "@/utils/constants";
+import { Provider, UserRole } from "@/constants";
 
 export const role = pgEnum("role", UserRole);
 export const provider = pgEnum("provider", Provider);

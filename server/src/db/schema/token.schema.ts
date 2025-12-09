@@ -1,7 +1,7 @@
 import { pgTable, text, uuid, timestamp, pgEnum } from "drizzle-orm/pg-core";
 import { timestamps } from "@/db/column-helpers";
 import { userTable } from "./user.schema";
-import { TokenType } from "@/utils/constants";
+import { TokenType } from "@/constants";
 
 export const tokenType = pgEnum("type", TokenType);
 
