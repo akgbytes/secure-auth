@@ -1,21 +1,21 @@
-import {
-  forgotPassword,
-  githubCallback,
-  githubLogin,
-  googleCallback,
-  googleLogin,
-  login,
-  logout,
-  register,
-  resendVerificationEmail,
-  resetPassword,
-  verifyEmail,
-} from "@/modules/auth/controller";
-import {
-  authRateLimiter,
-  forgotPasswordRateLimiter,
-} from "@/middlewares/rateLimit.middleware";
 import { Router } from "express";
+import {
+	authRateLimiter,
+	forgotPasswordRateLimiter,
+} from "@/middlewares/rateLimit.middleware";
+import {
+	forgotPassword,
+	githubCallback,
+	githubLogin,
+	googleCallback,
+	googleLogin,
+	login,
+	logout,
+	register,
+	resendVerificationEmail,
+	resetPassword,
+	verifyEmail,
+} from "@/modules/auth/controller";
 
 const router = Router();
 

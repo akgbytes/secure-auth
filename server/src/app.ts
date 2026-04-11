@@ -1,6 +1,6 @@
-import express from "express";
-import cors from "cors";
 import cookieParser from "cookie-parser";
+import cors from "cors";
+import express from "express";
 import { env } from "@/config/env";
 import { errorHandler } from "@/middlewares/error.middleware";
 
@@ -8,22 +8,32 @@ export const app = express();
 
 app.set("trust proxy", true);
 
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.use(
-  cors({
-    origin: env.APP_ORIGIN,
-    credentials: true,
-    methods: ["GET", "POST", "DELETE", "PUT", "PATCH"],
-  })
+	cors({
+		origin: env.APP_ORIGIN,
+		credentials: true,
+		methods: ["GET", "POST", "DELETE", "PUT", "PATCH"],
+	}),
 );
 
-import healthRoutes from "@/modules/health/routes";
-import authRoutes from "@/modules/auth/routes";
-import sessionRoutes from "@/modules/sessions/routes";
+app.use((req, res, next) => {
+  console.log({
+    ip: req.ip,
+    forwarded: req.headers["x-forwarded-for"],
+    remote: req.socket.remoteAddress,
+  });
+  next();
+});
+
 import adminRoutes from "@/modules/admin/routes";
+import authRoutes from "@/modules/auth/routes";
+import healthRoutes from "@/modules/health/routes";
+import sessionRoutes from "@/modules/sessions/routes";
 import userRoutes from "@/modules/users/routes";
 
 app.use("/api/v1/health", healthRoutes);

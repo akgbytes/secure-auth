@@ -1,16 +1,16 @@
 export const emailVerifyTemplate = (
-  link: string,
-  brandColor: string = "#117149"
+	link: string,
+	brandColor: string = "#117149",
 ) => ({
-  subject: "Verify your SecureAuth account",
-  text: `Welcome to SecureAuth! 
+	subject: "Verify your SecureAuth account",
+	text: `Welcome to SecureAuth! 
 
 Please verify your email by clicking this link: ${link}
 
 If you didn’t create this account, you can safely ignore this email.
 
 Need help? Contact our support team.`,
-  html: `
+	html: `
   <!DOCTYPE html>
   <html lang="en">
   <head>
@@ -75,18 +75,18 @@ Need help? Contact our support team.`,
 });
 
 export const passwordResetTemplate = (
-  link: string,
-  brandColor: string = "#117149"
+	link: string,
+	brandColor: string = "#117149",
 ) => ({
-  subject: "Reset your SecureAuth password",
-  text: `We received a request to reset your password.
+	subject: "Reset your SecureAuth password",
+	text: `We received a request to reset your password.
 
 Reset it using this link: ${link}
 
 If you didn’t request this, you can safely ignore this email.
 
 Need help? Contact our support team.`,
-  html: `
+	html: `
   <!DOCTYPE html>
   <html lang="en">
   <head>

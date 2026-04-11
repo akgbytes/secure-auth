@@ -1,12 +1,12 @@
-import {
-  changePassword,
-  deleteAccount,
-  getMe,
-  updateAvatar,
-} from "@/modules/users/controller";
+import { Router } from "express";
 import { isLoggedIn } from "@/middlewares/auth.middleware";
 import { upload } from "@/middlewares/multer.middleware";
-import { Router } from "express";
+import {
+	changePassword,
+	deleteAccount,
+	getMe,
+	updateAvatar,
+} from "@/modules/users/controller";
 
 const router = Router();
 

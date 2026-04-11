@@ -1,9 +1,9 @@
-import {
-  getAllSessions,
-  logoutFromSpecificSession,
-} from "@/modules/sessions/controller";
-import { isLoggedIn } from "@/middlewares/auth.middleware";
 import { Router } from "express";
+import { isLoggedIn } from "@/middlewares/auth.middleware";
+import {
+	getAllSessions,
+	logoutFromSpecificSession,
+} from "@/modules/sessions/controller";
 
 const router = Router();
 

@@ -1,72 +1,72 @@
-import { logger } from "@/utils/core/logger";
+import { and, desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { sessionTable } from "@/db/schema/session.schema";
 import { ApiError, ApiResponse, asyncHandler, HttpStatus } from "@/utils/core";
+import { logger } from "@/utils/core/logger";
 import { transformSessions } from "@/utils/sessions";
-import { and, desc, eq } from "drizzle-orm";
 
 export const getAllSessions = asyncHandler(async (req, res) => {
-  const user = req.user;
+	const user = req.user;
 
-  if (!user) {
-    throw new ApiError(HttpStatus.UNAUTHORIZED, "Unauthorized");
-  }
-  const currentSessionId = user.sessionId;
+	if (!user) {
+		throw new ApiError(HttpStatus.UNAUTHORIZED, "Unauthorized");
+	}
+	const currentSessionId = user.sessionId;
 
-  const allSessions = await db
-    .select()
-    .from(sessionTable)
-    .where(eq(sessionTable.userId, user.id))
-    .orderBy(desc(sessionTable.createdAt));
+	const allSessions = await db
+		.select()
+		.from(sessionTable)
+		.where(eq(sessionTable.userId, user.id))
+		.orderBy(desc(sessionTable.createdAt));
 
-  // Setting true flag to current session
-  const allSesssionsWithCurrentFlag = allSessions.map((session) => ({
-    ...session,
-    current: session.id === currentSessionId,
-  }));
+	// Setting true flag to current session
+	const allSesssionsWithCurrentFlag = allSessions.map((session) => ({
+		...session,
+		current: session.id === currentSessionId,
+	}));
 
-  const formattedSessions = await transformSessions(
-    allSesssionsWithCurrentFlag
-  );
+	const formattedSessions = await transformSessions(
+		allSesssionsWithCurrentFlag,
+	);
 
-  const response = new ApiResponse(
-    HttpStatus.OK,
-    "Fetched all sessions successfully",
-    formattedSessions
-  );
+	const response = new ApiResponse(
+		HttpStatus.OK,
+		"Fetched all sessions successfully",
+		formattedSessions,
+	);
 
-  res.status(response.statusCode).json(response);
+	res.status(response.statusCode).json(response);
 });
 
 export const logoutFromSpecificSession = asyncHandler(async (req, res) => {
-  const user = req.user;
-  if (!user) {
-    throw new ApiError(HttpStatus.UNAUTHORIZED, "Unauthorized");
-  }
+	const user = req.user;
+	if (!user) {
+		throw new ApiError(HttpStatus.UNAUTHORIZED, "Unauthorized");
+	}
 
-  const sessionId = req.params.id as string;
-  if (!sessionId) {
-    throw new ApiError(HttpStatus.BAD_REQUEST, "Session ID is required");
-  }
+	const sessionId = req.params.id as string;
+	if (!sessionId) {
+		throw new ApiError(HttpStatus.BAD_REQUEST, "Session ID is required");
+	}
 
-  const result = await db
-    .delete(sessionTable)
-    .where(
-      and(eq(sessionTable.userId, user.id), eq(sessionTable.id, sessionId))
-    )
-    .returning();
+	const result = await db
+		.delete(sessionTable)
+		.where(
+			and(eq(sessionTable.userId, user.id), eq(sessionTable.id, sessionId)),
+		)
+		.returning();
 
-  if (result.length === 0) {
-    throw new ApiError(HttpStatus.NOT_FOUND, "Session not found");
-  }
+	if (result.length === 0) {
+		throw new ApiError(HttpStatus.NOT_FOUND, "Session not found");
+	}
 
-  logger.info("Signed out successfully", { userId: user.id, sessionId });
+	logger.info("Signed out successfully", { userId: user.id, sessionId });
 
-  const response = new ApiResponse(
-    HttpStatus.OK,
-    "Signed out successfully",
-    null
-  );
+	const response = new ApiResponse(
+		HttpStatus.OK,
+		"Signed out successfully",
+		null,
+	);
 
-  res.status(response.statusCode).json(response);
+	res.status(response.statusCode).json(response);
 });
