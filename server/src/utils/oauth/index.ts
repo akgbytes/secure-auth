@@ -34,7 +34,7 @@ export const cookieOptionsForOauth: CookieOptions = {
 	httpOnly: true,
 	secure: env.NODE_ENV === "production",
 	maxAge: 10 * 60 * 1000, // 10 minutes in ms
-	sameSite: "lax", // 'lax' works well for OAuth redirect flows
+	sameSite: "none",
 	path: "/",
 };
 

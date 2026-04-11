@@ -535,13 +535,17 @@ export const googleCallback = asyncHandler(async (req, res) => {
 		const profile = await verifyIdToken(tokens.id_token || "");
 
 		await handleOAuthUser(profile, req, res, "google");
-	} catch (_err: unknown) {
-		logger.error("Failed to complete OAuth exchange");
-		res.clearCookie("google_oauth_state", { path: "/" });
-		return res.redirect(
-			`${env.APP_ORIGIN}/auth/callback?provider=google&success=false`,
-		);
-	}
+	}catch (err: unknown) {
+  if (axios.isAxiosError(err)) {
+    logger.error("OAuth exchange failed", err.response?.data);
+  } else {
+    logger.error("OAuth exchange failed", err);
+  }
+  res.clearCookie("google_oauth_state", { path: "/" });
+  return res.redirect(
+    `${env.APP_ORIGIN}/auth/callback?provider=google&success=false`,
+  );
+}
 });
 
 export const githubLogin = asyncHandler(async (_req, res) => {
