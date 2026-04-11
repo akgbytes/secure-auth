@@ -9,7 +9,7 @@ const cookieOptions = {
   refreshTokenExpiryMs: ms(env.REFRESH_TOKEN_EXPIRY as StringValue),
   secure: isProd,
   httpOnly: true,
-  sameSite: isProd ? "none" : "lax",
+  sameSite: "none",
 };
 
 export const setAuthCookies = (
