@@ -1,21 +1,19 @@
-import rateLimit from "express-rate-limit";
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 import { HttpStatus } from "@/utils/core";
 
 export const authRateLimiter = rateLimit({
-	windowMs: 15 * 60 * 1000,
-	max: 50,
-	message: {
-		statusCode: HttpStatus.TOO_MANY_REQUESTS,
-		message: "Too many attempts. Please try again later.",
-		data: null,
-		success: false,
+  windowMs: 15 * 60 * 1000,
+  max: 50,
+  message: {
+    statusCode: HttpStatus.TOO_MANY_REQUESTS,
+    message: "Too many attempts. Please try again later.",
+    data: null,
+    success: false,
   },
-  keyGenerator: (req) => {
-    return req.ip || req.socket.remoteAddress || "unknown";
+  keyGenerator: (req, res) => {
+    return ipKeyGenerator(req as any, res as any);
   },
-
 });
-
 export const resendVerificationRateLimiter = rateLimit({
 	windowMs: 60 * 60 * 1000,
 	max: 10,
@@ -25,8 +23,8 @@ export const resendVerificationRateLimiter = rateLimit({
 		data: null,
 		success: false,
   },
-  keyGenerator: (req) => {
-    return req.ip || req.socket.remoteAddress || "unknown";
+  keyGenerator: (req, res) => {
+    return ipKeyGenerator(req as any, res as any);
   },
 });
 
@@ -39,7 +37,8 @@ export const forgotPasswordRateLimiter = rateLimit({
 		data: null,
 		success: false,
   },
-  keyGenerator: (req) => {
-    return req.ip || req.socket.remoteAddress || "unknown";
+  keyGenerator: (req, res) => {
+    return ipKeyGenerator(req as any, res as any);
   },
+
 });
