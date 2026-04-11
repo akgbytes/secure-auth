@@ -2,12 +2,14 @@ import type { CookieOptions, Response } from "express";
 import ms, { type StringValue } from "ms";
 import { env } from "@/config/env";
 
+const isProd = env.NODE_ENV === "production";
+
 const cookieOptions = {
-	accessTokenExpiryMs: ms(env.ACCESS_TOKEN_EXPIRY as StringValue),
-	refreshTokenExpiryMs: ms(env.REFRESH_TOKEN_EXPIRY as StringValue),
-	secure: env.NODE_ENV === "production",
-	httpOnly: true,
-	sameSite: "none",
+  accessTokenExpiryMs: ms(env.ACCESS_TOKEN_EXPIRY as StringValue),
+  refreshTokenExpiryMs: ms(env.REFRESH_TOKEN_EXPIRY as StringValue),
+  secure: isProd,
+  httpOnly: true,
+  sameSite: isProd ? "none" : "lax",
 };
 
 export const setAuthCookies = (

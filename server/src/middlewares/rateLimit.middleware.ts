@@ -9,7 +9,11 @@ export const authRateLimiter = rateLimit({
 		message: "Too many attempts. Please try again later.",
 		data: null,
 		success: false,
-	},
+  },
+  keyGenerator: (req) => {
+    return req.ip || req.socket.remoteAddress || "unknown";
+  },
+
 });
 
 export const resendVerificationRateLimiter = rateLimit({
@@ -20,7 +24,10 @@ export const resendVerificationRateLimiter = rateLimit({
 		message: "Too many verification email requests. Try again later.",
 		data: null,
 		success: false,
-	},
+  },
+  keyGenerator: (req) => {
+    return req.ip || req.socket.remoteAddress || "unknown";
+  },
 });
 
 export const forgotPasswordRateLimiter = rateLimit({
@@ -31,5 +38,8 @@ export const forgotPasswordRateLimiter = rateLimit({
 		message: "Too many password reset requests. Try again later.",
 		data: null,
 		success: false,
-	},
+  },
+  keyGenerator: (req) => {
+    return req.ip || req.socket.remoteAddress || "unknown";
+  },
 });
